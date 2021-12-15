@@ -1,0 +1,462 @@
+open import Nat
+open import Prelude
+open import constraints-core
+open import contexts
+open import core
+open import dynamic-result-judgements
+open import lemmas-satisfy
+open import notintro-decidable
+open import possible-decidable
+open import satisfy-decidable
+open import statics-core
+open import xrefutable-decidable
+
+module satisfy-exclusive where
+
+  -- result of the exclusivity theorem
+  data TriSat (e : ihexp) (ξ : constr) : Set where
+    Satisfy    : (e ⊧̇ ξ)     → (e ⊧̇? ξ → ⊥) → (e ⊧̇†? ξ)     → TriSat e ξ
+    MaySatisfy : (e ⊧̇ ξ → ⊥) → (e ⊧̇? ξ)     → (e ⊧̇†? ξ)     → TriSat e ξ
+    NotSatisfy : (e ⊧̇ ξ → ⊥) → (e ⊧̇? ξ → ⊥) → (e ⊧̇†? ξ → ⊥) → TriSat e ξ
+  
+
+  -- exclusivity of satisfaction
+  satisfy-exclusive : ∀{ξ τ Δ e} →
+                      ξ :c: τ →
+                      ∅ , Δ ⊢ e :: τ →
+                      e final →
+                      TriSat e ξ
+  satisfy-exclusive CTTruth wt fin =
+    Satisfy CSTruth not-maysat-truth (CSMSSat CSTruth)
+  satisfy-exclusive CTFalsity wt fin =
+    NotSatisfy (λ ()) not-maysat-falsity not-satormay-falsity
+  satisfy-exclusive CTUnknown wt fin =
+    MaySatisfy (λ ()) CMSUnknown (CSMSMay CMSUnknown)
+    
+  -- num cases
+  satisfy-exclusive {e = N n} (CTNum {n = m}) TANum fin with natEQ n m
+  ... | Inl refl = Satisfy CSNum (λ{ (CMSNotIntro () ref pos)})
+                           (CSMSSat CSNum)
+  ... | Inr n≠m = NotSatisfy (λ{CSNum → n≠m refl})
+                             (λ{(CMSNotIntro () ref pos)})
+                             λ{(CSMSSat CSNum) → n≠m refl
+                             ; (CSMSMay (CMSNotIntro () _ _))}
+  satisfy-exclusive {e = X x} CTNum TANum fin =
+    NotSatisfy (λ ()) (λ{(CMSNotIntro () _ _)})
+               λ{(CSMSMay (CMSNotIntro () _ _))}
+  satisfy-exclusive {e = ·λ x ·[ τ ] e} CTNum TANum fin =
+    NotSatisfy (λ ()) (λ{ (CMSNotIntro () _ _)})
+               λ{(CSMSMay (CMSNotIntro () _ _))}
+  satisfy-exclusive {e = e1 ∘ e2} CTNum TANum fin =
+    MaySatisfy (λ ()) (CMSNotIntro NVAp RXNum PNum)
+               (CSMSMay (CMSNotIntro NVAp RXNum PNum))
+  satisfy-exclusive {e = inl τ e} CTNum TANum fin =
+    NotSatisfy (λ ()) (λ{(CMSNotIntro () _ _)})
+               λ{(CSMSMay (CMSNotIntro () _ _))}
+  satisfy-exclusive {e = inr τ e} CTNum TANum fin =
+    NotSatisfy (λ ()) (λ{(CMSNotIntro () _ _)})
+               λ{(CSMSMay (CMSNotIntro () _ _))}
+  satisfy-exclusive {e = match e rs} CTNum TANum fin =
+    MaySatisfy (λ ()) (CMSNotIntro NVMatch RXNum PNum)
+               (CSMSMay (CMSNotIntro NVMatch RXNum PNum))
+  satisfy-exclusive {e = ⟨ e1 , e2 ⟩} CTNum TANum fin =
+    NotSatisfy (λ ()) (λ{(CMSNotIntro () _ _)})
+               λ{(CSMSMay (CMSNotIntro () _ _))}
+  satisfy-exclusive {e = fst e} CTNum TANum fin =
+    MaySatisfy (λ ()) (CMSNotIntro NVFst RXNum PNum)
+               (CSMSMay (CMSNotIntro NVFst RXNum PNum))
+  satisfy-exclusive {e = snd e} CTNum TANum fin =
+    MaySatisfy (λ ()) (CMSNotIntro NVSnd RXNum PNum)
+               (CSMSMay (CMSNotIntro NVSnd RXNum PNum))
+  satisfy-exclusive {e = ⦇-⦈[ u ]} CTNum TANum fin =
+    MaySatisfy (λ ()) (CMSNotIntro NVEHole RXNum PNum)
+               (CSMSMay (CMSNotIntro NVEHole RXNum PNum))
+  satisfy-exclusive {e = ⦇⌜ e ⌟⦈[ u ]} CTNum TANum fin =
+    MaySatisfy (λ ()) (CMSNotIntro NVNEHole RXNum PNum)
+               (CSMSMay (CMSNotIntro NVNEHole RXNum PNum))
+  satisfy-exclusive CTNum (TAAp wt1 wt2) fin =
+    MaySatisfy (λ ()) (CMSNotIntro NVAp RXNum PNum)
+               (CSMSMay (CMSNotIntro NVAp RXNum PNum))
+  satisfy-exclusive CTNum (TAMatchZPre wt x) fin =
+    MaySatisfy (λ ()) (CMSNotIntro NVMatch RXNum PNum)
+               (CSMSMay (CMSNotIntro NVMatch RXNum PNum))
+  satisfy-exclusive CTNum (TAMatchNZPre wt x x₁ x₂ x₃) fin =
+    MaySatisfy (λ ()) (CMSNotIntro NVMatch RXNum PNum)
+               (CSMSMay (CMSNotIntro NVMatch RXNum PNum))
+  satisfy-exclusive CTNum (TAFst wt) fin =
+    MaySatisfy (λ ()) (CMSNotIntro NVFst RXNum PNum)
+               (CSMSMay (CMSNotIntro NVFst RXNum PNum))
+  satisfy-exclusive CTNum (TASnd wt) fin =
+    MaySatisfy (λ ()) (CMSNotIntro NVSnd RXNum PNum)
+               (CSMSMay (CMSNotIntro NVSnd RXNum PNum))
+  satisfy-exclusive CTNum (TAEHole x) fin =
+    MaySatisfy (λ ()) (CMSNotIntro NVEHole RXNum PNum)
+               (CSMSMay (CMSNotIntro NVEHole RXNum PNum))
+  satisfy-exclusive CTNum (TANEHole x wt) fin =
+    MaySatisfy (λ ()) (CMSNotIntro NVNEHole RXNum PNum)
+               (CSMSMay (CMSNotIntro NVNEHole RXNum PNum))
+
+  -- inl cases
+  satisfy-exclusive {ξ = ξ} {e = e} (CTInl ct) wt fin
+    with notintro-dec e
+  ... | Inl ni
+    with xrefutable-dec ξ | possible-dec ξ
+  ... | Inl ref | Inl pos =
+    MaySatisfy (λ sat → notintro-sat-not-ref ni sat ref)
+               (CMSNotIntro ni ref pos)
+               (CSMSMay (CMSNotIntro ni ref pos))
+  ... | Inl ref | Inr ¬pos =
+    NotSatisfy (λ sat → notintro-sat-not-ref ni sat ref)
+               (λ msat → ¬pos (msat-pos msat))
+               (λ satm → ¬pos (satm-pos satm))
+  ... | Inr ¬ref | Inl pos =
+    Satisfy (not-ref-sat (CTInl ct) wt fin ¬ref)
+            (λ{(CMSNotIntro _ ref _) → ¬ref ref} )
+            (CSMSSat (not-ref-sat (CTInl ct) wt fin ¬ref))
+  ... | Inr ¬ref | Inr ¬pos = abort (not-ref-not-pos-not ¬ref ¬pos)
+  satisfy-exclusive {ξ = ξ} (CTInl ct) wt fin | Inr ¬ni
+    with wt
+  ... | TAAp _ _ = abort (¬ni NVAp)
+  ... | TAMatchZPre _ _ = abort (¬ni NVMatch)
+  ... | TAMatchNZPre _ _ _ _ _ = abort (¬ni NVMatch)
+  ... | TAFst _ = abort (¬ni NVFst)
+  ... | TASnd _ = abort (¬ni NVSnd)
+  ... | TAEHole _ = abort (¬ni NVEHole)
+  ... | TANEHole _ _ = abort (¬ni NVNEHole)
+  ... | TAInr _ =
+    NotSatisfy (λ ())
+               (λ{(CMSNotIntro () _ _)})
+               (λ{(CSMSMay (CMSNotIntro () _ _))})
+  ... | TAInl wt'
+    with satisfy-exclusive ct wt' (inl-final fin)
+  ... | Satisfy sat ¬msat satm =
+    Satisfy (CSInl sat)
+            (λ{(CMSInl msat) → ¬msat msat})
+            (CSMSSat (CSInl sat))
+  ... | MaySatisfy ¬sat msat satm =
+    MaySatisfy (λ{(CSInl sat) → ¬sat sat})
+               (CMSInl msat)
+               (CSMSMay (CMSInl msat))
+  ... | NotSatisfy ¬sat ¬msat ¬satm =
+    NotSatisfy (λ{(CSInl sat) → ¬sat sat})
+               (λ{(CMSInl msat) → ¬msat msat})
+               (λ{(CSMSSat (CSInl sat)) → ¬sat sat
+                ; (CSMSMay (CMSInl msat)) → ¬msat msat})
+
+  -- inr cases 
+  satisfy-exclusive {ξ = ξ} {e = e} (CTInr ct) wt fin
+    with notintro-dec e
+  ... | Inl ni
+    with xrefutable-dec ξ | possible-dec ξ
+  ... | Inl ref | Inl pos =
+    MaySatisfy (λ sat → notintro-sat-not-ref ni sat ref)
+               (CMSNotIntro ni ref pos)
+               (CSMSMay (CMSNotIntro ni ref pos))
+  ... | Inl ref | Inr ¬pos =
+    NotSatisfy (λ sat → notintro-sat-not-ref ni sat ref)
+               (λ msat → ¬pos (msat-pos msat))
+               (λ satm → ¬pos (satm-pos satm))
+  ... | Inr ¬ref | Inl pos =
+    Satisfy (not-ref-sat (CTInr ct) wt fin ¬ref)
+            (λ{(CMSNotIntro _ ref _) → ¬ref ref} )
+            (CSMSSat (not-ref-sat (CTInr ct) wt fin ¬ref))
+  ... | Inr ¬ref | Inr ¬pos = abort (not-ref-not-pos-not ¬ref ¬pos)
+  satisfy-exclusive {ξ = ξ} (CTInr ct) wt fin | Inr ¬ni
+    with wt
+  ... | TAAp _ _ = abort (¬ni NVAp)
+  ... | TAMatchZPre _ _ = abort (¬ni NVMatch)
+  ... | TAMatchNZPre _ _ _ _ _ = abort (¬ni NVMatch)
+  ... | TAFst _ = abort (¬ni NVFst)
+  ... | TASnd _ = abort (¬ni NVSnd)
+  ... | TAEHole _ = abort (¬ni NVEHole)
+  ... | TANEHole _ _ = abort (¬ni NVNEHole)
+  ... | TAInl _ =
+    NotSatisfy (λ ())
+               (λ{(CMSNotIntro () _ _)})
+               (λ{(CSMSMay (CMSNotIntro () _ _))})
+  ... | TAInr wt'
+    with satisfy-exclusive ct wt' (inr-final fin)
+  ... | Satisfy sat ¬msat satm =
+    Satisfy (CSInr sat)
+            (λ{(CMSInr msat) → ¬msat msat})
+            (CSMSSat (CSInr sat))
+  ... | MaySatisfy ¬sat msat satm =
+    MaySatisfy (λ{(CSInr sat) → ¬sat sat})
+               (CMSInr msat)
+               (CSMSMay (CMSInr msat))
+  ... | NotSatisfy ¬sat ¬msat ¬satm =
+    NotSatisfy (λ{(CSInr sat) → ¬sat sat})
+               (λ{(CMSInr msat) → ¬msat msat})
+               (λ{(CSMSSat (CSInr sat)) → ¬sat sat
+                ; (CSMSMay (CMSInr msat)) → ¬msat msat})
+
+  -- pair cases
+  satisfy-exclusive {ξ = ξ} {e = e} (CTPair ct1 ct2) wt fin
+    with notintro-dec e
+  ... | Inl ni with final-notintro-indet fin ni
+  ... | ind
+    with satisfy-exclusive ct1 (TAFst wt) (FIndet (IFst ind)) |
+         satisfy-exclusive ct2 (TASnd wt) (FIndet (ISnd ind))
+  ... | Satisfy sat1 ¬msat1 satm1 | Satisfy sat2 ¬msat2 satm2 =
+    Satisfy (CSNotIntroPair ni sat1 sat2)
+            (λ{(CMSNotIntro ni ref pos) →
+               notintro-sat-not-ref ni (CSNotIntroPair ni sat1 sat2) ref})
+            (CSMSSat (CSNotIntroPair ni sat1 sat2))
+  ... | Satisfy sat1 ¬msat1 satm1 | MaySatisfy ¬sat2 msat2 satm2 =
+    let msat = (CMSNotIntro ni (RXPairR (notintro-msat-ref NVSnd msat2))
+                               (PPair (sat-pos sat1) (msat-pos msat2)))
+    in MaySatisfy (λ{(CSNotIntroPair ni sat1 sat2) → ¬sat2 sat2})
+                  msat
+                  (CSMSMay msat)
+  ... | MaySatisfy ¬sat1 msat1 satm1 | Satisfy sat2 ¬msat2 satm2 =
+    let msat = (CMSNotIntro ni (RXPairL (notintro-msat-ref NVFst msat1))
+                               (PPair (msat-pos msat1) (sat-pos sat2)))
+    in MaySatisfy (λ{(CSNotIntroPair ni sat1 sat2) → ¬sat1 sat1})
+                  msat
+                  (CSMSMay msat)
+  ... | MaySatisfy ¬sat1 msat1 satm1 | MaySatisfy ¬sat2 msat2 satm2 =
+    let msat = (CMSNotIntro ni (RXPairL (notintro-msat-ref NVFst msat1))
+                               (PPair (msat-pos msat1) (msat-pos msat2)))
+    in MaySatisfy (λ{(CSNotIntroPair ni sat1 sat2) → ¬sat1 sat1})
+                  msat
+                  (CSMSMay msat)
+  ... | Satisfy sat1 ¬msat1 satm1 | NotSatisfy ¬sat2 ¬msat2 ¬satm2 =
+    NotSatisfy ¬sat ¬msat ¬satm
+    where
+      ¬sat : (e ⊧̇ ξ) → ⊥
+      ¬sat (CSNotIntroPair ni sat1 sat2) = ¬sat2 sat2
+      ¬msat : (e ⊧̇? ξ) → ⊥
+      ¬msat (CMSNotIntro ni (RXPairL ref1) pos) =
+        notintro-sat-not-ref NVFst sat1 ref1
+      ¬msat (CMSNotIntro ni (RXPairR ref2) (PPair pos1 pos2)) =
+        ¬msat2 (CMSNotIntro NVSnd ref2 pos2)
+      ¬satm : (e ⊧̇†? ξ) → ⊥
+      ¬satm (CSMSSat sat) = ¬sat sat
+      ¬satm (CSMSMay msat) = ¬msat msat  
+  ... | NotSatisfy ¬sat1 ¬msat1 ¬satm1 | Satisfy sat2 ¬msat2 satm2 =
+    NotSatisfy ¬sat ¬msat ¬satm
+    where
+      ¬sat : (e ⊧̇ ξ) → ⊥
+      ¬sat (CSNotIntroPair ni sat1 sat2) = ¬sat1 sat1
+      ¬msat : (e ⊧̇? ξ) → ⊥
+      ¬msat (CMSNotIntro ni (RXPairL ref1) (PPair pos1 pos2)) =
+        ¬msat1 (CMSNotIntro NVFst ref1 pos1)
+      ¬msat (CMSNotIntro ni (RXPairR ref2) pos) =
+        notintro-sat-not-ref NVSnd sat2 ref2
+      ¬satm : (e ⊧̇†? ξ) → ⊥
+      ¬satm (CSMSSat sat) = ¬sat sat
+      ¬satm (CSMSMay msat) = ¬msat msat   
+  satisfy-exclusive {ξ = ⟨ ξ1 , ξ2 ⟩} {e = e} (CTPair ct1 ct2) wt fin | Inl ni | ind
+       | MaySatisfy ¬sat1 msat1 satm1 | NotSatisfy ¬sat2 ¬msat2 ¬satm2
+    with possible-dec ξ2
+  ... | Inl pos2 = MaySatisfy ¬sat msat (CSMSMay msat)
+    where
+      ¬sat : (e ⊧̇ ⟨ ξ1 , ξ2 ⟩) → ⊥
+      ¬sat (CSNotIntroPair ni sat1 sat2) = ¬sat2 sat2
+      msat : e ⊧̇? ⟨ ξ1 , ξ2 ⟩
+      msat = CMSNotIntro ni (RXPairL (notintro-msat-ref NVFst msat1))
+                         (PPair (msat-pos msat1) pos2)
+  ... | Inr ¬pos2 = NotSatisfy ¬sat ¬msat ¬satm
+    where
+      ¬sat : (e ⊧̇ ⟨ ξ1 , ξ2 ⟩) → ⊥
+      ¬sat (CSNotIntroPair ni sat1 sat2) = ¬sat2 sat2
+      ¬msat : (e ⊧̇? ⟨ ξ1 , ξ2 ⟩) → ⊥
+      ¬msat (CMSNotIntro ni ref (PPair pos1 pos2)) = ¬pos2 pos2
+      ¬satm : (e ⊧̇†? ⟨ ξ1 , ξ2 ⟩) → ⊥
+      ¬satm (CSMSSat sat) = ¬sat sat
+      ¬satm (CSMSMay msat) = ¬msat msat
+  satisfy-exclusive {ξ = ⟨ ξ1 , ξ2 ⟩} {e = e} (CTPair ct1 ct2) wt fin | Inl ni | ind
+       | NotSatisfy ¬sat1 ¬msat1 ¬satm1 | MaySatisfy ¬sat2 msat2 satm2
+    with possible-dec ξ1
+  ... | Inl pos1 = MaySatisfy ¬sat msat (CSMSMay msat)
+    where
+      ¬sat : (e ⊧̇ ⟨ ξ1 , ξ2 ⟩) → ⊥
+      ¬sat (CSNotIntroPair ni sat1 sat2) = ¬sat1 sat1
+      msat : e ⊧̇? ⟨ ξ1 , ξ2 ⟩
+      msat = CMSNotIntro ni (RXPairR (notintro-msat-ref NVSnd msat2))
+                         (PPair pos1 (msat-pos msat2))
+  ... | Inr ¬pos1 = NotSatisfy ¬sat ¬msat ¬satm
+    where
+      ¬sat : (e ⊧̇ ⟨ ξ1 , ξ2 ⟩) → ⊥
+      ¬sat (CSNotIntroPair ni sat1 sat2) = ¬sat1 sat1
+      ¬msat : (e ⊧̇? ⟨ ξ1 , ξ2 ⟩) → ⊥
+      ¬msat (CMSNotIntro ni ref (PPair pos1 pos2)) = ¬pos1 pos1
+      ¬satm : (e ⊧̇†? ⟨ ξ1 , ξ2 ⟩) → ⊥
+      ¬satm (CSMSSat sat) = ¬sat sat
+      ¬satm (CSMSMay msat) = ¬msat msat
+  satisfy-exclusive {ξ = ξ} {e = e} (CTPair ct1 ct2) wt fin | Inl ni | ind
+      | NotSatisfy ¬sat1 ¬msat1 ¬satm1 | NotSatisfy ¬sat2 ¬msat2 ¬satm2 =
+    NotSatisfy ¬sat ¬msat ¬satm
+    where
+      ¬sat : (e ⊧̇ ξ) → ⊥
+      ¬sat (CSNotIntroPair ni sat1 sat2) = ¬sat1 sat1
+      ¬msat : (e ⊧̇? ξ) → ⊥
+      ¬msat (CMSNotIntro ni (RXPairL ref1) (PPair pos1 pos2)) =
+        ¬msat1 (CMSNotIntro NVFst ref1 pos1)
+      ¬msat (CMSNotIntro ni (RXPairR ref2) (PPair pos1 pos2)) =
+        ¬msat2 (CMSNotIntro NVSnd ref2 pos2)
+      ¬satm : (e ⊧̇†? ξ) → ⊥
+      ¬satm (CSMSSat sat) = ¬sat sat
+      ¬satm (CSMSMay msat) = ¬msat msat
+  satisfy-exclusive {ξ = ξ} {e = e} (CTPair ct1 ct2) wt fin | Inr ¬ni
+    with wt
+  ... | TAAp _ _ = abort (¬ni NVAp)
+  ... | TAMatchZPre _ _ = abort (¬ni NVMatch)
+  ... | TAMatchNZPre _ _ _ _ _ = abort (¬ni NVMatch)
+  ... | TAFst _ = abort (¬ni NVFst)
+  ... | TASnd _ = abort (¬ni NVSnd)
+  ... | TAEHole _ = abort (¬ni NVEHole)
+  ... | TANEHole _ _ = abort (¬ni NVNEHole)
+  ... | TAPair wt1 wt2
+    with pair-final fin
+  ... | fin1 , fin2 
+    with satisfy-exclusive ct1 wt1 fin1 | satisfy-exclusive ct2 wt2 fin2
+  ... | Satisfy sat1 ¬msat1 satm1 | Satisfy sat2 ¬msat2 satm2 =
+    Satisfy (CSPair sat1 sat2)
+            (λ{(CMSPairL msat1 sat2) → ¬msat1 msat1
+             ; (CMSPairR sat1 msat2) → ¬msat2 msat2
+             ; (CMSPair msat1 msat2) → ¬msat2 msat2})
+            (CSMSSat (CSPair sat1 sat2))
+  ... | Satisfy sat1 ¬msat1 satm1 | MaySatisfy ¬sat2 msat2 satm2 =
+    MaySatisfy (λ{(CSPair sat1 sat2) → ¬sat2 sat2})
+               (CMSPairR sat1 msat2)
+               (CSMSMay (CMSPairR sat1 msat2))
+  ... | Satisfy sat1 ¬msat1 satm1 | NotSatisfy ¬sat2 ¬msat2 ¬satm2 =
+    NotSatisfy ¬sat ¬msat ¬satm
+    where
+      ¬sat : (e ⊧̇ ξ) → ⊥
+      ¬sat (CSPair sat1 sat2) = ¬sat2 sat2
+      ¬msat : (e ⊧̇? ξ) → ⊥
+      ¬msat (CMSPairL msat1 sat2) = ¬msat1 msat1
+      ¬msat (CMSPairR sat1 msat2) = ¬msat2 msat2
+      ¬msat (CMSPair msat1 msat2) = ¬msat1 msat1
+      ¬satm : (e ⊧̇†? ξ) → ⊥
+      ¬satm (CSMSSat sat) = ¬sat sat
+      ¬satm (CSMSMay msat) = ¬msat msat
+  ... | MaySatisfy ¬sat1 msat1 satm1 | Satisfy sat2 ¬msat2 satm2 =
+    MaySatisfy (λ{(CSPair sat1 sat2) → ¬sat1 sat1})
+               (CMSPairL msat1 sat2)
+               (CSMSMay (CMSPairL msat1 sat2))
+  ... | MaySatisfy ¬sat1 msat1 satm1 | MaySatisfy ¬sat2 msat2 satm2 =
+    MaySatisfy (λ{(CSPair sat1 sat2) → ¬sat2 sat2})
+               (CMSPair msat1 msat2)
+               (CSMSMay (CMSPair msat1 msat2))
+  ... | MaySatisfy ¬sat1 msat1 satm1 | NotSatisfy ¬sat2 ¬msat2 ¬satm2 =
+    NotSatisfy ¬sat ¬msat ¬satm
+    where
+      ¬sat : (e ⊧̇ ξ) → ⊥
+      ¬sat (CSPair sat1 sat2) = ¬sat2 sat2
+      ¬msat : (e ⊧̇? ξ) → ⊥
+      ¬msat (CMSPairL msat1 sat2) = ¬sat2 sat2
+      ¬msat (CMSPairR sat1 msat2) = ¬msat2 msat2
+      ¬msat (CMSPair msat1 msat2) = ¬msat2 msat2
+      ¬satm : (e ⊧̇†? ξ) → ⊥
+      ¬satm (CSMSSat sat) = ¬sat sat
+      ¬satm (CSMSMay msat) = ¬msat msat  
+  ... | NotSatisfy ¬sat1 ¬msat1 ¬satm1 | Satisfy sat2 ¬msat2 satm2 =
+    NotSatisfy ¬sat ¬msat ¬satm
+    where
+      ¬sat : (e ⊧̇ ξ) → ⊥
+      ¬sat (CSPair sat1 sat2) = ¬sat1 sat1
+      ¬msat : (e ⊧̇? ξ) → ⊥
+      ¬msat (CMSPairL msat1 sat2) = ¬msat1 msat1
+      ¬msat (CMSPairR sat1 msat2) = ¬msat2 msat2
+      ¬msat (CMSPair msat1 msat2) = ¬msat1 msat1
+      ¬satm : (e ⊧̇†? ξ) → ⊥
+      ¬satm (CSMSSat sat) = ¬sat sat
+      ¬satm (CSMSMay msat) = ¬msat msat
+  ... | NotSatisfy ¬sat1 ¬msat1 ¬satm1 | MaySatisfy ¬sat2 msat2 satm2 =
+    NotSatisfy ¬sat ¬msat ¬satm
+    where
+      ¬sat : (e ⊧̇ ξ) → ⊥
+      ¬sat (CSPair sat1 sat2) = ¬sat2 sat2
+      ¬msat : (e ⊧̇? ξ) → ⊥
+      ¬msat (CMSPairL msat1 sat2) = ¬sat2 sat2
+      ¬msat (CMSPairR sat1 msat2) = ¬sat1 sat1
+      ¬msat (CMSPair msat1 msat2) = ¬msat1 msat1
+      ¬satm : (e ⊧̇†? ξ) → ⊥
+      ¬satm (CSMSSat sat) = ¬sat sat
+      ¬satm (CSMSMay msat) = ¬msat msat
+  ... | NotSatisfy ¬sat1 ¬msat1 ¬satm1 | NotSatisfy ¬sat2 ¬msat2 ¬samt2 =
+    NotSatisfy ¬sat ¬msat ¬satm
+    where
+      ¬sat : (e ⊧̇ ξ) → ⊥
+      ¬sat (CSPair sat1 sat2) = ¬sat2 sat2
+      ¬msat : (e ⊧̇? ξ) → ⊥
+      ¬msat (CMSPairL msat1 sat2) = ¬msat1 msat1
+      ¬msat (CMSPairR sat1 msat2) = ¬msat2 msat2
+      ¬msat (CMSPair msat1 msat2) = ¬msat2 msat2
+      ¬satm : (e ⊧̇†? ξ) → ⊥
+      ¬satm (CSMSSat sat) = ¬sat sat
+      ¬satm (CSMSMay msat) = ¬msat msat
+  
+  -- or cases
+  satisfy-exclusive (CTOr ct1 ct2) wt fin
+    with satisfy-exclusive ct1 wt fin | satisfy-exclusive ct2 wt fin
+  ... | Satisfy sat1 ¬msat1 satm1 | Satisfy sat2 ¬msat2 satm2 =
+    Satisfy (CSOrR sat2)
+            (λ{(CMSOrL _ ¬sat2) → ¬sat2 sat2
+             ; (CMSOrR ¬sat1 _) → ¬sat1 sat1
+             ; (CMSNotIntro ni (RXOr ref1 ref2) _) →
+               notintro-sat-not-ref ni sat1 ref1})
+             (CSMSSat (CSOrL sat1))
+  ... | Satisfy sat1 ¬msat1 satm1 | MaySatisfy ¬sat2 msat2 satm2 =
+    Satisfy (CSOrL sat1)
+            (λ{(CMSOrL msat1 _) → ¬msat1 msat1
+             ; (CMSOrR ¬sat1 _) → ¬sat1 sat1
+             ; (CMSNotIntro ni (RXOr ref1 ref2) _) →
+               notintro-sat-not-ref ni sat1 ref1})
+            (CSMSSat (CSOrL sat1))
+  ... | Satisfy sat1 ¬msat1 satm1 | NotSatisfy ¬sat2 ¬msat2 ¬satm2 =
+    Satisfy (CSOrL sat1)
+            (λ{(CMSOrL msat1 _) → ¬msat1 msat1
+             ; (CMSOrR ¬sat1 _) → ¬sat1 sat1
+             ; (CMSNotIntro ni (RXOr ref1 ref2) _) →
+               notintro-sat-not-ref ni sat1 ref1})
+            (CSMSSat (CSOrL sat1))
+  ... | MaySatisfy ¬sat1 msat1 satm1 | Satisfy sat2 ¬msat2 satm2 =
+    Satisfy (CSOrR sat2)
+            (λ{(CMSOrL _ ¬sat2) → ¬sat2 sat2
+             ; (CMSOrR _ msat2) → ¬msat2 msat2
+             ; (CMSNotIntro ni (RXOr ref1 ref2) _) →
+               notintro-sat-not-ref ni sat2 ref2})
+            (CSMSSat (CSOrR sat2))
+  ... | MaySatisfy ¬sat1 msat1 satm1 | MaySatisfy ¬sat2 msat2 satm2 =
+    MaySatisfy (λ{(CSOrL sat1) → ¬sat1 sat1
+                ; (CSOrR sat2) → ¬sat2 sat2})
+               (CMSOrL msat1 ¬sat2)
+               (CSMSMay (CMSOrL msat1 ¬sat2))
+  ... | MaySatisfy ¬sat1 msat1 satm1 | NotSatisfy ¬sat2 ¬msat2 ¬satm1 =
+    MaySatisfy (λ{(CSOrL sat1) → ¬sat1 sat1
+                ; (CSOrR sat2) → ¬sat2 sat2})
+               (CMSOrL msat1 ¬sat2)
+               (CSMSMay (CMSOrL msat1 ¬sat2))
+  ... | NotSatisfy ¬sat1 ¬msat1 ¬satm1 | Satisfy sat2 ¬msat2 satm2 =
+    Satisfy (CSOrR sat2)
+            (λ{(CMSOrL _ ¬sat2) → ¬sat2 sat2
+             ; (CMSOrR _ msat2) → ¬msat2 msat2
+             ; (CMSNotIntro ni (RXOr ref1 ref2) _) →
+               notintro-sat-not-ref ni sat2 ref2})
+            (CSMSSat (CSOrR sat2))
+  ... | NotSatisfy ¬sat1 ¬msat1 ¬satm1 | MaySatisfy ¬sat2 msat2 satm2 =
+    MaySatisfy (λ{(CSOrL sat1) → ¬sat1 sat1
+                ; (CSOrR sat2) → ¬sat2 sat2})
+               (CMSOrR ¬sat1 msat2)
+               (CSMSMay (CMSOrR ¬sat1 msat2))
+  ... | NotSatisfy ¬sat1 ¬msat1 ¬satm1 | NotSatisfy ¬sat2 ¬msat2 ¬satm2 =
+    NotSatisfy (λ{(CSOrL sat1) → ¬sat1 sat1
+                ; (CSOrR sat2) → ¬sat2 sat2})
+               (λ{(CMSOrL msat1 ¬sat2) → ¬msat1 msat1
+                ; (CMSOrR ¬sat1 msat2) → ¬msat2 msat2
+                ; (CMSNotIntro ni (RXOr ref1 ref2) (POrL pos1)) →
+                  ¬satm1 (CSMSMay (CMSNotIntro ni ref1 pos1))
+                ; (CMSNotIntro ni (RXOr ref1 ref2) (POrR pos2)) →
+                  ¬satm2 (CSMSMay (CMSNotIntro ni ref2 pos2))})
+               (λ{(CSMSSat (CSOrL sat1)) → ¬sat1 sat1
+                ; (CSMSSat (CSOrR sat2)) → ¬sat2 sat2
+                ; (CSMSMay (CMSOrL msat1 _)) → ¬msat1 msat1
+                ; (CSMSMay (CMSOrR _ msat2)) → ¬msat2 msat2
+                ; (CSMSMay (CMSNotIntro ni (RXOr ref1 ref2) (POrL pos1))) →
+                  ¬satm1 (CSMSMay (CMSNotIntro ni ref1 pos1))
+                ; (CSMSMay (CMSNotIntro ni (RXOr ref1 ref2) (POrR pos2))) →
+                  ¬satm2 (CSMSMay (CMSNotIntro ni ref2 pos2))})
