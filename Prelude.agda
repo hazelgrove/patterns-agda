@@ -69,8 +69,10 @@ module Prelude where
   -- ap, in the sense of HoTT, that all functions respect equality in their
   -- arguments. named in a slightly non-standard way to avoid naming
   -- clashes with hazelnut constructors.
-  ap1 : {l1 l2 : Level} {α : Set l1} {β : Set l2} {x y : α} (F : α → β)
-          → x == y → F x == F y
+  ap1 : {l1 l2 : Level} {α : Set l1} {β : Set l2} {x y : α}
+        (F : α → β) →
+        x == y →
+        F x == F y
   ap1 F refl = refl
 
   -- transport, in the sense of HoTT, that fibrations respect equality

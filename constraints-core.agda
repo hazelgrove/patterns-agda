@@ -199,6 +199,34 @@ module constraints-core where
                 ξ2 :cc: τ →
                 (ξ1 ∧ ξ2) :cc: τ
 
+  -- dual of ξ is ξbar
+  data dual : (ξ : comp-constr) → (ξbar : comp-constr) → Set where
+    CDTruth   : dual ·⊤ ·⊥
+    CDFalsity : dual ·⊥ ·⊤
+    CDNum     : ∀{n} →
+                dual (N n) (N̸ n)
+    CDNotNum  : ∀{n} →
+                dual (N̸ n) (N n)
+    CDInl     : ∀{ξ ξbar} →
+                dual ξ ξbar →
+                dual (inl ξ) (inl ξbar ∨ inr ·⊤)
+    CDInr     : ∀{ξ ξbar} →
+                dual ξ ξbar →
+                dual (inr ξ) (inr ξbar ∨ inl ·⊤)
+    CDPair    : ∀{ξ1 ξ1bar ξ2 ξ2bar} →
+                dual ξ1 ξ1bar →
+                dual ξ2 ξ2bar →
+                dual ⟨ ξ1 , ξ2 ⟩
+                     ((⟨ ξ1 , ξ2bar ⟩ ∨ ⟨ ξ1bar , ξ2 ⟩) ∨ ⟨ ξ1bar , ξ2bar ⟩)
+    CDOr      : ∀{ξ1 ξ1bar ξ2 ξ2bar} →
+                dual ξ1 ξ1bar →
+                dual ξ2 ξ2bar →
+                dual (ξ1 ∨ ξ2) (ξ1bar ∧ ξ2bar)
+    CDAnd     : ∀{ξ1 ξ1bar ξ2 ξ2bar} →
+                dual ξ1 ξ1bar →
+                dual ξ2 ξ2bar →
+                dual (ξ1 ∧ ξ2) (ξ1bar ∨ ξ2bar)
+    
   -- e satisfies ξ
   data _⊧_ : (e : ihexp) → (ξ : comp-constr) → Set where
     CSTruth  : ∀{e} →
@@ -230,3 +258,4 @@ module constraints-core where
                e ⊧ (ξ1 ∧ ξ2)
    
 
+    

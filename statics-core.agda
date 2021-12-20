@@ -12,7 +12,7 @@ module statics-core where
     data _,_⊢_::_ : (Γ : tctx) → (Δ : tctx) →
                     (e : ihexp) → (τ : htyp) → Set where
       TANum        : ∀{Γ Δ n} →
-                     Γ , Δ ⊢ n :: num
+                     Γ , Δ ⊢ (N n) :: num
       TAVar        : ∀{Γ x τ Δ} →
                      (x , τ) ∈ Γ →
                      Γ , Δ ⊢ (X x) :: τ

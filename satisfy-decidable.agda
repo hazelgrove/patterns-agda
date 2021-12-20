@@ -36,7 +36,7 @@ module satisfy-decidable where
     satisfy-bool e ξ1 or satisfy-bool e ξ2
   -- otherwise,
   -- satisfy-bool e ξ = false.
-  -- we expand things out so that all clasues hold definitionally
+  -- we expand things out so that all clauses hold definitionally
   satisfy-bool e ·? = false
   satisfy-bool (X x) (N n) = false
   satisfy-bool (·λ x ·[ u ] e) (N n) = false

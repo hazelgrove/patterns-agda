@@ -14,10 +14,10 @@ open import xrefutable-decidable
 module satisfy-exclusive where
 
   -- result of the exclusivity theorem
-  data TriSat (e : ihexp) (ξ : constr) : Set where
-    Satisfy    : (e ⊧̇ ξ)     → (e ⊧̇? ξ → ⊥) → (e ⊧̇†? ξ)     → TriSat e ξ
-    MaySatisfy : (e ⊧̇ ξ → ⊥) → (e ⊧̇? ξ)     → (e ⊧̇†? ξ)     → TriSat e ξ
-    NotSatisfy : (e ⊧̇ ξ → ⊥) → (e ⊧̇? ξ → ⊥) → (e ⊧̇†? ξ → ⊥) → TriSat e ξ
+  data ExSat (e : ihexp) (ξ : constr) : Set where
+    Satisfy    : (e ⊧̇ ξ)     → (e ⊧̇? ξ → ⊥) → (e ⊧̇†? ξ)     → ExSat e ξ
+    MaySatisfy : (e ⊧̇ ξ → ⊥) → (e ⊧̇? ξ)     → (e ⊧̇†? ξ)     → ExSat e ξ
+    NotSatisfy : (e ⊧̇ ξ → ⊥) → (e ⊧̇? ξ → ⊥) → (e ⊧̇†? ξ → ⊥) → ExSat e ξ
   
 
   -- exclusivity of satisfaction
@@ -25,7 +25,7 @@ module satisfy-exclusive where
                       ξ :c: τ →
                       ∅ , Δ ⊢ e :: τ →
                       e final →
-                      TriSat e ξ
+                      ExSat e ξ
   satisfy-exclusive CTTruth wt fin =
     Satisfy CSTruth not-maysat-truth (CSMSSat CSTruth)
   satisfy-exclusive CTFalsity wt fin =
@@ -41,39 +41,6 @@ module satisfy-exclusive where
                              (λ{(CMSNotIntro () ref pos)})
                              λ{(CSMSSat CSNum) → n≠m refl
                              ; (CSMSMay (CMSNotIntro () _ _))}
-  satisfy-exclusive {e = X x} CTNum TANum fin =
-    NotSatisfy (λ ()) (λ{(CMSNotIntro () _ _)})
-               λ{(CSMSMay (CMSNotIntro () _ _))}
-  satisfy-exclusive {e = ·λ x ·[ τ ] e} CTNum TANum fin =
-    NotSatisfy (λ ()) (λ{ (CMSNotIntro () _ _)})
-               λ{(CSMSMay (CMSNotIntro () _ _))}
-  satisfy-exclusive {e = e1 ∘ e2} CTNum TANum fin =
-    MaySatisfy (λ ()) (CMSNotIntro NVAp RXNum PNum)
-               (CSMSMay (CMSNotIntro NVAp RXNum PNum))
-  satisfy-exclusive {e = inl τ e} CTNum TANum fin =
-    NotSatisfy (λ ()) (λ{(CMSNotIntro () _ _)})
-               λ{(CSMSMay (CMSNotIntro () _ _))}
-  satisfy-exclusive {e = inr τ e} CTNum TANum fin =
-    NotSatisfy (λ ()) (λ{(CMSNotIntro () _ _)})
-               λ{(CSMSMay (CMSNotIntro () _ _))}
-  satisfy-exclusive {e = match e rs} CTNum TANum fin =
-    MaySatisfy (λ ()) (CMSNotIntro NVMatch RXNum PNum)
-               (CSMSMay (CMSNotIntro NVMatch RXNum PNum))
-  satisfy-exclusive {e = ⟨ e1 , e2 ⟩} CTNum TANum fin =
-    NotSatisfy (λ ()) (λ{(CMSNotIntro () _ _)})
-               λ{(CSMSMay (CMSNotIntro () _ _))}
-  satisfy-exclusive {e = fst e} CTNum TANum fin =
-    MaySatisfy (λ ()) (CMSNotIntro NVFst RXNum PNum)
-               (CSMSMay (CMSNotIntro NVFst RXNum PNum))
-  satisfy-exclusive {e = snd e} CTNum TANum fin =
-    MaySatisfy (λ ()) (CMSNotIntro NVSnd RXNum PNum)
-               (CSMSMay (CMSNotIntro NVSnd RXNum PNum))
-  satisfy-exclusive {e = ⦇-⦈[ u ]} CTNum TANum fin =
-    MaySatisfy (λ ()) (CMSNotIntro NVEHole RXNum PNum)
-               (CSMSMay (CMSNotIntro NVEHole RXNum PNum))
-  satisfy-exclusive {e = ⦇⌜ e ⌟⦈[ u ]} CTNum TANum fin =
-    MaySatisfy (λ ()) (CMSNotIntro NVNEHole RXNum PNum)
-               (CSMSMay (CMSNotIntro NVNEHole RXNum PNum))
   satisfy-exclusive CTNum (TAAp wt1 wt2) fin =
     MaySatisfy (λ ()) (CMSNotIntro NVAp RXNum PNum)
                (CSMSMay (CMSNotIntro NVAp RXNum PNum))
