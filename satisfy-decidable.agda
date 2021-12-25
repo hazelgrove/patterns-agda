@@ -5,7 +5,7 @@ open import constraints-core
 open import core
 open import notintro-decidable
 open import possible-decidable
-open import value-result-judgements
+open import value-judgements
 open import xrefutable-decidable
 
 module satisfy-decidable where

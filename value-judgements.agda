@@ -2,11 +2,9 @@ open import Bool
 open import Prelude
 open import core
 
-module value-result-judgements where
-  -- these judgements declare that an expression is a value, or can syntactically
-  -- be determined to not be a value.
+module value-judgements where
   -- these judgements are placed into their own module separate from the
-  -- final, indet, etc. judgements in order to break some dependency cycles
+  -- final and indet judgements in order to break some dependency cycles
 
   -- e is a value
   data _val : (e : ihexp) → Set where
@@ -41,5 +39,13 @@ module value-result-judgements where
                ⦇⌜ e ⌟⦈[ u ] notintro
 
   
+  val-notintro-not : ∀{e} →
+                     e val →
+                     e notintro →
+                     ⊥
+  val-notintro-not VNum ()
+  val-notintro-not VLam ()
+  val-notintro-not (VInl eval) ()
+  val-notintro-not (VInr eval) ()
+  val-notintro-not (VPair eval1 eval2) ()
 
-  

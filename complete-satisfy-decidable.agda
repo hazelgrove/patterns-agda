@@ -1,7 +1,7 @@
 open import Bool
 open import Nat
 open import Prelude
-open import constraints-core
+open import complete-constraints-core
 open import core
 
 module complete-satisfy-decidable where

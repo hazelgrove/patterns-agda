@@ -6,7 +6,6 @@ module core where
   -- types
   data htyp : Set where
     num   : htyp
-    ⦇-⦈   : htyp
     _==>_ : htyp → htyp → htyp
     _⊕_   : htyp → htyp → htyp
     _⊠_   : htyp → htyp → htyp
@@ -19,13 +18,13 @@ module core where
   mutual
     -- patterns used for structural pattern matching
     data pattrn : Set where
-      N          : Nat → pattrn
-      X          : Nat → pattrn
-      inl        : pattrn → pattrn
-      inr        : pattrn → pattrn
-      ⟨_,_⟩      : pattrn → pattrn → pattrn
-      wild       : pattrn
-      ⦇-⦈[_]     : Nat → pattrn
+      N        : Nat → pattrn
+      X        : Nat → pattrn
+      inl      : pattrn → pattrn
+      inr      : pattrn → pattrn
+      ⟨_,_⟩    : pattrn → pattrn → pattrn
+      wild     : pattrn
+      ⦇-⦈[_]   : Nat → pattrn
       ⦇⌜_⌟⦈[_] : pattrn → (Nat × htyp) → pattrn
     
     -- pattern matching rules
@@ -56,10 +55,10 @@ module core where
       ⦇-⦈[_]   : Nat → ihexp
       ⦇⌜_⌟⦈[_] : ihexp → Nat → ihexp
 
-  -- the type of type contexts, i.e. Γs in the judgements below
+  -- the type of type contexts, i.e., Γs in the judgements
   tctx : Set
   tctx = htyp ctx
 
-  -- the type of hole contexts, i.e. Δs in the judgements
+  -- the type of hole contexts, i.e., Δs in the judgements
   pctx : Set
   pctx = htyp ctx

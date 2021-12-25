@@ -36,7 +36,9 @@ module lemmas-disjointness where
       ds2 .u2 d | refl | Inl x₁ = abort (neq x₁)
       ds2 .u2 d | refl | Inr x₁ = refl
 
-  apart-noteq : {A : Set} (p r : Nat) (q : A) → p # (■ (r , q)) → p ≠ r
+  apart-noteq : {A : Set} (p r : Nat) (q : A) →
+                p # (■ (r , q)) →
+                p ≠ r
   apart-noteq p r q apt with natEQ r p
   apart-noteq p .p q apt | Inl refl = abort (somenotnone apt)
   apart-noteq p r q apt | Inr x₁ = flip x₁
@@ -45,7 +47,8 @@ module lemmas-disjointness where
   singles-notequal : {A : Set} {x y : A} {u1 u2 : Nat} →
                      (■ (u1 , x)) ## (■ (u2 , y)) →
                      u1 ≠ u2
-  singles-notequal {A} {x} {y} {u1} {u2} (d1 , d2) = apart-noteq u1 u2 y (d1 u1 (lem-domsingle u1 x))
+  singles-notequal {A} {x} {y} {u1} {u2} (d1 , d2) =
+    apart-noteq u1 u2 y (d1 u1 (lem-domsingle u1 x))
 
   -- dual of lem2 above; if two indices are disequal, then either is apart
   -- from the singleton formed with the other
@@ -59,20 +62,29 @@ module lemmas-disjointness where
   -- if an index is apart from two contexts, it's apart from their union as
   -- well. used below and in other files, so it's outside the local scope.
   apart-parts : {A : Set} (Γ1 Γ2 : A ctx) (n : Nat) →
-                n # Γ1 → n # Γ2 → n # (Γ1 ∪ Γ2)
+                n # Γ1 →
+                n # Γ2 →
+                n # (Γ1 ∪ Γ2)
   apart-parts Γ1 Γ2 n apt1 apt2 with Γ1 n
   apart-parts _ _ n refl apt2 | .None = apt2
 
   -- this is just for convenience; it shows up a lot.
-  apart-extend1 : {A : Set} → ∀{x y τ} → (Γ : A ctx) →
-                  x ≠ y → x # Γ → x # (Γ ,, (y , τ))
+  apart-extend1 : {A : Set} →
+                  ∀{x y τ} →
+                  (Γ : A ctx) →
+                  x ≠ y →
+                  x # Γ →
+                  x # (Γ ,, (y , τ))
   apart-extend1 {A} {x} {y} {τ} Γ neq apt with natEQ y x
   ... | Inl refl = abort (neq refl)
   ... | Inr y≠x  = apt
 
   -- if an index is in the domain of a union, it's in the domain of one or
   -- the other unand
-  dom-split : {A : Set} → (Γ1 Γ2 : A ctx) (n : Nat) → dom (Γ1 ∪ Γ2) n →
+  dom-split : {A : Set} →
+              (Γ1 Γ2 : A ctx) →
+              (n : Nat) →
+              dom (Γ1 ∪ Γ2) n →
               dom Γ1 n + dom Γ2 n
   dom-split Γ4 Γ5 n (π1 , π2) with Γ4 n
   dom-split Γ4 Γ5 n (π1 , π2) | Some x = Inl (x , refl)
@@ -80,7 +92,9 @@ module lemmas-disjointness where
 
   -- if both parts of a union are disjoint with a target, so is the union
   disjoint-parts : {A : Set} {Γ1 Γ2 Γ3 : A ctx} →
-                   Γ1 ## Γ3 → Γ2 ## Γ3 → (Γ1 ∪ Γ2) ## Γ3
+                   Γ1 ## Γ3 →
+                   Γ2 ## Γ3 →
+                   (Γ1 ∪ Γ2) ## Γ3
   disjoint-parts {_} {Γ1} {Γ2} {Γ3} D13 D23 = d31 , d32
     where
       d31 : (n : Nat) → dom (Γ1 ∪ Γ2) n → n # Γ3
@@ -92,23 +106,28 @@ module lemmas-disjointness where
       d32 n D = apart-parts Γ1 Γ2 n (π2 D13 n D) (π2 D23 n D)
 
   apart-union1 : {A : Set} (Γ1 Γ2 : A ctx) (n : Nat) →
-                 n # (Γ1 ∪ Γ2) → n # Γ1
+                 n # (Γ1 ∪ Γ2) →
+                 n # Γ1
   apart-union1 Γ1 Γ2 n aprt with Γ1 n
   apart-union1 Γ1 Γ2 n () | Some x
   apart-union1 Γ1 Γ2 n aprt | None = refl
 
   apart-union2 : {A : Set} (Γ1 Γ2 : A ctx) (n : Nat) →
-                 n # (Γ1 ∪ Γ2) → n # Γ2
+                 n # (Γ1 ∪ Γ2) →
+                 n # Γ2
   apart-union2 Γ1 Γ2 n aprt with Γ1 n
   apart-union2 Γ3 Γ4 n () | Some x
   apart-union2 Γ3 Γ4 n aprt | None = aprt
 
   -- if a union is disjoint with a target, so is the left unand
-  disjoint-union1 : {A : Set} {Γ1 Γ2 Δ : A ctx} → (Γ1 ∪ Γ2) ## Δ → Γ1 ## Δ
+  disjoint-union1 : {A : Set} {Γ1 Γ2 Δ : A ctx} →
+                    (Γ1 ∪ Γ2) ## Δ →
+                    Γ1 ## Δ
   disjoint-union1 {Γ1 = Γ1} {Γ2 = Γ2} {Δ = Δ} (ud1 , ud2) = du11 , du12
     where
       dom-union1 : {A : Set} (Γ1 Γ2 : A ctx) (n : Nat) →
-                   dom Γ1 n → dom (Γ1 ∪ Γ2) n
+                   dom Γ1 n →
+                   dom (Γ1 ∪ Γ2) n
       dom-union1 Γ1 Γ2 n (π1 , π2) with Γ1 n
       dom-union1 Γ1 Γ2 n (π1 , π2) | Some x = x , refl
       dom-union1 Γ1 Γ2 n (π1 , ()) | None
@@ -120,11 +139,14 @@ module lemmas-disjointness where
       du12 n dom = apart-union1 Γ1 Γ2 n (ud2 n dom)
 
   -- if a union is disjoint with a target, so is the right unand
-  disjoint-union2 : {A : Set} {Γ1 Γ2 Δ : A ctx} → (Γ1 ∪ Γ2) ## Δ → Γ2 ## Δ
+  disjoint-union2 : {A : Set} {Γ1 Γ2 Δ : A ctx} →
+                    (Γ1 ∪ Γ2) ## Δ →
+                    Γ2 ## Δ
   disjoint-union2 {Γ1 = Γ1} {Γ2 = Γ2} {Δ = Δ} (ud1 , ud2) = du21 , du22
     where
       dom-union2 : {A : Set} (Γ1 Γ2 : A ctx) (n : Nat) →
-                   dom Γ2 n → dom (Γ1 ∪ Γ2) n
+                   dom Γ2 n →
+                   dom (Γ1 ∪ Γ2) n
       dom-union2 Γ1 Γ2 n (π1 , π2) with Γ1 n
       dom-union2 Γ3 Γ4 n (π1 , π2) | Some x = x , refl
       dom-union2 Γ3 Γ4 n (π1 , π2) | None = π1 , π2
@@ -136,7 +158,12 @@ module lemmas-disjointness where
       du22 n dom = apart-union2 Γ1 Γ2 n (ud2 n dom)
 
   -- if x isn't in a context and y is then they can't be equal
-  lem-dom-apt : {A : Set} {G : A ctx} {x y : Nat} → x # G → dom G y → x ≠ y
+  lem-dom-apt : {A : Set} {G : A ctx} {x y : Nat} →
+                x # G →
+                dom G y →
+                x ≠ y
   lem-dom-apt {x = x} {y = y} apt dom with natEQ x y
   lem-dom-apt apt dom | Inl refl = abort (somenotnone (! (π2 dom) · apt))
   lem-dom-apt apt dom | Inr x₁ = x₁
+
+  

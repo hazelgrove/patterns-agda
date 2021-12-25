@@ -1,7 +1,7 @@
 open import Bool
 open import Prelude
 open import core
-open import value-result-judgements
+open import value-judgements
 
 module notintro-decidable where
   notintro-bool : ihexp → Bool

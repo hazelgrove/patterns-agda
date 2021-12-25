@@ -1,10 +1,10 @@
 open import Prelude
 open import core
 open import patterns-core
-open import value-result-judgements
+open import value-judgements
 
-module dynamic-result-judgements where
-  open value-result-judgements public
+module result-judgements where
+  open value-judgements public
   mutual
     -- e is indeterminate
     data _indet : (e : ihexp) → Set where
@@ -80,3 +80,18 @@ module dynamic-result-judgements where
     final-notintro-indet (FVal ()) NVEHole
     final-notintro-indet (FVal ()) NVNEHole
     final-notintro-indet (FIndet ind) ni = ind
+
+    val-indet-not : ∀{e} →
+                    e val →
+                    e indet →
+                    ⊥
+    val-indet-not VNum ()
+    val-indet-not VLam ()
+    val-indet-not (VInl eval) (IInl ind) = val-indet-not eval ind
+    val-indet-not (VInr eval) (IInr ind) = val-indet-not eval ind
+    val-indet-not (VPair eval1 eval2) (IPairL ind1 val2) =
+      val-indet-not eval1 ind1
+    val-indet-not (VPair eval1 eval2) (IPairR val1 ind2) =
+      val-indet-not eval2 ind2
+    val-indet-not (VPair eval1 eval2) (IPair ind1 ind2) =
+      val-indet-not eval1 ind1

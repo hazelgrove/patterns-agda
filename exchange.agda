@@ -12,7 +12,7 @@ module exchange where
                                                 (■ (x , τ1))
                                                 (disjoint-singles (flip neq))
 
-  -- really the dynamics-core of all the exchange arguments: contexts with two
+  -- really the core of all the exchange arguments: contexts with two
   -- disequal elements exchanged are the same. we reassociate the unions,
   -- swap as above, and then associate them back.
   --
@@ -21,7 +21,9 @@ module exchange where
   -- various other proofs; the remaning exchange properties for both Δ and
   -- Γ positions for all the other hypothetical judgements are exactly in
   -- this pattern.
-  swap : {A : Set} {x y : Nat} {τ1 τ2 : A} (Γ : A ctx) (x≠y : x == y → ⊥) →
+  swap : {A : Set} {x y : Nat} {τ1 τ2 : A} →
+         (Γ : A ctx) →
+         (x≠y : x == y → ⊥) →
          ((Γ ,, (x , τ1)) ,, (y , τ2)) == ((Γ ,, (y , τ2)) ,, (x , τ1))
   swap {A} {x} {y} {τ1} {τ2} Γ neq = funext eq
     where

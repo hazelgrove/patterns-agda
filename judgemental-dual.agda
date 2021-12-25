@@ -1,5 +1,5 @@
 open import Prelude
-open import constraints-core
+open import complete-constraints-core
 
 -- duality of complete constraints is defined in the paper as a function
 -- on complete constraints. because of the particular encoding of all the

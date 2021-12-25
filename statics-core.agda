@@ -1,11 +1,11 @@
-
 open import List
 open import Prelude
+open import complete-constraints-core
 open import constraints-core
 open import contexts
 open import core
 open import patterns-core
-open import dynamic-result-judgements
+open import result-judgements
 
 module statics-core where
   mutual

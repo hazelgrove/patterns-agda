@@ -5,7 +5,7 @@ open import contexts
 open import constraints-core
 open import core
 open import substitution-env
-open import value-result-judgements
+open import value-judgements
 
 module patterns-core where
   -- pointer erasure for pattern rules
@@ -142,55 +142,3 @@ module patterns-core where
     PTWild   : ∀{τ} →
                wild :: τ [ ·⊤ ]⊣ ∅ , ∅
     
-  data unbound-in : (x : Nat) → (p : pattrn) → Set where
-    UBPNum    : ∀{x n} →
-                unbound-in x (N n)
-    UBPVar    : ∀{x y} →
-                x ≠ y →
-                unbound-in x (X y)
-    UBPInl    : ∀{x p} →
-                unbound-in x p →
-                unbound-in x (inl p)
-    UBPInr    : ∀{x p} →
-                unbound-in x p →
-                unbound-in x (inr p)
-    UBPPair   : ∀{x p1 p2} →
-                unbound-in x p1 →
-                unbound-in x p2 →
-                unbound-in x ⟨ p1 , p2 ⟩
-    UBPWild   : ∀{x} →
-                unbound-in x wild
-    UBPEHole  : ∀{x u} →
-                unbound-in x ⦇-⦈[ u ]
-    UBPNEHole : ∀{x p u} →
-                unbound-in x p →
-                unbound-in x ⦇⌜ p ⌟⦈[ u ]
- 
-  unbound-in-dec : (x : Nat) →
-                   (p : pattrn) →
-                   (unbound-in x p) + (unbound-in x p → ⊥)
-  unbound-in-dec x (N n) = Inl UBPNum
-  unbound-in-dec x (X y)
-    with natEQ x y
-  ... | Inl refl = Inr λ{ (UBPVar x≠y) → x≠y refl }
-  ... | Inr x≠y = Inl (UBPVar x≠y)
-  unbound-in-dec x (inl p)
-    with unbound-in-dec x p
-  ... | Inl ub = Inl (UBPInl ub)
-  ... | Inr nub = Inr λ{ (UBPInl ub) → nub ub }
-  unbound-in-dec x (inr p)
-    with unbound-in-dec x p
-  ... | Inl ub = Inl (UBPInr ub)
-  ... | Inr nub = Inr λ{ (UBPInr ub) → nub ub }
-  unbound-in-dec x ⟨ p1 , p2 ⟩
-    with unbound-in-dec x p1
-  ... | Inr nub = Inr λ{ (UBPPair ub1 ub2) → nub ub1 }
-  ... | Inl ub1 with unbound-in-dec x p2
-  ... | Inr nub = Inr λ{ (UBPPair ub1 ub2) → nub ub2 }
-  ... | Inl ub2 = Inl (UBPPair ub1 ub2)
-  unbound-in-dec x wild = Inl UBPWild
-  unbound-in-dec x ⦇-⦈[ u ] = Inl UBPEHole
-  unbound-in-dec x ⦇⌜ p ⌟⦈[ u ]
-    with unbound-in-dec x p
-  ... | Inl ub = Inl (UBPNEHole ub)
-  ... | Inr nub = Inr λ{ (UBPNEHole ub) → nub ub }

@@ -2,44 +2,46 @@ open import Nat
 open import Prelude
 open import contexts
 open import core
-open import dynamic-result-judgements
+open import freshness
 open import patterns-core
+open import result-judgements
 open import statics-core
 open import substitution-env
+
 module dynamics-core where
   -- e' is one of the possible values of e
-  data _∈values_ : (e' : ihexp) → (e : ihexp) → Set where
+  data _∈[_]values_ : (e' : ihexp) → (Δ : tctx) → (e : ihexp) → Set where
     IVVal   : ∀{Δ e τ} →
               e val →
               ∅ , Δ ⊢ e :: τ →
-              e ∈values e
+              e ∈[ Δ ]values e
     IVIndet : ∀{Δ e e' τ} →
               e notintro →
               ∅ , Δ ⊢ e :: τ →
               e' val →
               ∅ , Δ ⊢ e' :: τ →
-              e' ∈values e
+              e' ∈[ Δ ]values e
     IVInl   : ∀{Δ e1 e1' τ2 τ} →
               (inl τ2 e1) indet →
               ∅ , Δ ⊢ inl τ2 e1 :: τ →
-              e1' ∈values e1 →
-              (inl τ2 e1') ∈values (inl τ2 e1)
+              e1' ∈[ Δ ]values e1 →
+              (inl τ2 e1') ∈[ Δ ]values (inl τ2 e1)
     IVInr   : ∀{Δ e2 e2' τ1 τ} →
               (inr τ1 e2) indet →
               ∅ , Δ ⊢ inr τ1 e2 :: τ →
-              e2' ∈values e2 →
-              (inr τ1 e2') ∈values (inr τ1 e2)
+              e2' ∈[ Δ ]values e2 →
+              (inr τ1 e2') ∈[ Δ ]values (inr τ1 e2)
     IVPair  : ∀{Δ e1 e1' e2 e2' τ} →
               ⟨ e1 , e2 ⟩ indet →
               ∅ , Δ ⊢ ⟨ e1 , e2 ⟩ :: τ →
-              e1' ∈values e1 →
-              e2' ∈values e2 →
-              ⟨ e1' , e2' ⟩ ∈values ⟨ e1 , e2 ⟩
+              e1' ∈[ Δ ]values e1 →
+              e2' ∈[ Δ ]values e2 →
+              ⟨ e1' , e2' ⟩ ∈[ Δ ]values ⟨ e1 , e2 ⟩
 
     -- substitution
   mutual
     [_/_]r : ihexp → Nat → rule → rule
-    [ d / y ]r (p => e) with unbound-in-dec y p
+    [ d / y ]r (p => e) with unbound-in-p-dec y p
     ... | Inl _ = p => ([ d / y ] e)
     ... | Inr _ = p => e
 

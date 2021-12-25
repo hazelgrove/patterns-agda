@@ -1,13 +1,13 @@
 open import Nat
 open import Prelude
 open import complete-satisfy-decidable
-open import constraints-core
+open import complete-constraints-core
 open import contexts
 open import core
-open import dynamic-result-judgements
 open import judgemental-dual
+open import result-judgements
 open import statics-core
-open import value-result-judgements
+open import value-judgements
 
 module complete-satisfy-exclusive where
 

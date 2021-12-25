@@ -3,10 +3,10 @@ open import Prelude
 open import constraints-core
 open import contexts
 open import core
-open import dynamic-result-judgements
 open import lemmas-satisfy
 open import notintro-decidable
 open import possible-decidable
+open import result-judgements
 open import satisfy-decidable
 open import statics-core
 open import xrefutable-decidable
@@ -27,9 +27,9 @@ module satisfy-exclusive where
                       e final →
                       ExSat e ξ
   satisfy-exclusive CTTruth wt fin =
-    Satisfy CSTruth not-maysat-truth (CSMSSat CSTruth)
+    Satisfy CSTruth maysat-truth-not (CSMSSat CSTruth)
   satisfy-exclusive CTFalsity wt fin =
-    NotSatisfy (λ ()) not-maysat-falsity not-satormay-falsity
+    NotSatisfy (λ ()) maysat-falsity-not satormay-falsity-not
   satisfy-exclusive CTUnknown wt fin =
     MaySatisfy (λ ()) CMSUnknown (CSMSMay CMSUnknown)
     
@@ -69,13 +69,13 @@ module satisfy-exclusive where
   ... | Inl ni
     with xrefutable-dec ξ | possible-dec ξ
   ... | Inl ref | Inl pos =
-    MaySatisfy (λ sat → notintro-sat-not-ref ni sat ref)
+    MaySatisfy (λ sat → notintro-sat-ref-not ni sat ref)
                (CMSNotIntro ni ref pos)
                (CSMSMay (CMSNotIntro ni ref pos))
   ... | Inl ref | Inr ¬pos =
-    NotSatisfy (λ sat → notintro-sat-not-ref ni sat ref)
-               (λ msat → ¬pos (msat-pos msat))
-               (λ satm → ¬pos (satm-pos satm))
+    NotSatisfy (λ sat → notintro-sat-ref-not ni sat ref)
+               (λ msat → ¬pos (maysat-pos msat))
+               (λ satm → ¬pos (satormay-pos satm))
   ... | Inr ¬ref | Inl pos =
     Satisfy (not-ref-sat (CTInl ct) wt fin ¬ref)
             (λ{(CMSNotIntro _ ref _) → ¬ref ref} )
@@ -116,13 +116,13 @@ module satisfy-exclusive where
   ... | Inl ni
     with xrefutable-dec ξ | possible-dec ξ
   ... | Inl ref | Inl pos =
-    MaySatisfy (λ sat → notintro-sat-not-ref ni sat ref)
+    MaySatisfy (λ sat → notintro-sat-ref-not ni sat ref)
                (CMSNotIntro ni ref pos)
                (CSMSMay (CMSNotIntro ni ref pos))
   ... | Inl ref | Inr ¬pos =
-    NotSatisfy (λ sat → notintro-sat-not-ref ni sat ref)
-               (λ msat → ¬pos (msat-pos msat))
-               (λ satm → ¬pos (satm-pos satm))
+    NotSatisfy (λ sat → notintro-sat-ref-not ni sat ref)
+               (λ msat → ¬pos (maysat-pos msat))
+               (λ satm → ¬pos (satormay-pos satm))
   ... | Inr ¬ref | Inl pos =
     Satisfy (not-ref-sat (CTInr ct) wt fin ¬ref)
             (λ{(CMSNotIntro _ ref _) → ¬ref ref} )
@@ -167,23 +167,23 @@ module satisfy-exclusive where
   ... | Satisfy sat1 ¬msat1 satm1 | Satisfy sat2 ¬msat2 satm2 =
     Satisfy (CSNotIntroPair ni sat1 sat2)
             (λ{(CMSNotIntro ni ref pos) →
-               notintro-sat-not-ref ni (CSNotIntroPair ni sat1 sat2) ref})
+               notintro-sat-ref-not ni (CSNotIntroPair ni sat1 sat2) ref})
             (CSMSSat (CSNotIntroPair ni sat1 sat2))
   ... | Satisfy sat1 ¬msat1 satm1 | MaySatisfy ¬sat2 msat2 satm2 =
-    let msat = (CMSNotIntro ni (RXPairR (notintro-msat-ref NVSnd msat2))
-                               (PPair (sat-pos sat1) (msat-pos msat2)))
+    let msat = (CMSNotIntro ni (RXPairR (notintro-maysat-ref NVSnd msat2))
+                               (PPair (sat-pos sat1) (maysat-pos msat2)))
     in MaySatisfy (λ{(CSNotIntroPair ni sat1 sat2) → ¬sat2 sat2})
                   msat
                   (CSMSMay msat)
   ... | MaySatisfy ¬sat1 msat1 satm1 | Satisfy sat2 ¬msat2 satm2 =
-    let msat = (CMSNotIntro ni (RXPairL (notintro-msat-ref NVFst msat1))
-                               (PPair (msat-pos msat1) (sat-pos sat2)))
+    let msat = (CMSNotIntro ni (RXPairL (notintro-maysat-ref NVFst msat1))
+                               (PPair (maysat-pos msat1) (sat-pos sat2)))
     in MaySatisfy (λ{(CSNotIntroPair ni sat1 sat2) → ¬sat1 sat1})
                   msat
                   (CSMSMay msat)
   ... | MaySatisfy ¬sat1 msat1 satm1 | MaySatisfy ¬sat2 msat2 satm2 =
-    let msat = (CMSNotIntro ni (RXPairL (notintro-msat-ref NVFst msat1))
-                               (PPair (msat-pos msat1) (msat-pos msat2)))
+    let msat = (CMSNotIntro ni (RXPairL (notintro-maysat-ref NVFst msat1))
+                               (PPair (maysat-pos msat1) (maysat-pos msat2)))
     in MaySatisfy (λ{(CSNotIntroPair ni sat1 sat2) → ¬sat1 sat1})
                   msat
                   (CSMSMay msat)
@@ -194,7 +194,7 @@ module satisfy-exclusive where
       ¬sat (CSNotIntroPair ni sat1 sat2) = ¬sat2 sat2
       ¬msat : (e ⊧̇? ξ) → ⊥
       ¬msat (CMSNotIntro ni (RXPairL ref1) pos) =
-        notintro-sat-not-ref NVFst sat1 ref1
+        notintro-sat-ref-not NVFst sat1 ref1
       ¬msat (CMSNotIntro ni (RXPairR ref2) (PPair pos1 pos2)) =
         ¬msat2 (CMSNotIntro NVSnd ref2 pos2)
       ¬satm : (e ⊧̇†? ξ) → ⊥
@@ -209,7 +209,7 @@ module satisfy-exclusive where
       ¬msat (CMSNotIntro ni (RXPairL ref1) (PPair pos1 pos2)) =
         ¬msat1 (CMSNotIntro NVFst ref1 pos1)
       ¬msat (CMSNotIntro ni (RXPairR ref2) pos) =
-        notintro-sat-not-ref NVSnd sat2 ref2
+        notintro-sat-ref-not NVSnd sat2 ref2
       ¬satm : (e ⊧̇†? ξ) → ⊥
       ¬satm (CSMSSat sat) = ¬sat sat
       ¬satm (CSMSMay msat) = ¬msat msat   
@@ -221,8 +221,8 @@ module satisfy-exclusive where
       ¬sat : (e ⊧̇ ⟨ ξ1 , ξ2 ⟩) → ⊥
       ¬sat (CSNotIntroPair ni sat1 sat2) = ¬sat2 sat2
       msat : e ⊧̇? ⟨ ξ1 , ξ2 ⟩
-      msat = CMSNotIntro ni (RXPairL (notintro-msat-ref NVFst msat1))
-                         (PPair (msat-pos msat1) pos2)
+      msat = CMSNotIntro ni (RXPairL (notintro-maysat-ref NVFst msat1))
+                         (PPair (maysat-pos msat1) pos2)
   ... | Inr ¬pos2 = NotSatisfy ¬sat ¬msat ¬satm
     where
       ¬sat : (e ⊧̇ ⟨ ξ1 , ξ2 ⟩) → ⊥
@@ -240,8 +240,8 @@ module satisfy-exclusive where
       ¬sat : (e ⊧̇ ⟨ ξ1 , ξ2 ⟩) → ⊥
       ¬sat (CSNotIntroPair ni sat1 sat2) = ¬sat1 sat1
       msat : e ⊧̇? ⟨ ξ1 , ξ2 ⟩
-      msat = CMSNotIntro ni (RXPairR (notintro-msat-ref NVSnd msat2))
-                         (PPair pos1 (msat-pos msat2))
+      msat = CMSNotIntro ni (RXPairR (notintro-maysat-ref NVSnd msat2))
+                         (PPair pos1 (maysat-pos msat2))
   ... | Inr ¬pos1 = NotSatisfy ¬sat ¬msat ¬satm
     where
       ¬sat : (e ⊧̇ ⟨ ξ1 , ξ2 ⟩) → ⊥
@@ -365,28 +365,28 @@ module satisfy-exclusive where
             (λ{(CMSOrL _ ¬sat2) → ¬sat2 sat2
              ; (CMSOrR ¬sat1 _) → ¬sat1 sat1
              ; (CMSNotIntro ni (RXOr ref1 ref2) _) →
-               notintro-sat-not-ref ni sat1 ref1})
+               notintro-sat-ref-not ni sat1 ref1})
              (CSMSSat (CSOrL sat1))
   ... | Satisfy sat1 ¬msat1 satm1 | MaySatisfy ¬sat2 msat2 satm2 =
     Satisfy (CSOrL sat1)
             (λ{(CMSOrL msat1 _) → ¬msat1 msat1
              ; (CMSOrR ¬sat1 _) → ¬sat1 sat1
              ; (CMSNotIntro ni (RXOr ref1 ref2) _) →
-               notintro-sat-not-ref ni sat1 ref1})
+               notintro-sat-ref-not ni sat1 ref1})
             (CSMSSat (CSOrL sat1))
   ... | Satisfy sat1 ¬msat1 satm1 | NotSatisfy ¬sat2 ¬msat2 ¬satm2 =
     Satisfy (CSOrL sat1)
             (λ{(CMSOrL msat1 _) → ¬msat1 msat1
              ; (CMSOrR ¬sat1 _) → ¬sat1 sat1
              ; (CMSNotIntro ni (RXOr ref1 ref2) _) →
-               notintro-sat-not-ref ni sat1 ref1})
+               notintro-sat-ref-not ni sat1 ref1})
             (CSMSSat (CSOrL sat1))
   ... | MaySatisfy ¬sat1 msat1 satm1 | Satisfy sat2 ¬msat2 satm2 =
     Satisfy (CSOrR sat2)
             (λ{(CMSOrL _ ¬sat2) → ¬sat2 sat2
              ; (CMSOrR _ msat2) → ¬msat2 msat2
              ; (CMSNotIntro ni (RXOr ref1 ref2) _) →
-               notintro-sat-not-ref ni sat2 ref2})
+               notintro-sat-ref-not ni sat2 ref2})
             (CSMSSat (CSOrR sat2))
   ... | MaySatisfy ¬sat1 msat1 satm1 | MaySatisfy ¬sat2 msat2 satm2 =
     MaySatisfy (λ{(CSOrL sat1) → ¬sat1 sat1
@@ -403,7 +403,7 @@ module satisfy-exclusive where
             (λ{(CMSOrL _ ¬sat2) → ¬sat2 sat2
              ; (CMSOrR _ msat2) → ¬msat2 msat2
              ; (CMSNotIntro ni (RXOr ref1 ref2) _) →
-               notintro-sat-not-ref ni sat2 ref2})
+               notintro-sat-ref-not ni sat2 ref2})
             (CSMSSat (CSOrR sat2))
   ... | NotSatisfy ¬sat1 ¬msat1 ¬satm1 | MaySatisfy ¬sat2 msat2 satm2 =
     MaySatisfy (λ{(CSOrL sat1) → ¬sat1 sat1
