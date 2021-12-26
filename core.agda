@@ -58,7 +58,3 @@ module core where
   -- the type of type contexts, i.e., Γs in the judgements
   tctx : Set
   tctx = htyp ctx
-
-  -- the type of hole contexts, i.e., Δs in the judgements
-  pctx : Set
-  pctx = htyp ctx

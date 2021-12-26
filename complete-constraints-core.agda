@@ -45,34 +45,6 @@ module complete-constraints-core where
                 ξ1 :cc: τ →
                 ξ2 :cc: τ →
                 (ξ1 ∧ ξ2) :cc: τ
-
-  -- dual of ξ is ξbar
-  data dual : (ξ : comp-constr) → (ξbar : comp-constr) → Set where
-    CDTruth   : dual ·⊤ ·⊥
-    CDFalsity : dual ·⊥ ·⊤
-    CDNum     : ∀{n} →
-                dual (N n) (N̸ n)
-    CDNotNum  : ∀{n} →
-                dual (N̸ n) (N n)
-    CDInl     : ∀{ξ ξbar} →
-                dual ξ ξbar →
-                dual (inl ξ) (inl ξbar ∨ inr ·⊤)
-    CDInr     : ∀{ξ ξbar} →
-                dual ξ ξbar →
-                dual (inr ξ) (inr ξbar ∨ inl ·⊤)
-    CDPair    : ∀{ξ1 ξ1bar ξ2 ξ2bar} →
-                dual ξ1 ξ1bar →
-                dual ξ2 ξ2bar →
-                dual ⟨ ξ1 , ξ2 ⟩
-                     ((⟨ ξ1 , ξ2bar ⟩ ∨ ⟨ ξ1bar , ξ2 ⟩) ∨ ⟨ ξ1bar , ξ2bar ⟩)
-    CDOr      : ∀{ξ1 ξ1bar ξ2 ξ2bar} →
-                dual ξ1 ξ1bar →
-                dual ξ2 ξ2bar →
-                dual (ξ1 ∨ ξ2) (ξ1bar ∧ ξ2bar)
-    CDAnd     : ∀{ξ1 ξ1bar ξ2 ξ2bar} →
-                dual ξ1 ξ1bar →
-                dual ξ2 ξ2bar →
-                dual (ξ1 ∧ ξ2) (ξ1bar ∨ ξ2bar)
     
   -- e satisfies ξ
   data _⊧_ : (e : ihexp) → (ξ : comp-constr) → Set where
@@ -104,6 +76,18 @@ module complete-constraints-core where
                e ⊧ ξ2 →
                e ⊧ (ξ1 ∧ ξ2)
 
+  -- compute the dual of a constraint
+  _◆d : comp-constr → comp-constr
+  ·⊤ ◆d = ·⊥
+  ·⊥ ◆d = ·⊤
+  (N n) ◆d = N̸ n
+  (N̸ n) ◆d = N n
+  (inl ξ) ◆d = inl (ξ ◆d) ∨ inr ·⊤
+  (inr ξ) ◆d = inr (ξ ◆d) ∨ inl ·⊤
+  ⟨ ξ1 , ξ2 ⟩ ◆d = (⟨ ξ1 , ξ2 ◆d ⟩ ∨ ⟨ ξ1 ◆d , ξ2 ⟩) ∨ ⟨ ξ1 ◆d , ξ2 ◆d ⟩
+  (ξ1 ∨ ξ2) ◆d = (ξ1 ◆d) ∧ (ξ2 ◆d)
+  (ξ1 ∧ ξ2) ◆d = (ξ1 ◆d) ∨ (ξ2 ◆d)
+  
   -- substitute ⊤ for ? in ξ
   _◆⊤ : constr → comp-constr
   ·⊤ ◆⊤ = ·⊤

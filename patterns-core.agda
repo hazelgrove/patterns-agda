@@ -84,10 +84,10 @@ module patterns-core where
                  e1 ?▹ p1 →
                  e2 ?▹ p2 →
                  ⟨ e1 , e2 ⟩ ?▹ ⟨ p1 , p2 ⟩
-    MMEHole    : ∀{u p} →
-                 ⦇-⦈[ u ] ?▹ p
-    MMNEHole   : ∀{e u p} →
-                 ⦇⌜ e ⌟⦈[ u ] ?▹ p
+    MMEHole    : ∀{e w} →
+                 e ?▹ ⦇-⦈[ w ]
+    MMNEHole   : ∀{e p w τ} →
+                 e ?▹ ⦇⌜ p ⌟⦈[ w , τ ]
     
   -- e does not match p
   data _⊥▹_ : (e : ihexp) → (p : pattrn) → Set where

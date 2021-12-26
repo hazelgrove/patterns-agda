@@ -18,7 +18,6 @@ open import result-judgements
 open import value-judgements
 open import constraints-core
 open import complete-constraints-core
-open import judgemental-dual
 open import patterns-core
 open import dynamics-core
 open import statics-core
@@ -37,4 +36,5 @@ open import satisfy-exclusive
 open import complete-satisfy-exclusive
 
 open import complete-relationship
-
+open import material-entailment
+--open import matching-determinism
