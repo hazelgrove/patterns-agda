@@ -88,8 +88,7 @@ module statics-core where
     Entails : ∀{ξ1 ξ2 τ} →
               ξ1 :c: τ →
               ξ2 :c: τ →
-              ((Δ : pctx) →
-               (e : ihexp) →
+              (∀{Δ e} →
                ∅ , Δ ⊢ e :: τ →
                e val →
                e ⊧̇†? ξ1 →
@@ -98,28 +97,26 @@ module statics-core where
 
   -- ξ1 potentially entails ξ2
   data _c⊧̇†?_ : (ξ1 : constr) → (ξ2 : constr) → Set where
-    MayEntail : ∀{ξ1 ξ2 τ} →
-                ξ1 :c: τ →
-                ξ2 :c: τ →
-                ((Δ : pctx) →
-                 (e : ihexp) →
-                 ∅ , Δ ⊢ e :: τ →
-                 e final →
-                 e ⊧̇†? ξ1 →
-                 e ⊧̇†? ξ2) →
-                ξ1 c⊧̇†? ξ2
+    PotEntails : ∀{ξ1 ξ2 τ} →
+                 ξ1 :c: τ →
+                 ξ2 :c: τ →
+                 (∀{Δ e} →
+                  ∅ , Δ ⊢ e :: τ →
+                  e final →
+                  e ⊧̇†? ξ1 →
+                  e ⊧̇†? ξ2) →
+                 ξ1 c⊧̇†? ξ2
 
   -- ξ1 entails ξ2
   data _cc⊧_ : (ξ1 : comp-constr) → (ξ2 : comp-constr) → Set where
     Entails : ∀{ξ1 ξ2 τ} →
               ξ1 :cc: τ →
               ξ2 :cc: τ →
-              ((Δ : pctx) →
-                (e : ihexp) →
-                ∅ , Δ ⊢ e :: τ →
-                e val →
-                e ⊧ ξ1 →
-                e ⊧ ξ2) →
+              (∀{Δ e} →
+               ∅ , Δ ⊢ e :: τ →
+               e val →
+               e ⊧ ξ1 →
+               e ⊧ ξ2) →
               ξ1 cc⊧ ξ2
 
   -- rs is matched by expressions of type τ, emitting constraint ξrs.
