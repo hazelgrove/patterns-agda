@@ -93,7 +93,7 @@ module Prelude where
   someinj : {A : Set} {x y : A} → Some x == Some y → x == y
   someinj refl = refl
 
-  --  some isn't none.
+  -- some isn't none.
   somenotnone : {A : Set} {x : A} → Some x == None → ⊥
   somenotnone ()
 
@@ -113,4 +113,5 @@ module Prelude where
   _≃_ A B = Σ[ f ∈ (A → B) ] Σ[ g ∈ (B → A) ]
              (((a : A) → g (f a) == a) × (((b : B) → f (g b) == b)))
 
-  
+  contra : {A : Set} → A → (A → ⊥) → ⊥
+  contra a ¬a = ¬a a

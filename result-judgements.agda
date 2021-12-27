@@ -68,7 +68,7 @@ module result-judgements where
     pair-final (FIndet (IPairL ind1 val2)) = FIndet ind1 , FVal val2
     pair-final (FIndet (IPairR val1 ind2)) = FVal val1 , FIndet ind2
     pair-final (FIndet (IPair ind1 ind2)) = FIndet ind1 , FIndet ind2
-    
+
     final-notintro-indet : ∀{e} →
                            e final →
                            e notintro →

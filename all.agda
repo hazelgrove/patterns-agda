@@ -37,4 +37,4 @@ open import complete-satisfy-exclusive
 
 open import complete-relationship
 open import material-entailment
---open import matching-determinism
+open import matching-determinism
