@@ -1,8 +1,7 @@
-
 open import Nat
 open import Prelude
-open import contexts
 open import constraints-core
+open import contexts
 open import core
 open import patterns-core
 open import result-judgements
@@ -59,9 +58,9 @@ module type-assignment-unicity where
     -- if we assume a given type for the pattern, then unicity
     -- holds for all other aspects
     pattern-unicity : ∀{p τ ξ ξ' Γ Γ' Δ Δ'} →
-                           p :: τ [ ξ ]⊣ Γ , Δ →
-                           p :: τ [ ξ' ]⊣ Γ' , Δ' →
-                           (ξ == ξ') × (Γ == Γ') × (Δ == Δ')
+                      p :: τ [ ξ ]⊣ Γ , Δ →
+                      p :: τ [ ξ' ]⊣ Γ' , Δ' →
+                      (ξ == ξ') × (Γ == Γ') × (Δ == Δ')
     pattern-unicity PTVar PTVar = refl , refl , refl
     pattern-unicity PTNum PTNum = refl , refl , refl
     pattern-unicity (PTInl pt) (PTInl pt')
@@ -80,9 +79,9 @@ module type-assignment-unicity where
     pattern-unicity PTWild PTWild = refl , refl , refl
     
     rule-unicity : ∀{Γ Δ r τ1 ξ ξ' τ2 τ2'} →
-                        Γ , Δ ⊢ r :: τ1 [ ξ ]=> τ2 →
-                        Γ , Δ ⊢ r :: τ1 [ ξ' ]=> τ2' →
-                       (ξ == ξ') × (τ2 == τ2')
+                   Γ , Δ ⊢ r :: τ1 [ ξ ]=> τ2 →
+                   Γ , Δ ⊢ r :: τ1 [ ξ' ]=> τ2' →
+                   (ξ == ξ') × (τ2 == τ2')
     rule-unicity (CTRule pt dis dish wt) (CTRule pt' dis' dish' wt')
       with pattern-unicity pt pt'
     ... | refl , refl , refl
@@ -90,9 +89,9 @@ module type-assignment-unicity where
     ... | refl = refl , refl
     
     rules-unicity : ∀{Γ Δ rs τ1 ξrs ξrs' τ2 τ2'} →
-                                Γ , Δ ⊢ rs ::s τ1 [ ξrs ]=> τ2 →
-                                Γ , Δ ⊢ rs ::s τ1 [ ξrs' ]=> τ2' →
-                                (ξrs == ξrs') × (τ2 == τ2')
+                    Γ , Δ ⊢ rs ::s τ1 [ ξrs ]=> τ2 →
+                    Γ , Δ ⊢ rs ::s τ1 [ ξrs' ]=> τ2' →
+                    (ξrs == ξrs') × (τ2 == τ2')
     rules-unicity (CTOneRule wt) (CTOneRule wt')
       with rule-unicity wt wt'
     ... | refl , refl = refl , refl

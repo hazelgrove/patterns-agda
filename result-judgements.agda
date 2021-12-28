@@ -63,11 +63,16 @@ module result-judgements where
     inr-final (FVal (VInr eval)) = FVal eval
     inr-final (FIndet (IInr eind)) = FIndet eind
 
-    pair-final : ∀{e1 e2} → ⟨ e1 , e2 ⟩ final → e1 final × e2 final
+    pair-final : ∀{e1 e2} →
+                 ⟨ e1 , e2 ⟩ final →
+                 e1 final × e2 final
     pair-final (FVal (VPair val1 val2)) = FVal val1 , FVal val2
-    pair-final (FIndet (IPairL ind1 val2)) = FIndet ind1 , FVal val2
-    pair-final (FIndet (IPairR val1 ind2)) = FVal val1 , FIndet ind2
-    pair-final (FIndet (IPair ind1 ind2)) = FIndet ind1 , FIndet ind2
+    pair-final (FIndet (IPairL ind1 val2)) =
+      FIndet ind1 , FVal val2
+    pair-final (FIndet (IPairR val1 ind2)) =
+      FVal val1 , FIndet ind2
+    pair-final (FIndet (IPair ind1 ind2)) =
+      FIndet ind1 , FIndet ind2
 
     final-notintro-indet : ∀{e} →
                            e final →
