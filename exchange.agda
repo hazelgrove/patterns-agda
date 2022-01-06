@@ -3,14 +3,17 @@ open import Nat
 open import core
 open import contexts
 open import lemmas-disjointness
+open import statics-core
 
 module exchange where
   -- exchanging just two disequal elements produces the same context
-  swap-little : {A : Set} {x y : Nat} {τ1 τ2 : A} → (x ≠ y) →
-    ((■ (x , τ1)) ,, (y , τ2)) == ((■ (y , τ2)) ,, (x , τ1))
-  swap-little {A} {x} {y} {τ1} {τ2} neq = ∪comm (■ (y , τ2))
-                                                (■ (x , τ1))
-                                                (disjoint-singles (flip neq))
+  swap-little : {A : Set} {x y : Nat} {τ1 τ2 : A} →
+                (x ≠ y) →
+                ((■ (x , τ1)) ,, (y , τ2)) ==
+                  ((■ (y , τ2)) ,, (x , τ1))
+  swap-little {A} {x} {y} {τ1} {τ2} neq =
+    ∪comm (■ (y , τ2)) (■ (x , τ1))
+          (disjoint-singles (flip neq))
 
   -- really the core of all the exchange arguments: contexts with two
   -- disequal elements exchanged are the same. we reassociate the unions,
@@ -24,10 +27,13 @@ module exchange where
   swap : {A : Set} {x y : Nat} {τ1 τ2 : A} →
          (Γ : A ctx) →
          (x≠y : x == y → ⊥) →
-         ((Γ ,, (x , τ1)) ,, (y , τ2)) == ((Γ ,, (y , τ2)) ,, (x , τ1))
+         ((Γ ,, (x , τ1)) ,, (y , τ2)) ==
+           ((Γ ,, (y , τ2)) ,, (x , τ1))
   swap {A} {x} {y} {τ1} {τ2} Γ neq = funext eq
     where
-      eq : (z : Nat) →  ((Γ ,, (x , τ1)) ,, (y , τ2)) z == ((Γ ,, (y , τ2)) ,, (x , τ1)) z
+      eq : (z : Nat) →
+           ((Γ ,, (x , τ1)) ,, (y , τ2)) z ==
+             ((Γ ,, (y , τ2)) ,, (x , τ1)) z
       eq z with natEQ y z
       ... | Inr y≠z with natEQ x z
       ... | Inl refl = refl
@@ -39,3 +45,10 @@ module exchange where
       ... | Inr x≠z with natEQ z z
       ... | Inl refl = refl
       ... | Inr z≠z = abort (z≠z refl)
+
+  exchange-ta-Γ : ∀{Γ Δ x y τ1 τ2 e τ} →
+                  x ≠ y →
+                  (Γ ,, (x , τ1) ,, (y , τ2)) , Δ ⊢ e :: τ →
+                  (Γ ,, (y , τ2) ,, (x , τ1)) , Δ ⊢ e :: τ
+  exchange-ta-Γ {Γ = Γ} {Δ = Δ} {e = e} {τ = τ} x≠y wt =
+    tr (λ qq → qq , Δ ⊢ e :: τ) (swap Γ x≠y) wt

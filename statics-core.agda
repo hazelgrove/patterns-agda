@@ -72,7 +72,7 @@ module statics-core where
 
     -- rs transforms a final expression of type τ to a final expression
     -- of type τ', emitting constraint ξrs
-    data _,_⊢_::s_[_]=>_ : (Γ : tctx) → (Δ : tctx) → (rs : hrules) →
+    data _,_⊢_::s_[_]=>_ : (Γ : tctx) → (Δ : tctx) → (rs : rules) →
                            (τ : htyp) → (ξrs : constr) →
                            (τ' : htyp) → Set where
       CTOneRule : ∀{Γ Δ r τ ξr τ'} →
@@ -120,7 +120,7 @@ module statics-core where
               ξ1 cc⊧ ξ2
 
   -- rs is matched by expressions of type τ, emitting constraint ξrs.
-  data _::s_[_] : (rs : hrules) → (τ : htyp) → (ξrs : constr) → Set where
+  data _::s_[_] : (rs : rules) → (τ : htyp) → (ξrs : constr) → Set where
      CTOneRule : ∀{p e τ ξr Γp Δp} →
                  p :: τ [ ξr ]⊣ Γp , Δp →
                  ((p => e) / nil) ::s τ [ ξr ]
@@ -133,7 +133,7 @@ module statics-core where
   -- moreover, ξrs does not entail ξpre, i.e., rs is non-redundant
   -- assuming ξpre denotes the constraint given by all previously
   -- considered patterns
-  data _::s_[_nr/_] : (rs : hrules) → (τ : htyp) →
+  data _::s_[_nr/_] : (rs : rules) → (τ : htyp) →
                       (ξpre : constr) → (ξrs : constr) → Set where
      CTOneRule : ∀{p e τ ξpre ξr Γp Δp} →
                  p :: τ [ ξr ]⊣ Γp , Δp →
@@ -147,14 +147,14 @@ module statics-core where
 
   -- every expression of the same type as rs matches or may
   -- match at least one rule in rs
-  data _exhaustive : (rs : hrules) → Set where
+  data _exhaustive : (rs : rules) → Set where
     EXRules : ∀{rs τ ξ} →
               rs ::s τ [ ξ ] →
               ·⊤ c⊧̇†? ξ →
               rs exhaustive
 
   -- no rule occurring in rs is redundant 
-  data _nonredundant : (rs : hrules) → Set where
+  data _nonredundant : (rs : rules) → Set where
     NRRules   : ∀{rs τ ξ} →
                 rs ::s τ [ ·⊥ nr/ ξ ] →
                 rs nonredundant
@@ -203,7 +203,7 @@ module statics-core where
 
     -- for each rule p => e in rs, all match expressions
     -- occurring in e are exhaustive
-    data _branches-all-exhaustive : (rs : hrules) → Set where
+    data _branches-all-exhaustive : (rs : rules) → Set where
       AEXNoRules : nil branches-all-exhaustive
       AEXRules   : ∀{p e rs} →
                    e all-exhaustive →
@@ -254,7 +254,7 @@ module statics-core where
 
     -- for each rule p => e in rs, no match expression
     -- occurring in e contains redundant rules
-    data _branches-all-nonredundant : (rs : hrules) → Set where
+    data _branches-all-nonredundant : (rs : rules) → Set where
       ANRNoRules : nil branches-all-nonredundant
       ANRRules   : ∀{p e rs} →
                    e all-nonredundant →

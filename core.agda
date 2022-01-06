@@ -32,13 +32,13 @@ module core where
       _=>_ : pattrn → ihexp → rule
 
     -- unzippered rules
-    data hrules : Set where
-      nil : hrules
-      _/_ : rule → hrules → hrules
+    data rules : Set where
+      nil : rules
+      _/_ : rule → rules → rules
 
     -- zippered rules
     data zrules : Set where
-      _/_/_ : hrules → rule → hrules → zrules
+      _/_/_ : rules → rule → rules → zrules
     
     -- internal expressions
     data ihexp : Set where

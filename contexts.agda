@@ -69,6 +69,57 @@ module contexts where
 
   infixl 10 _,,_
 
+  -- difference, i.e., C1 but with any element of C2 removeed
+  _∖_ : {A : Set} → A ctx → A ctx → A ctx
+  (C1 ∖ C2) x with C2 x
+  ... | Some _ = None
+  ... | None = C1 x
+
+  -- unions choose the LHS when there is overlap
+  lem-union-diff : {A : Set} (C1 C2 : A ctx) →
+                   (C1 ∪ C2) == C1 ∪ (C2 ∖ C1)
+  lem-union-diff C1 C2 = funext eq
+    where
+      eq : (x : Nat) → (C1 ∪ C2) x == (C1 ∪ (C2 ∖ C1)) x
+      eq x with C1 x in C1x
+      ... | Some τ1 = refl
+      ... | None
+        with C1 x
+      ... | Some _ = abort (somenotnone C1x)
+      ... | None = refl
+
+  disjoint-diff : {A : Set} (C1 C2 : A ctx) →
+                  C1 ## (C2 ∖ C1)
+  disjoint-diff C1 C2 = disj1 , disj2
+    where
+      disj1 : (x : Nat) →
+              dom C1 x →
+              x # (C2 ∖ C1)
+      disj1 x x∈C1
+        with C1 x
+      ... | Some _ = refl
+      disj2 : (x : Nat) →
+              dom (C2 ∖ C1) x →
+              x # C1
+      disj2 x x∈C2∖C1
+        with C1 x
+      ... | None = refl
+
+  lem-dom-diffl : {A : Set} {C1 C2 : A ctx} {n : Nat} {x : A} →
+                  (n , x) ∈ (C1 ∖ C2) →
+                  (n , x) ∈ C1
+  lem-dom-diffl {A} {C1} {C2} {n} {x} ∈C1∖C2
+    with C2 n 
+  ... | Some x' = abort (somenotnone (! ∈C1∖C2))
+  ... | None = ∈C1∖C2
+  
+  lem-apt-diffr : {A : Set} {C1 C2 : A ctx} {n : Nat} {x : A} →
+                  (n , x) ∈ (C1 ∖ C2) →
+                  C2 n == None
+  lem-apt-diffr {A} {C1} {C2} {n} {x} ∈C1∖C2 
+    with C2 n
+  ... | None = refl
+  
   extend-empty : {A : Set} (x : Nat) (t : A) →
                  ∅ ,, (x , t) == ■ (x , t)
   extend-empty x t = funext eq
@@ -369,7 +420,7 @@ module contexts where
       ... | Inr x≠z with Δ1 z
       ... | Some z' = refl
       ... | None = refl
-      
+
   update : {A : Set} (Γ : A ctx) (x : Nat) (τ1 τ2 : A) →
            Γ ,, (x , τ1) ,, (x , τ2) == Γ ,, (x , τ2)
   update Γ x τ1 τ2 = funext eq

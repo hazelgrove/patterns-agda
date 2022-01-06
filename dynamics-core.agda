@@ -38,14 +38,14 @@ module dynamics-core where
               e2' ∈[ Δ ]values e2 →
               ⟨ e1' , e2' ⟩ ∈[ Δ ]values ⟨ e1 , e2 ⟩
 
-    -- substitution
+  -- substitution
   mutual
     [_/_]r : ihexp → Nat → rule → rule
     [ d / y ]r (p => e) with unbound-in-p-dec y p
     ... | Inl _ = p => ([ d / y ] e)
     ... | Inr _ = p => e
 
-    [_/_]rs : ihexp → Nat → hrules → hrules
+    [_/_]rs : ihexp → Nat → rules → rules
     [ d / y ]rs nil = nil
     [ d / y ]rs (r / rs) = ([ d / y ]r r) / ([ d / y ]rs rs)
 
@@ -62,11 +62,11 @@ module dynamics-core where
     [ d / y ] (·λ x ·[ x₁ ] d')
       with natEQ x y
     [ d / y ] (·λ .y ·[ τ ] d') | Inl refl = ·λ y ·[ τ ] d'
-    [ d / y ] (·λ x ·[ τ ] d')  | Inr x₁ = ·λ x ·[ τ ] ( [ d / y ] d')
+    [ d / y ] (·λ x ·[ τ ] d')  | Inr x≠y = ·λ x ·[ τ ] ( [ d / y ] d')
     [ d / y ] (d1 ∘ d2) = ([ d / y ] d1) ∘ ([ d / y ] d2)
     [ d / y ] (inl τ d') = inl τ ([ d / y ] d')
     [ d / y ] (inr τ d') = inr τ ([ d / y ] d')
-    [ d / y ] match d' rs = match ([ d' / y ] d') ([ d / y ]zrs rs) 
+    [ d / y ] match d' rs = match ([ d / y ] d') ([ d / y ]zrs rs) 
     [ d / y ] ⟨ d1 , d2 ⟩ = ⟨ [ d / y ] d1 , [ d / y ] d2 ⟩
     [ d / y ] (fst d') = fst ([ d / y ] d')
     [ d / y ] (snd d') = snd ([ d / y ] d')

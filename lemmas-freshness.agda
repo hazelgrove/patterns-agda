@@ -7,48 +7,89 @@ open import lemmas-disjointness
 open import patterns-core
 
 module lemmas-freshness where
-  unbound-in-p-apart : ∀{x p τ ξ Γp Δp} →
-                       unbound-in-p x p →
+  unbound-in-p-apart : ∀{p τ ξ Γp Δp x} →
                        p :: τ [ ξ ]⊣ Γp , Δp →
+                       unbound-in-p x p →
                        x # Γp
-  unbound-in-p-apart (UBPVar x≠y) PTVar = apart-singleton x≠y
-  unbound-in-p-apart UBPNum PTNum = refl
-  unbound-in-p-apart (UBPInl ub) (PTInl pt) = unbound-in-p-apart ub pt
-  unbound-in-p-apart (UBPInr ub) (PTInr pt) = unbound-in-p-apart ub pt
-  unbound-in-p-apart {x = x} (UBPPair ub1 ub2)
-                     (PTPair {Γ1 = Γ1} {Γ2 = Γ2} disj disjh pt1 pt2) =
+  unbound-in-p-apart PTVar (UBPVar x≠y) = apart-singleton x≠y
+  unbound-in-p-apart PTNum UBPNum = refl
+  unbound-in-p-apart (PTInl pt) (UBPInl ub) = unbound-in-p-apart pt ub
+  unbound-in-p-apart (PTInr pt) (UBPInr ub)  = unbound-in-p-apart pt ub
+  unbound-in-p-apart {x = x}
+                     (PTPair {Γ1 = Γ1} {Γ2 = Γ2} disj disjh pt1 pt2)
+                     (UBPPair ub1 ub2) =
     apart-parts Γ1 Γ2 x
-                (unbound-in-p-apart ub1 pt1)
-                (unbound-in-p-apart ub2 pt2)
-  unbound-in-p-apart UBPEHole PTEHole = refl
-  unbound-in-p-apart (UBPNEHole ub) (PTNEHole pt apt') = unbound-in-p-apart ub pt
-  unbound-in-p-apart UBPWild PTWild = refl
+                (unbound-in-p-apart pt1 ub1)
+                (unbound-in-p-apart pt2 ub2)
+  unbound-in-p-apart PTEHole UBPEHole = refl
+  unbound-in-p-apart (PTNEHole pt apt') (UBPNEHole ub) = unbound-in-p-apart pt ub
+  unbound-in-p-apart PTWild UBPWild = refl
+
+  apart-unbound-in-p : ∀{p τ ξ Γp Δp x} →
+                       p :: τ [ ξ ]⊣ Γp , Δp →
+                       x # Γp →
+                       unbound-in-p x p
+  apart-unbound-in-p {τ = τ} {x = x} (PTVar {x = y}) x#Γp =
+    UBPVar (apart-noteq x y τ x#Γp)
+  apart-unbound-in-p PTNum x#Γp = UBPNum
+  apart-unbound-in-p (PTInl pt) x#Γp =
+    UBPInl (apart-unbound-in-p pt x#Γp)
+  apart-unbound-in-p (PTInr pt) x#Γp =
+    UBPInr (apart-unbound-in-p pt x#Γp)
+  apart-unbound-in-p {x = x} (PTPair {Γ1 = Γ1} {Γ2 = Γ2} Γ1##Γ2 Δ1##Δ2 pt1 pt2) x#Γp =
+    UBPPair (apart-unbound-in-p pt1 (apart-union1 Γ1 Γ2 x x#Γp))
+            (apart-unbound-in-p pt2 (apart-union2 Γ1 Γ2 x x#Γp))
+  apart-unbound-in-p PTEHole x#Γp = UBPEHole
+  apart-unbound-in-p (PTNEHole pt w#Δ) x#Γp =
+    UBPNEHole (apart-unbound-in-p pt x#Γp)
+  apart-unbound-in-p PTWild x#Γp = UBPWild
   
   hole-unbound-in-p-apart : ∀{u p τ ξ Γp Δp} →
-                            hole-unbound-in-p u p →
                             p :: τ [ ξ ]⊣ Γp , Δp →
+                            hole-unbound-in-p u p →
                             u # Δp
-  hole-unbound-in-p-apart HUBPNum PTNum = refl
-  hole-unbound-in-p-apart HUBPVar PTVar = refl
-  hole-unbound-in-p-apart (HUBPInl hub) (PTInl pt) =
-    hole-unbound-in-p-apart hub pt
-  hole-unbound-in-p-apart (HUBPInr hub) (PTInr pt) =
-    hole-unbound-in-p-apart hub pt
-  hole-unbound-in-p-apart {u = u} (HUBPPair hub1 hub2)
-                          (PTPair {Δ1 = Δ1} {Δ2 = Δ2} disj disjh pt1 pt2) =
+  hole-unbound-in-p-apart PTNum HUBPNum = refl
+  hole-unbound-in-p-apart PTVar HUBPVar = refl
+  hole-unbound-in-p-apart (PTInl pt) (HUBPInl hub) =
+    hole-unbound-in-p-apart pt hub
+  hole-unbound-in-p-apart (PTInr pt) (HUBPInr hub) =
+    hole-unbound-in-p-apart pt hub
+  hole-unbound-in-p-apart {u = u}
+                          (PTPair {Δ1 = Δ1} {Δ2 = Δ2} disj disjh pt1 pt2)
+                          (HUBPPair hub1 hub2) =
     apart-parts Δ1 Δ2 u
-                (hole-unbound-in-p-apart hub1 pt1)
-                (hole-unbound-in-p-apart hub2 pt2)
-  hole-unbound-in-p-apart HUBPWild PTWild = refl
-  hole-unbound-in-p-apart (HUBPEHole u≠u') PTEHole = apart-singleton u≠u'
-  hole-unbound-in-p-apart {u = u} (HUBPNEHole {u' = u'} u≠u' hub)
-                          (PTNEHole pt apt')
-    with hole-unbound-in-p-apart hub pt
+                (hole-unbound-in-p-apart pt1 hub1)
+                (hole-unbound-in-p-apart pt2 hub2)
+  hole-unbound-in-p-apart PTWild HUBPWild = refl
+  hole-unbound-in-p-apart PTEHole (HUBPEHole u≠u') = apart-singleton u≠u'
+  hole-unbound-in-p-apart {u = u} (PTNEHole pt apt')
+                          (HUBPNEHole {u' = u'} u≠u' hub)
+    with hole-unbound-in-p-apart pt hub
   ... | apt
     with natEQ u' u
   ... | Inl u'=u = abort (u≠u' (! u'=u))
   ... | Inr u'≠u = apt
 
+  apart-hole-unbound-in-p : ∀{u p τ ξ Γp Δp} →
+                            p :: τ [ ξ ]⊣ Γp , Δp →
+                            u # Δp →
+                            hole-unbound-in-p u p
+  apart-hole-unbound-in-p PTVar u#Δp = HUBPVar
+  apart-hole-unbound-in-p PTNum u#Δp = HUBPNum
+  apart-hole-unbound-in-p (PTInl pt) u#Δp =
+    HUBPInl (apart-hole-unbound-in-p pt u#Δp)
+  apart-hole-unbound-in-p (PTInr pt) u#Δp =
+    HUBPInr (apart-hole-unbound-in-p pt u#Δp)
+  apart-hole-unbound-in-p {u = u} (PTPair {Δ1 = Δ1} {Δ2 = Δ2} Γ1##Γ2 Δ1##Δ2 pt1 pt2) u#Δp =
+    HUBPPair (apart-hole-unbound-in-p pt1 (apart-union1 Δ1 Δ2 u u#Δp))
+             (apart-hole-unbound-in-p pt2 (apart-union2 Δ1 Δ2 u u#Δp))
+  apart-hole-unbound-in-p {u = u} (PTEHole {w = w} {τ = τ}) u#Δp =
+    HUBPEHole (apart-noteq u w τ u#Δp)
+  apart-hole-unbound-in-p {u = u} (PTNEHole {w = w} {τ = τ} {Δ = Δ} pt w#Δ) u#Δp =
+    HUBPNEHole (apart-noteq u w τ (apart-union1 (■ (w , τ)) Δ u u#Δp))
+               (apart-hole-unbound-in-p pt (apart-union2 (■ (w , τ)) Δ u u#Δp))
+  apart-hole-unbound-in-p PTWild u#Δp = HUBPWild
+  
   mutual
     max-var : ihexp → Nat
     max-var (N n) = 0
@@ -77,14 +118,14 @@ module lemmas-freshness where
     max-var-r : rule → Nat
     max-var-r (p => e) = max (max-var-p p) (max-var e)
 
-    max-var-hrs : hrules → Nat
-    max-var-hrs nil = 0
-    max-var-hrs (r / rs) = max (max-var-r r) (max-var-hrs rs)
+    max-var-rs : rules → Nat
+    max-var-rs nil = 0
+    max-var-rs (r / rs) = max (max-var-r r) (max-var-rs rs)
 
     max-var-zrs : zrules → Nat
     max-var-zrs (rs-pre / r / rs-post) =
-      max (max (max-var-hrs rs-pre) (max-var-r r))
-          (max-var-hrs rs-post)
+      max (max (max-var-rs rs-pre) (max-var-r r))
+          (max-var-rs rs-post)
 
   mutual
     max<-fresh : ∀{x e} →
@@ -104,12 +145,12 @@ module lemmas-freshness where
       FPair (max<-fresh (max<→arg1< max<x)) (max<-fresh (max<→arg2< max<x))
     max<-fresh {e = fst e} max<x = FFst (max<-fresh max<x)
     max<-fresh {e = snd e} max<x = FSnd (max<-fresh max<x)
-    max<-fresh {e = ⦇-⦈[ u ]} max<x = FHole
+    max<-fresh {e = ⦇-⦈[ u ]} max<x = FEHole
     max<-fresh {e = ⦇⌜ e ⌟⦈[ u ]} max<x = FNEHole (max<-fresh max<x)
 
     max<-unbound-in-p : ∀{x p} →
-                   (max-var-p p) < x →
-                   unbound-in-p x p
+                        (max-var-p p) < x →
+                        unbound-in-p x p
     max<-unbound-in-p {p = N n} max<x = UBPNum
     max<-unbound-in-p {p = X x} max<x = UBPVar (flip (<→≠ max<x))
     max<-unbound-in-p {p = inl p} max<x = UBPInl (max<-unbound-in-p max<x)
@@ -129,21 +170,21 @@ module lemmas-freshness where
       FRule (max<-unbound-in-p (max<→arg1< max<x))
             (max<-fresh (max<→arg2< max<x))
 
-    max<-fresh-hrs : ∀{x rs} →
-                     (max-var-hrs rs) < x →
-                     fresh-hrs x rs
-    max<-fresh-hrs {rs = nil} max<x = FNoRules
-    max<-fresh-hrs {rs = r / rs} max<x =
-      FRules (max<-fresh-r (max<→arg1< max<x)) (max<-fresh-hrs (max<→arg2< max<x))
+    max<-fresh-rs : ∀{x rs} →
+                    (max-var-rs rs) < x →
+                    fresh-rs x rs
+    max<-fresh-rs {rs = nil} max<x = FNoRules
+    max<-fresh-rs {rs = r / rs} max<x =
+      FRules (max<-fresh-r (max<→arg1< max<x)) (max<-fresh-rs (max<→arg2< max<x))
 
     max<-fresh-zrs : ∀{x zrs} →
                      (max-var-zrs zrs) < x →
                      fresh-zrs x zrs
     max<-fresh-zrs {zrs = rs-pre / r / rs-post} max<x =
-      FZRules (max<-fresh-hrs (max<→arg1< (max<→arg1< max<x)))
-              (max<-fresh-r (max<→arg2< {m = max-var-hrs rs-pre} {n = max-var-r r}
+      FZRules (max<-fresh-rs (max<→arg1< (max<→arg1< max<x)))
+              (max<-fresh-r (max<→arg2< {m = max-var-rs rs-pre} {n = max-var-r r}
                             (max<→arg1< max<x)))
-              (max<-fresh-hrs (max<→arg2< max<x))
+              (max<-fresh-rs (max<→arg2< max<x))
     
   exists-fresh : (e : ihexp) →
                  Σ[ x ∈ Nat ] (fresh x e)

@@ -29,10 +29,11 @@ open import possible-decidable
 open import satisfy-decidable
 open import xrefutable-decidable
 
-open import type-assignment-unicity
+
 open import lemmas-values
 open import lemmas-patterns
 open import lemmas-satisfy
+open import type-assignment-unicity
 open import satisfy-exclusive
 open import complete-satisfy-exclusive
 
@@ -40,3 +41,7 @@ open import complete-relationship
 open import material-entailment
 open import matching-determinism
 open import matching-coherence
+
+
+--open import lemmas-substitution
+--open import preservation

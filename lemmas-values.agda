@@ -52,8 +52,8 @@ module lemmas-values where
     VPair (values-val vals1) (values-val vals2)
 
   type-has-val : (τ : htyp) →
-                (Δ : tctx) →
-                Σ[ e ∈ ihexp ] (e val × (∅ , Δ ⊢ e :: τ))
+                 (Δ : tctx) →
+                 Σ[ e ∈ ihexp ] (e val × (∅ , Δ ⊢ e :: τ))
   type-has-val num Δ = N 0 , VNum , TANum
   type-has-val (τ1 ==> τ2) Δ
     with type-has-val τ2 Δ

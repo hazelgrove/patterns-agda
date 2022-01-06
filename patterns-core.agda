@@ -9,7 +9,7 @@ open import value-judgements
 
 module patterns-core where
   -- pointer erasure for pattern rules
-  data erase-r : zrules → hrules → Set where
+  data erase-r : zrules → rules → Set where
     ERZPre  : ∀{r rs} →
               erase-r (nil / r / rs) (r / rs)
     ERNZPre : ∀{r' rs' r rs er} →
