@@ -65,23 +65,23 @@ module Nat where
   n<1+n Z = z<1+
   n<1+n (1+ n) = 1+<1+ (n<1+n n)
 
-  <→≠ : ∀{n m} →
+  <-≠ : ∀{n m} →
         n < m →
         n ≠ m
-  <→≠ (1+<1+ m<m) refl = <→≠ m<m refl
+  <-≠ (1+<1+ m<m) refl = <-≠ m<m refl
 
-  max<→arg1< : ∀{m n x} →
+  max<-arg1< : ∀{m n x} →
                max m n < x →
                m < x
-  max<→arg1< {m = Z} {n = Z} z<1+ = z<1+
-  max<→arg1< {m = Z} {n = 1+ n} (1+<1+ max<x) = z<1+
-  max<→arg1< {m = 1+ m} {n = Z} (1+<1+ max<x) = 1+<1+ max<x
-  max<→arg1< {m = 1+ m} {n = 1+ n} (1+<1+ max<x) = 1+<1+ (max<→arg1< max<x)
+  max<-arg1< {m = Z} {n = Z} z<1+ = z<1+
+  max<-arg1< {m = Z} {n = 1+ n} (1+<1+ max<x) = z<1+
+  max<-arg1< {m = 1+ m} {n = Z} (1+<1+ max<x) = 1+<1+ max<x
+  max<-arg1< {m = 1+ m} {n = 1+ n} (1+<1+ max<x) = 1+<1+ (max<-arg1< max<x)
 
-  max<→arg2< : ∀{m n x} →
+  max<-arg2< : ∀{m n x} →
                max m n < x →
                n < x
-  max<→arg2< {m = Z} {n = Z} z<1+ = z<1+
-  max<→arg2< {m = Z} {n = 1+ n} (1+<1+ max<x) = 1+<1+ max<x
-  max<→arg2< {m = 1+ m} {n = Z} (1+<1+ max<x) = z<1+
-  max<→arg2< {m = 1+ m} {n = 1+ n} (1+<1+ max<x) = 1+<1+ (max<→arg2< max<x)
+  max<-arg2< {m = Z} {n = Z} z<1+ = z<1+
+  max<-arg2< {m = Z} {n = 1+ n} (1+<1+ max<x) = 1+<1+ max<x
+  max<-arg2< {m = 1+ m} {n = Z} (1+<1+ max<x) = z<1+
+  max<-arg2< {m = 1+ m} {n = 1+ n} (1+<1+ max<x) = 1+<1+ (max<-arg2< max<x)

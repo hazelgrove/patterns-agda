@@ -1,3 +1,4 @@
+open import Nat
 open import contexts
 open import core
 open import dynamics-core

@@ -3,6 +3,7 @@ open import Prelude
 open import constraints-core
 open import contexts
 open import core
+open import lemmas-contexts
 open import patterns-core
 open import result-judgements
 open import statics-core
@@ -15,7 +16,7 @@ module type-assignment-unicity where
                         τ == τ'
     expr-type-unicity TANum TANum = refl
     expr-type-unicity {Γ = Γ} (TAVar wt) (TAVar wt') =
-      ctxunicity {Γ = Γ} wt wt'
+      ctx-unicity {Γ = Γ} wt wt'
     expr-type-unicity (TALam apt wt) (TALam apt' wt')
       with expr-type-unicity wt wt'
     ... | refl = refl
@@ -49,9 +50,9 @@ module type-assignment-unicity where
       with expr-type-unicity wt wt'
     ... | refl = refl
     expr-type-unicity {Δ = Δ} (TAEHole x) (TAEHole x') =
-      ctxunicity {Γ = Δ} x x'
+      ctx-unicity {Γ = Δ} x x'
     expr-type-unicity {Δ = Δ} (TANEHole x wt) (TANEHole x' wt') =
-      ctxunicity {Γ = Δ} x x'
+      ctx-unicity {Γ = Δ} x x'
 
     -- variable and hole patterns may be assigned any type,
     -- so unicity does not actually hold for patterns. However,

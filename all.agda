@@ -4,12 +4,10 @@ open import Nat
 open import Prelude
 
 open import contexts
-open import contraction
-open import dom-eq
+open import lemmas-contexts
 open import exchange
 open import freshness
 open import lemmas-freshness
-open import lemmas-disjointness
 open import weakening
 
 open import core
@@ -42,6 +40,5 @@ open import material-entailment
 open import matching-determinism
 open import matching-coherence
 
-
---open import lemmas-substitution
+open import lemmas-substitution
 --open import preservation

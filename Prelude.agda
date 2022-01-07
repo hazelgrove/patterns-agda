@@ -89,16 +89,16 @@ module Prelude where
     None : Maybe A
   {-# BUILTIN MAYBE Maybe #-}
   
-  -- the some constructor is injective. perhaps unsurprisingly.
-  someinj : {A : Set} {x y : A} → Some x == Some y → x == y
-  someinj refl = refl
+  -- the some constructor is injective
+  some-inj : {A : Set} {x y : A} → Some x == Some y → x == y
+  some-inj refl = refl
 
-  -- some isn't none.
-  somenotnone : {A : Set} {x : A} → Some x == None → ⊥
-  somenotnone ()
+  -- some isn't none
+  some-not-none : {A : Set} {x : A} → Some x == None → ⊥
+  some-not-none ()
 
   -- function extensionality, used to reason about contexts as
-  -- finite functions.
+  -- finite functions
   postulate
      funext : {A : Set} {B : A → Set} {f g : (x : A) → (B x)} →
               ((x : A) → f x == g x) → f == g

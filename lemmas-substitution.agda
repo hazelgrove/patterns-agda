@@ -6,7 +6,7 @@ open import core
 open import dynamics-core
 open import exchange
 open import freshness
-open import lemmas-disjointness
+open import lemmas-contexts
 open import lemmas-freshness
 open import patterns-core
 open import result-judgements
@@ -26,7 +26,7 @@ module lemmas-substitution where
       FRule xubp
             (binders-fresh wt xube
                            (apart-parts Γ Γp x x#Γ
-                                        (unbound-in-p-apart pt xubp)))
+                                        (unbound-in-p-apart-Γp pt xubp)))
 
     binders-fresh-rs : ∀{Γ Δ rs τ1 ξ τ2 x} →
                        Γ , Δ ⊢ rs ::s τ1 [ ξ ]=> τ2 →
@@ -47,10 +47,10 @@ module lemmas-substitution where
                     fresh x e
     binders-fresh TANum UBNum x#Γ = FNum
     binders-fresh (TAVar {x = y} y∈Γ) UBVar x#Γ =
-      FVar (λ{ refl → somenotnone ((! y∈Γ) · x#Γ) })
+      FVar (λ{ refl → some-not-none ((! y∈Γ) · x#Γ) })
     binders-fresh {Γ = Γ} (TALam {x = y} y#Γ wt)
                   (UBLam x≠y xub) x#Γ =
-      FLam x≠y (binders-fresh wt xub (apart-extend1 Γ x≠y x#Γ))
+      FLam x≠y (binders-fresh wt xub (neq-apart-extend Γ x≠y x#Γ))
     binders-fresh (TAAp wt1 wt2) (UBAp ub1 ub2) x#Γ =
       FAp (binders-fresh wt1 ub1 x#Γ) (binders-fresh wt2 ub2 x#Γ)
     binders-fresh (TAInl wt) (UNInl ub) x#Γ =
@@ -91,7 +91,29 @@ module lemmas-substitution where
     binders-fresh (TAEHole x) UBEHole x#Γ = FEHole
     binders-fresh (TANEHole x wt) (UBNEHole ub) x#Γ =
       FNEHole (binders-fresh wt ub x#Γ)
-      
+
+  -- mutual
+  --   hole-binders-fresh-r : ∀{Γ Δ r τ1 ξ τ2 u} →
+  --                     Γ , Δ ⊢ r :: τ1 [ ξ ]=> τ2 →
+  --                     hole-unbound-in-r u r →
+  --                     u # Δ →
+  --                     hole-fresh-r u r
+  --   hole-binders-fresh-r {Δ = Δ} {u = u}
+  --                   (CTRule {Δp = Δp} pt Γ##Γp Δ##Δp wt)
+  --                   (UBRule ubp ube) u#Δ =        
+  --     HFRule ubp
+  --            (holes-binders-fresh
+  --              wt ube
+  --              (apart-parts Δ Δp u u#Δp
+  --                           (hole-unbound-in-p-apart-Δp pt ubp)))
+
+  --   hole-binders-fresh : ∀{Γ Δ e τ x} →
+  --                        Γ , Δ ⊢ e :: τ →
+  --                        unbound-in u e →
+  --                        u # Δ →
+  --                        hole-fresh u e
+  --   hole-binders-fresh = ?
+    
   mutual
     subst-type-r : ∀{Γ Δ x τ1 r τ ξ τ' e2} →
                    x # Γ →
@@ -100,21 +122,45 @@ module lemmas-substitution where
                    (Γ ,, (x , τ1)) , Δ ⊢ r :: τ [ ξ ]=> τ' →
                    Γ , Δ ⊢ e2 :: τ1 →
                    Γ , Δ ⊢ [ e2 / x ]r r :: τ [ ξ ]=> τ'
-    subst-type-r {Γ = Γ} {x = x} {τ1 = τ1} x#Γ
+    subst-type-r {Γ = Γ} {x = x} {τ1 = τ1} {e2 = e2} x#Γ
                  (BDRule {p = p} pd2 1d2) bu
-                 (CTRule {Γp = Γp} pt Γ,##Γp Δ##Δp wts) wt2
+                 (CTRule {Γp = Γp} {Δp = Δp} pt Γ,##Γp Δ##Δp wts) wt2
       with unbound-in-p-dec x p
     ... | Inr ¬ub =
-      abort (¬ub (apart-unbound-in-p
+      abort (¬ub (apart-Γp-unbound-in-p
                     pt
-                    (lem-disj-sing-apart (disjoint-union1 Γ,##Γp))))
-    ... | Inl ub rewrite ! (lem-extend-union Γ Γp x τ1) =
-      CTRule pt (disjoint-union2 {Γ1 = ■ (x , τ1)} {Γ2 = Γ} Γ,##Γp) Δ##Δp
+                    (disjoint-singleton-apart (union-disjoint-l Γ,##Γp))))
+    ... | Inl ub rewrite (∪-assoc (■ (x , τ1)) Γ Γp) =
+      CTRule pt (union-disjoint-r {Γ1 = ■ (x , τ1)} {Γ2 = Γ} Γ,##Γp) Δ##Δp
              (subst-type (apart-parts Γ Γp x x#Γ
-                                      (unbound-in-p-apart pt ub))
+                                      (unbound-in-p-apart-Γp pt ub))
                          1d2 bu wts
-                         {!wt2!})
-                                             
+                         (weaken-ta-Γ∪ frsh
+                                       (weaken-ta-Δ∪ hfrsh wt2)))
+      where
+        frsh : ∀{z} →
+               dom Γp z →
+               fresh z e2
+        frsh {z = z} z∈Γp = 
+          binders-fresh wt2
+                        (dom-Γp-unbound-in pt z∈Γp pd2)
+                        z#Γ
+          where
+            z#Γ : z # Γ
+            z#Γ with Γ z in Γz
+            ... | None = refl
+            ... | Some τ =
+              abort (some-not-none
+                      ((! Γz) ·
+                       apart-union-r (■ (x , τ1)) Γ z
+                                    (π2 Γ,##Γp z z∈Γp)))
+          
+        
+        hfrsh : ∀{z} →
+                dom Δp z →
+                hole-fresh z e2
+        hfrsh z∈Δp = {!!}
+        
     subst-type-rs : ∀{Γ Δ x τ1 rs τ ξ τ' e2} →
                     x # Γ →
                     binders-disjoint-rs rs e2 →
@@ -138,7 +184,7 @@ module lemmas-substitution where
       with natEQ x x
     ... | Inr x≠x = abort (x≠x refl)
     ... | Inl refl
-      with someinj y∈
+      with some-inj y∈
     ... | refl = wt2
     subst-type {x = x} x#Γ bd bu (TAVar {x = y} y∈) wt2
         | Inr y≠x
@@ -150,14 +196,14 @@ module lemmas-substitution where
     ... | Inl refl
       with natEQ x x
     ... | Inr x≠x = abort (x≠x refl)
-    ... | Inl refl = abort (somenotnone y#)
+    ... | Inl refl = abort (some-not-none y#)
     subst-type {Γ = Γ} {x = x} x#Γ (BDLam bd ub) bu (TALam {x = y} y# wts) wt2
         | Inr y≠x
       with natEQ x y
     ... | Inl refl = abort (y≠x refl)
     ... | Inr x≠y =
       TALam y#
-            (subst-type (apart-extend1 Γ x≠y x#Γ) bd bu
+            (subst-type (neq-apart-extend Γ x≠y x#Γ) bd bu
                         (exchange-ta-Γ x≠y wts)
                         (weaken-ta-Γ (binders-fresh wt2 ub y#) wt2))
     subst-type x#Γ (BDAp bd1 bd2) bu (TAAp wts1 wts2) wt2 =

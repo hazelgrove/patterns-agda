@@ -2,19 +2,10 @@ open import Prelude
 open import Nat
 open import core
 open import contexts
-open import lemmas-disjointness
+open import lemmas-contexts
 open import statics-core
 
 module exchange where
-  -- exchanging just two disequal elements produces the same context
-  swap-little : {A : Set} {x y : Nat} {τ1 τ2 : A} →
-                (x ≠ y) →
-                ((■ (x , τ1)) ,, (y , τ2)) ==
-                  ((■ (y , τ2)) ,, (x , τ1))
-  swap-little {A} {x} {y} {τ1} {τ2} neq =
-    ∪comm (■ (y , τ2)) (■ (x , τ1))
-          (disjoint-singles (flip neq))
-
   -- really the core of all the exchange arguments: contexts with two
   -- disequal elements exchanged are the same. we reassociate the unions,
   -- swap as above, and then associate them back.

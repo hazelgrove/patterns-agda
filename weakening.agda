@@ -6,7 +6,7 @@ open import contexts
 open import core
 open import exchange
 open import freshness
-open import lemmas-disjointness
+open import lemmas-contexts
 open import lemmas-freshness
 open import patterns-core
 open import statics-core
@@ -23,7 +23,7 @@ module weakening where
     weaken-ta-∪Γ frsh TANum = TANum
     weaken-ta-∪Γ {Γ' = Γ'} {Γ = Γ} {τ = τ} frsh (TAVar {x = x} x∈Γ)
       with Γ' x in Γ'x
-    ... | None = TAVar (x∈∪r Γ' Γ x τ x∈Γ Γ'x)
+    ... | None = TAVar (dom-r-union Γ' Γ x τ x∈Γ Γ'x)
     ... | Some τ'
       with frsh (τ' , Γ'x)
     ... | FVar x≠x = abort (x≠x refl)
@@ -47,12 +47,11 @@ module weakening where
         ... | FLam z≠x f = f
         
         eq : Γ' ∪ (Γ ,, (x , τ1)) == (Γ' ∪ Γ) ,, (x , τ1)
-        eq = ! (∪assoc Γ' (■ (x , τ1)) Γ
-                       (lem-apart-sing-disj x#Γ)) ·
+        eq = ! (∪-assoc Γ' (■ (x , τ1)) Γ) ·
              (ap1 (λ qq → qq ∪ Γ)
-                  (∪comm Γ' (■ (x , τ1))
-                         (##-comm (lem-apart-sing-disj Γ'x))) ·
-              ! (lem-extend-union Γ' Γ x τ1))
+                  (∪-comm Γ' (■ (x , τ1))
+                         (##-comm (apart-singleton-disjoint Γ'x))) ·
+              (∪-assoc (■ (x , τ1)) Γ' Γ))
     weaken-ta-∪Γ {Γ' = Γ'} {e = e1 ∘ e2} frsh (TAAp wt1 wt2) =
       TAAp (weaken-ta-∪Γ frsh1 wt1)
            (weaken-ta-∪Γ frsh2 wt2)
@@ -203,7 +202,7 @@ module weakening where
              (disjoint-parts Γ'##Γp Γ##Γp)
              Δ##Δp
              (tr (λ qq → qq , Δ ∪ Δp ⊢ e :: τ2)
-                 (! (∪assoc Γ' Γ Γp Γ##Γp))
+                 (! (∪-assoc Γ' Γ Γp))
                  (weaken-ta-∪Γ frsh' wt))
       where
         Γ'##Γp : Γ' ## Γp
@@ -213,7 +212,7 @@ module weakening where
                     dom Γ' x →
                     x # Γp
             disj1 x x∈Γ' with frsh x∈Γ'
-            ... | FRule ub f = unbound-in-p-apart pt ub
+            ... | FRule ub f = unbound-in-p-apart-Γp pt ub
             disj2 : (x : Nat) →
                     dom Γp x →
                     x # Γ'
@@ -222,7 +221,7 @@ module weakening where
             ... | None = refl
             ... | Some τ1 
               with disj1 x (τ1 , Γ'x)
-            ... | x#Γp = abort (somenotnone (! (π2 x∈Γp) · x#Γp))
+            ... | x#Γp = abort (some-not-none (! (π2 x∈Γp) · x#Γp))
 
         frsh' : ∀{z} →
                 dom Γ' z →
@@ -241,15 +240,15 @@ module weakening where
                    (Γ ∪ Γ') , Δ ⊢ e :: τ
     weaken-ta-Γ∪ {Γ = Γ} {Γ' = Γ'} {Δ = Δ} {e = e} {τ = τ} frsh wt =
       tr (λ qq → qq , Δ ⊢ e :: τ)
-         (! (lem-union-diff Γ Γ' ·
-             ∪comm Γ (Γ' ∖ Γ) (disjoint-diff Γ Γ')))
+         (! (union-with-diff Γ Γ' ·
+             ∪-comm Γ (Γ' ∖ Γ) (r-disjoint-diff-r Γ' Γ)))
          (weaken-ta-∪Γ frsh' wt)
       where
         frsh' : ∀{z} →
                 dom (Γ' ∖ Γ) z →
                 fresh z e
         frsh' {z = z} (τ , z∈Γ'∖Γ) =
-          frsh (τ , lem-dom-diffl {C1 = Γ'} {C2 = Γ} z∈Γ'∖Γ)
+          frsh (τ , dom-diff-dom-l {Γ1 = Γ'} {Γ2 = Γ} z∈Γ'∖Γ)
          
     -- convenience function
     weaken-ta-Γ : ∀{Γ x τ' Δ e τ} →
@@ -262,7 +261,7 @@ module weakening where
         frsh' : ∀{z} →
                 dom (■ (x , τ')) z →
                 fresh z e
-        frsh' d with lem-dom-eq d
+        frsh' d with dom-singleton-eq d
         ... | refl = frsh
         
   mutual
@@ -390,7 +389,7 @@ module weakening where
       with frsh (τ' , Δ'u)
     ... | HFEHole u≠u = abort (u≠u refl)
     weaken-ta-∪Δ {Δ' = Δ'} {Δ = Δ} frsh (TAEHole {u = u} {τ = τ} u∈Δ)
-        | None = TAEHole (x∈∪r Δ' Δ u τ u∈Δ Δ'u)
+        | None = TAEHole (dom-r-union Δ' Δ u τ u∈Δ Δ'u)
     weaken-ta-∪Δ {Δ' = Δ'} {Δ = Δ} frsh (TANEHole {u = u} {τ = τ} u∈Δ wt)
       with Δ' u in Δ'u
     ... | Some τ'
@@ -399,7 +398,7 @@ module weakening where
     weaken-ta-∪Δ {Δ' = Δ'} {Δ = Δ} {e = ⦇⌜ e ⌟⦈[ u ]}
                  frsh (TANEHole {τ = τ} u∈Δ wt)
         | None =
-      TANEHole (x∈∪r Δ' Δ u τ u∈Δ Δ'u)
+      TANEHole (dom-r-union Δ' Δ u τ u∈Δ Δ'u)
                (weaken-ta-∪Δ frsh' wt)
       where
         frsh' : ∀{z} →
@@ -449,7 +448,7 @@ module weakening where
              Γ##Γp
              (disjoint-parts Δ'##Δp Δ##Δp)
              (tr (λ qq → (Γ ∪ Γp) , qq ⊢ e :: τ2)
-                 (! (∪assoc Δ' Δ Δp Δ##Δp))
+                 (! (∪-assoc Δ' Δ Δp))
                  (weaken-ta-∪Δ frsh' wt))
       where
         Δ'##Δp : Δ' ## Δp
@@ -459,7 +458,7 @@ module weakening where
                     dom Δ' x →
                     x # Δp
             disj1 x x∈Δ' with frsh x∈Δ'
-            ... | HFRule hub hf = hole-unbound-in-p-apart pt hub
+            ... | HFRule hub hf = hole-unbound-in-p-apart-Δp pt hub
             disj2 : (x : Nat) →
                     dom Δp x →
                     x # Δ'
@@ -468,7 +467,7 @@ module weakening where
             ... | None = refl
             ... | Some τ1 
               with disj1 x (τ1 , Δ'x)
-            ... | x#Δp = abort (somenotnone (! (π2 x∈Δp) · x#Δp))
+            ... | x#Δp = abort (some-not-none (! (π2 x∈Δp) · x#Δp))
 
         frsh' : ∀{z} →
                 dom Δ' z →
@@ -487,15 +486,15 @@ module weakening where
                    Γ , (Δ ∪ Δ') ⊢ e :: τ
     weaken-ta-Δ∪ {Γ = Γ} {Δ = Δ} {Δ' = Δ'} {e = e} {τ = τ} frsh wt =
       tr (λ qq → Γ , qq ⊢ e :: τ)
-         (! (lem-union-diff Δ Δ' ·
-             ∪comm Δ (Δ' ∖ Δ) (disjoint-diff Δ Δ')))
+         (! (union-with-diff Δ Δ' ·
+             ∪-comm Δ (Δ' ∖ Δ) (r-disjoint-diff-r Δ' Δ)))
          (weaken-ta-∪Δ frsh' wt)
       where
         frsh' : ∀{z} →
                 dom (Δ' ∖ Δ) z →
                 hole-fresh z e
         frsh' {z = z} (τ , z∈Δ'∖Δ) =
-          frsh (τ , lem-dom-diffl {C1 = Δ'} {C2 = Δ} z∈Δ'∖Δ)
+          frsh (τ , dom-diff-dom-l {Γ1 = Δ'} {Γ2 = Δ} z∈Δ'∖Δ)
          
     -- convenience function
     weaken-ta-Δ : ∀{Γ Δ u τ' e τ} →
@@ -508,5 +507,5 @@ module weakening where
         frsh' : ∀{z} →
                 dom (■ (u , τ')) z →
                 hole-fresh z e
-        frsh' d with lem-dom-eq d
+        frsh' d with dom-singleton-eq d
         ... | refl = frsh
