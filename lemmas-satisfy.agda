@@ -27,9 +27,11 @@ module lemmas-satisfy where
                          e ⊧̇ ξ →
                          ξ xrefutable →
                          ⊥
-  notintro-sat-ref-not ni (CSNotIntroPair ni' sat1 sat2) (RXPairL ref1) =
+  notintro-sat-ref-not ni (CSNotIntroPair ni' sat1 sat2)
+                       (RXPairL ref1) =
     notintro-sat-ref-not NVFst sat1 ref1
-  notintro-sat-ref-not ni (CSNotIntroPair ni' sat1 sat2) (RXPairR ref2) =
+  notintro-sat-ref-not ni (CSNotIntroPair ni' sat1 sat2)
+                       (RXPairR ref2) =
     notintro-sat-ref-not NVSnd sat2 ref2
   notintro-sat-ref-not ni (CSOrL sat1) (RXOr ref1 ref2) =
     notintro-sat-ref-not ni sat1 ref1
@@ -50,12 +52,14 @@ module lemmas-satisfy where
   not-ref-not-pos-not {⟨ ξ1 , ξ2 ⟩} ¬ref ¬pos =
     not-ref-not-pos-not (λ ref1 → ¬ref (RXPairL ref1))
                         (λ pos1 →
-                           not-ref-not-pos-not (λ ref2 → ¬ref (RXPairR ref2))
-                                             (λ pos2 → ¬pos (PPair pos1 pos2)))
+                           not-ref-not-pos-not
+                             (λ ref2 → ¬ref (RXPairR ref2))
+                             (λ pos2 → ¬pos (PPair pos1 pos2)))
   not-ref-not-pos-not {ξ1 ∨ ξ2} ¬ref ¬pos =
     not-ref-not-pos-not (λ ref1 →
-                           not-ref-not-pos-not (λ ref2 → ¬ref (RXOr ref1 ref2))
-                                               (λ pos2 → ¬pos (POrR pos2)))
+                           not-ref-not-pos-not
+                             (λ ref2 → ¬ref (RXOr ref1 ref2))
+                             (λ pos2 → ¬pos (POrR pos2)))
                         (λ pos1 → ¬pos (POrL pos1))
 
   sat-pos : ∀{ξ e} →
@@ -65,8 +69,10 @@ module lemmas-satisfy where
   sat-pos CSNum = PNum
   sat-pos (CSInl sat) = PInl (sat-pos sat)
   sat-pos (CSInr sat) = PInr (sat-pos sat)
-  sat-pos (CSPair sat1 sat2) = PPair (sat-pos sat1) (sat-pos sat2)
-  sat-pos (CSNotIntroPair ni sat1 sat2) = PPair (sat-pos sat1) (sat-pos sat2)
+  sat-pos (CSPair sat1 sat2) =
+    PPair (sat-pos sat1) (sat-pos sat2)
+  sat-pos (CSNotIntroPair ni sat1 sat2) =
+    PPair (sat-pos sat1) (sat-pos sat2)
   sat-pos (CSOrL sat) = POrL (sat-pos sat)
   sat-pos (CSOrR sat) = POrR (sat-pos sat)
   
@@ -76,9 +82,12 @@ module lemmas-satisfy where
   maysat-pos CMSUnknown = PUnknown
   maysat-pos (CMSInl msat) = PInl (maysat-pos msat)
   maysat-pos (CMSInr msat) = PInr (maysat-pos msat)
-  maysat-pos (CMSPairL msat1 sat2) = PPair (maysat-pos msat1) (sat-pos sat2)
-  maysat-pos (CMSPairR sat1 msat2) = PPair (sat-pos sat1) (maysat-pos msat2)
-  maysat-pos (CMSPair msat1 msat2) = PPair (maysat-pos msat1) (maysat-pos msat2)
+  maysat-pos (CMSPairL msat1 sat2) =
+    PPair (maysat-pos msat1) (sat-pos sat2)
+  maysat-pos (CMSPairR sat1 msat2) =
+    PPair (sat-pos sat1) (maysat-pos msat2)
+  maysat-pos (CMSPair msat1 msat2) =
+    PPair (maysat-pos msat1) (maysat-pos msat2)
   maysat-pos (CMSOrL msat1 ¬sat2) = POrL (maysat-pos msat1)
   maysat-pos (CMSOrR ¬sat1 msat2) = POrR (maysat-pos msat2)
   maysat-pos (CMSNotIntro ni ref pos) = pos
@@ -112,32 +121,46 @@ module lemmas-satisfy where
   ... | TAVar x | FIndet ()
   ... | TAAp wt1 wt2 | FIndet ind =
     CSNotIntroPair NVAp
-                   (not-ref-sat ct1 (TAFst wt) (FIndet (IFst ind)) ¬ref1)
-                   (not-ref-sat ct2 (TASnd wt) (FIndet (ISnd ind)) ¬ref2)
+                   (not-ref-sat ct1 (TAFst wt)
+                                (FIndet (IFst ind)) ¬ref1)
+                   (not-ref-sat ct2 (TASnd wt)
+                                (FIndet (ISnd ind)) ¬ref2)
   ... | TAMatchZPre wt' x | FIndet ind =
     CSNotIntroPair NVMatch
-                   (not-ref-sat ct1 (TAFst wt) (FIndet (IFst ind)) ¬ref1)
-                   (not-ref-sat ct2 (TASnd wt) (FIndet (ISnd ind)) ¬ref2)
+                   (not-ref-sat ct1 (TAFst wt)
+                                (FIndet (IFst ind)) ¬ref1)
+                   (not-ref-sat ct2 (TASnd wt)
+                                (FIndet (ISnd ind)) ¬ref2)
   ... | TAMatchNZPre wt' x x₁ x₂ x₃ | FIndet ind =
     CSNotIntroPair NVMatch
-                   (not-ref-sat ct1 (TAFst wt) (FIndet (IFst ind)) ¬ref1)
-                   (not-ref-sat ct2 (TASnd wt) (FIndet (ISnd ind)) ¬ref2)
+                   (not-ref-sat ct1 (TAFst wt)
+                                (FIndet (IFst ind)) ¬ref1)
+                   (not-ref-sat ct2 (TASnd wt)
+                                (FIndet (ISnd ind)) ¬ref2)
   ... | TAFst wt' | FIndet ind =
     CSNotIntroPair NVFst
-                   (not-ref-sat ct1 (TAFst wt) (FIndet (IFst ind)) ¬ref1)
-                   (not-ref-sat ct2 (TASnd wt) (FIndet (ISnd ind)) ¬ref2)
+                   (not-ref-sat ct1 (TAFst wt)
+                                (FIndet (IFst ind)) ¬ref1)
+                   (not-ref-sat ct2 (TASnd wt)
+                                (FIndet (ISnd ind)) ¬ref2)
   ... | TASnd wt' | FIndet ind =
     CSNotIntroPair NVSnd
-                   (not-ref-sat ct1 (TAFst wt) (FIndet (IFst ind)) ¬ref1)
-                   (not-ref-sat ct2 (TASnd wt) (FIndet (ISnd ind)) ¬ref2)
+                   (not-ref-sat ct1 (TAFst wt)
+                                (FIndet (IFst ind)) ¬ref1)
+                   (not-ref-sat ct2 (TASnd wt)
+                                (FIndet (ISnd ind)) ¬ref2)
   ... | TAEHole x | FIndet ind =
     CSNotIntroPair NVEHole
-                   (not-ref-sat ct1 (TAFst wt) (FIndet (IFst ind)) ¬ref1)
-                   (not-ref-sat ct2 (TASnd wt) (FIndet (ISnd ind)) ¬ref2)
+                   (not-ref-sat ct1 (TAFst wt)
+                                (FIndet (IFst ind)) ¬ref1)
+                   (not-ref-sat ct2 (TASnd wt)
+                                (FIndet (ISnd ind)) ¬ref2)
   ... | TANEHole x wt' | FIndet ind = 
     CSNotIntroPair NVNEHole
-                   (not-ref-sat ct1 (TAFst wt) (FIndet (IFst ind)) ¬ref1)
-                   (not-ref-sat ct2 (TASnd wt) (FIndet (ISnd ind)) ¬ref2)
+                   (not-ref-sat ct1 (TAFst wt)
+                                (FIndet (IFst ind)) ¬ref1)
+                   (not-ref-sat ct2 (TASnd wt)
+                                (FIndet (ISnd ind)) ¬ref2)
   ... | TAPair wt1 wt2 | fin
     with pair-final fin
   ... | fin1 , fin2 =
@@ -187,9 +210,11 @@ module lemmas-satisfy where
   notintro-maysat-ref () (CMSPairR _ _)
   notintro-maysat-ref () (CMSPair msat1 msat2)
   notintro-maysat-ref ni (CMSOrL msat1 ¬sat2) =
-    RXOr (notintro-maysat-ref ni msat1) (notintro-not-sat-ref ni ¬sat2)
+    RXOr (notintro-maysat-ref ni msat1)
+         (notintro-not-sat-ref ni ¬sat2)
   notintro-maysat-ref ni (CMSOrR ¬sat1 msat2) =
-    RXOr (notintro-not-sat-ref ni ¬sat1) (notintro-maysat-ref ni msat2)
+    RXOr (notintro-not-sat-ref ni ¬sat1)
+         (notintro-maysat-ref ni msat2)
   notintro-maysat-ref ni (CMSNotIntro ni' ref pos) = ref
   
   satormay-inl : ∀{e τ ξ} →
@@ -220,18 +245,26 @@ module lemmas-satisfy where
                   e1 ⊧̇†? ξ1 →
                   e2 ⊧̇†? ξ2 →
                   ⟨ e1 , e2 ⟩ ⊧̇†? ⟨ ξ1 , ξ2 ⟩
-  satormay-pair (CSMSSat sat1) (CSMSSat sat2) = CSMSSat (CSPair sat1 sat2)
-  satormay-pair (CSMSSat sat1) (CSMSMay msat2) = CSMSMay (CMSPairR sat1 msat2)
-  satormay-pair (CSMSMay msat1) (CSMSSat sat2) = CSMSMay (CMSPairL msat1 sat2)
-  satormay-pair (CSMSMay msat1) (CSMSMay msat2) = CSMSMay (CMSPair msat1 msat2)
+  satormay-pair (CSMSSat sat1) (CSMSSat sat2) =
+    CSMSSat (CSPair sat1 sat2)
+  satormay-pair (CSMSSat sat1) (CSMSMay msat2) =
+    CSMSMay (CMSPairR sat1 msat2)
+  satormay-pair (CSMSMay msat1) (CSMSSat sat2) =
+    CSMSMay (CMSPairL msat1 sat2)
+  satormay-pair (CSMSMay msat1) (CSMSMay msat2) =
+    CSMSMay (CMSPair msat1 msat2)
 
   pair-satormay : ∀{e1 e2 ξ1 ξ2} →
                   ⟨ e1 , e2 ⟩ ⊧̇†? ⟨ ξ1 , ξ2 ⟩ →
                   (e1 ⊧̇†? ξ1) × (e2 ⊧̇†? ξ2)
-  pair-satormay (CSMSSat (CSPair sat1 sat2)) = CSMSSat sat1 , CSMSSat sat2
-  pair-satormay (CSMSMay (CMSPairL msat1 sat2)) = CSMSMay msat1 , CSMSSat sat2
-  pair-satormay (CSMSMay (CMSPairR sat1 msat2)) = CSMSSat sat1 , CSMSMay msat2
-  pair-satormay (CSMSMay (CMSPair msat1 msat2)) = CSMSMay msat1 , CSMSMay msat2
+  pair-satormay (CSMSSat (CSPair sat1 sat2)) =
+    CSMSSat sat1 , CSMSSat sat2
+  pair-satormay (CSMSMay (CMSPairL msat1 sat2)) =
+    CSMSMay msat1 , CSMSSat sat2
+  pair-satormay (CSMSMay (CMSPairR sat1 msat2)) =
+    CSMSSat sat1 , CSMSMay msat2
+  pair-satormay (CSMSMay (CMSPair msat1 msat2)) =
+    CSMSMay msat1 , CSMSMay msat2
   
   satormay-or-l : ∀{e ξ1 ξ2} →
                   e ⊧̇†? ξ1 →
@@ -258,7 +291,76 @@ module lemmas-satisfy where
   or-satormay (CSMSSat (CSOrR sat2)) = Inr (CSMSSat sat2)
   or-satormay (CSMSMay (CMSOrL msat1 ¬sat2)) = Inl (CSMSMay msat1)
   or-satormay (CSMSMay (CMSOrR ¬sat1 msat2)) = Inr (CSMSMay msat2)
-  or-satormay (CSMSMay (CMSNotIntro ni (RXOr ref1 ref2) (POrL pos1))) =
+  or-satormay (CSMSMay (CMSNotIntro ni (RXOr ref1 ref2)
+                       (POrL pos1))) =
     Inl (CSMSMay (CMSNotIntro ni ref1 pos1))
-  or-satormay (CSMSMay (CMSNotIntro ni (RXOr ref1 ref2) (POrR pos2))) =
+  or-satormay (CSMSMay (CMSNotIntro ni (RXOr ref1 ref2)
+                       (POrR pos2))) =
     Inr (CSMSMay (CMSNotIntro ni ref2 pos2))
+
+  lam-sat-all-sat : ∀{x e τ ξ e'} →
+                    (·λ x ·[ τ ] e) ⊧̇ ξ →
+                    e' ⊧̇ ξ
+  lam-sat-all-sat CSTruth = CSTruth
+  lam-sat-all-sat (CSOrL sat) =
+    CSOrL (lam-sat-all-sat sat)
+  lam-sat-all-sat (CSOrR sat) =
+    CSOrR (lam-sat-all-sat sat)
+
+  all-lam-maysat : ∀{x τ e ξ x' τ' e'} → 
+                   (·λ x ·[ τ ] e) ⊧̇? ξ →
+                   (·λ x' ·[ τ' ] e') ⊧̇? ξ
+  all-lam-maysat CMSUnknown = CMSUnknown
+  all-lam-maysat {ξ = ξ1 ∨ ξ2} {e' = e'}
+                 (CMSOrL msat1 ¬sat2) =
+    CMSOrL (all-lam-maysat msat1)
+           (λ{sat2' → ¬sat2 (lam-sat-all-sat sat2')})
+  all-lam-maysat (CMSOrR ¬sat1 msat2) =
+    CMSOrR (λ{sat1' → ¬sat1 (lam-sat-all-sat sat1')})
+           (all-lam-maysat msat2)
+    
+  all-notintro-sat : ∀{e ξ e'} →
+                     e notintro →
+                     e ⊧̇ ξ →
+                     e' notintro →
+                     e' ⊧̇ ξ
+  all-notintro-sat ni CSTruth ni' = CSTruth
+  all-notintro-sat ni (CSNotIntroPair x sat1 sat2) ni' =
+    CSNotIntroPair ni' (all-notintro-sat NVFst sat1 NVFst)
+                   (all-notintro-sat NVSnd sat2 NVSnd)
+  all-notintro-sat ni (CSOrL sat) ni' =
+    CSOrL (all-notintro-sat ni sat ni')
+  all-notintro-sat ni (CSOrR sat) ni' =
+    CSOrR (all-notintro-sat ni sat ni')
+
+  all-notintro-not-sat : ∀{e ξ e'} →
+                         e notintro →
+                         (e ⊧̇ ξ → ⊥) →
+                         e' notintro →
+                         e' ⊧̇ ξ →
+                         ⊥
+  all-notintro-not-sat ni ¬sat ni' CSTruth = ¬sat CSTruth
+  all-notintro-not-sat ni ¬sat ni'
+                       (CSNotIntroPair _ sat1' sat2') =
+    ¬sat (CSNotIntroPair ni
+           (all-notintro-sat NVFst sat1' NVFst)
+           (all-notintro-sat NVSnd sat2' NVSnd))
+  all-notintro-not-sat ni ¬sat ni' (CSOrL sat') =
+    ¬sat (CSOrL (all-notintro-sat ni' sat' ni))
+  all-notintro-not-sat ni ¬sat ni' (CSOrR sat') =
+    ¬sat (CSOrR (all-notintro-sat ni' sat' ni))
+    
+  all-notintro-maysat : ∀{e ξ e'} →
+                        e notintro →
+                        e ⊧̇? ξ →
+                        e' notintro →
+                        e' ⊧̇? ξ
+  all-notintro-maysat ni CMSUnknown ni' = CMSUnknown
+  all-notintro-maysat ni (CMSOrL msat1 ¬sat2) ni' =
+    CMSOrL (all-notintro-maysat ni msat1 ni')
+           (all-notintro-not-sat ni ¬sat2 ni')
+  all-notintro-maysat ni (CMSOrR ¬sat1 msat2) ni' =
+    CMSOrR (all-notintro-not-sat ni ¬sat1 ni')
+           (all-notintro-maysat ni msat2 ni')
+  all-notintro-maysat ni (CMSNotIntro _ ref pos) ni' =
+    CMSNotIntro ni' ref pos

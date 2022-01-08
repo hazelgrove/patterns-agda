@@ -59,10 +59,18 @@ module result-judgements where
     inl-final (FVal (VInl eval)) = FVal eval
     inl-final (FIndet (IInl eind)) = FIndet eind
 
+    final-inl : ∀{e τ} → e final → (inl τ e) final
+    final-inl (FVal eval) = FVal (VInl eval)
+    final-inl (FIndet ind) = FIndet (IInl ind)
+    
     inr-final : ∀{e τ} → (inr τ e) final → e final
     inr-final (FVal (VInr eval)) = FVal eval
     inr-final (FIndet (IInr eind)) = FIndet eind
 
+    final-inr : ∀{e τ} → e final → (inr τ e) final
+    final-inr (FVal eval) = FVal (VInr eval)
+    final-inr (FIndet ind) = FIndet (IInr ind)
+    
     pair-final : ∀{e1 e2} →
                  ⟨ e1 , e2 ⟩ final →
                  e1 final × e2 final
@@ -73,6 +81,19 @@ module result-judgements where
       FVal val1 , FIndet ind2
     pair-final (FIndet (IPair ind1 ind2)) =
       FIndet ind1 , FIndet ind2
+
+    final-pair : ∀{e1 e2} →
+                 e1 final →
+                 e2 final →
+                 ⟨ e1 , e2 ⟩ final
+    final-pair (FVal val1) (FVal val2) =
+      FVal (VPair val1 val2)
+    final-pair (FVal val1) (FIndet ind2) =
+      FIndet (IPairR val1 ind2)
+    final-pair (FIndet ind1) (FVal val2) =
+      FIndet (IPairL ind1 val2)
+    final-pair (FIndet ind1) (FIndet ind2) =
+      FIndet (IPair ind1 ind2)
 
     final-notintro-indet : ∀{e} →
                            e final →
@@ -100,3 +121,4 @@ module result-judgements where
       val-indet-not eval2 ind2
     val-indet-not (VPair eval1 eval2) (IPair ind1 ind2) =
       val-indet-not eval1 ind1
+

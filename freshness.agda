@@ -63,7 +63,7 @@ module freshness where
                  unbound-in x e1 →
                  unbound-in x e2 →
                  unbound-in x (e1 ∘ e2)
-      UNInl    : ∀{x e τ} →
+      UBInl    : ∀{x e τ} →
                  unbound-in x e →
                  unbound-in x (inl τ e)
       UBInr    : ∀{x e τ} →
@@ -153,31 +153,92 @@ module freshness where
                 fresh x e →
                 fresh x (⦇⌜ e ⌟⦈[ u ])
 
-  -- the hole name u is not bound in p
-  data hole-unbound-in-p : Nat → pattrn → Set where
-    HUBPNum    : ∀{u n} →
-                 hole-unbound-in-p u (N n)
-    HUBPVar    : ∀{u x} →
-                 hole-unbound-in-p u (X x)
-    HUBPInl    : ∀{u p} →
-                 hole-unbound-in-p u p →
-                 hole-unbound-in-p u (inl p)
-    HUBPInr    : ∀{u p} →
-                 hole-unbound-in-p u p →
-                 hole-unbound-in-p u (inr p)
-    HUBPPair   : ∀{u p1 p2} →
-                 hole-unbound-in-p u p1 →
-                 hole-unbound-in-p u p2 →
-                 hole-unbound-in-p u ⟨ p1 , p2 ⟩
-    HUBPWild   : ∀{u} →
-                 hole-unbound-in-p u wild
-    HUBPEHole  : ∀{u u'} →
-                 u ≠ u' →
-                 hole-unbound-in-p u ⦇-⦈[ u' ]
-    HUBPNEHole : ∀{u p u' τ} →
-                 u ≠ u' →
-                 hole-unbound-in-p u p →
-                 hole-unbound-in-p u ⦇⌜ p ⌟⦈[ u' , τ ]
+  mutual
+    -- the hole name u is not bound in p
+    data hole-unbound-in-p : Nat → pattrn → Set where
+      HUBPNum    : ∀{u n} →
+                   hole-unbound-in-p u (N n)
+      HUBPVar    : ∀{u x} →
+                   hole-unbound-in-p u (X x)
+      HUBPInl    : ∀{u p} →
+                   hole-unbound-in-p u p →
+                   hole-unbound-in-p u (inl p)
+      HUBPInr    : ∀{u p} →
+                   hole-unbound-in-p u p →
+                   hole-unbound-in-p u (inr p)
+      HUBPPair   : ∀{u p1 p2} →
+                   hole-unbound-in-p u p1 →
+                   hole-unbound-in-p u p2 →
+                   hole-unbound-in-p u ⟨ p1 , p2 ⟩
+      HUBPWild   : ∀{u} →
+                   hole-unbound-in-p u wild
+      HUBPEHole  : ∀{u u'} →
+                   u ≠ u' →
+                   hole-unbound-in-p u ⦇-⦈[ u' ]
+      HUBPNEHole : ∀{u p u' τ} →
+                   u ≠ u' →
+                   hole-unbound-in-p u p →
+                   hole-unbound-in-p u ⦇⌜ p ⌟⦈[ u' , τ ]
+    
+    data hole-unbound-in-r : Nat → rule → Set where
+      HUBRule : ∀{u p e} →
+                hole-unbound-in-p u p →
+                hole-unbound-in u e →
+                hole-unbound-in-r u (p => e)
+
+    data hole-unbound-in-rs : Nat → rules → Set where
+      HUBNoRules : ∀{u} →
+                   hole-unbound-in-rs u nil
+      HUBRules   : ∀{u r rs} →
+                   hole-unbound-in-r u r →
+                   hole-unbound-in-rs u rs →
+                   hole-unbound-in-rs u (r / rs)
+
+    data hole-unbound-in-zrs : Nat → zrules → Set where
+      HUBZRules : ∀{u rs-pre r rs-post} →
+                  hole-unbound-in-rs u rs-pre →
+                  hole-unbound-in-r u r →
+                  hole-unbound-in-rs u rs-post →
+                  hole-unbound-in-zrs u (rs-pre / r / rs-post)
+                
+    data hole-unbound-in : Nat → ihexp → Set where
+      HUBNum    : ∀{u n} →
+                  hole-unbound-in u (N n)
+      HUBVar    : ∀{u x} →
+                  hole-unbound-in u (X x)
+      HUBLam    : ∀{u x τ e} →
+                  hole-unbound-in u e →
+                  hole-unbound-in u (·λ x ·[ τ ] e)
+      HUBAp     : ∀{u e1 e2} →
+                  hole-unbound-in u e1 →
+                  hole-unbound-in u e2 →
+                  hole-unbound-in u (e1 ∘ e2)
+      HUBInl    : ∀{u e τ} →
+                  hole-unbound-in u e →
+                  hole-unbound-in u (inl τ e)
+      HUBInr    : ∀{u e τ} →
+                  hole-unbound-in u e →
+                  hole-unbound-in u (inr τ e)
+      HUBMatch  : ∀{u e rs} →
+                  hole-unbound-in u e →
+                  hole-unbound-in-zrs u rs →
+                  hole-unbound-in u (match e rs)
+      HUBPair   : ∀{u e1 e2} →
+                  hole-unbound-in u e1 →
+                  hole-unbound-in u e2 →
+                  hole-unbound-in u ⟨ e1 , e2 ⟩
+      HUBFst    : ∀{u e} →
+                  hole-unbound-in u e →
+                  hole-unbound-in u (fst e)
+      HUBSnd    : ∀{u e} →
+                  hole-unbound-in u e →
+                  hole-unbound-in u (snd e)
+      HUBEHole  : ∀{u u'} →
+                  hole-unbound-in u (⦇-⦈[ u' ])
+      HUBNEHole : ∀{u e u'} →
+                  hole-unbound-in u e →
+                  hole-unbound-in u (⦇⌜ e ⌟⦈[ u' ])
+                 
   mutual
     -- the hole name u is fresh in e
     data hole-fresh-r : Nat → rule → Set where
@@ -240,231 +301,4 @@ module freshness where
                  u ≠ u' →
                  hole-fresh u e →
                  hole-fresh u (⦇⌜ e ⌟⦈[ u' ])
-
-  -- e1 and e2 do not share any binders
-  mutual
-    data binders-disjoint-p : pattrn → ihexp → Set where
-      BDPNum    : ∀{n e} →
-                  binders-disjoint-p (N n) e
-      BDPVar    : ∀{x e} →
-                  unbound-in x e →
-                  binders-disjoint-p (X x) e
-      BDPInl    : ∀{p e} →
-                  binders-disjoint-p p e →
-                  binders-disjoint-p (inl p) e
-      BDPInr    : ∀{p e} →
-                  binders-disjoint-p p e →
-                  binders-disjoint-p (inr p) e
-      BDPPair   : ∀{p1 p2 e} →
-                  binders-disjoint-p p1 e →
-                  binders-disjoint-p p2 e →
-                  binders-disjoint-p ⟨ p1 , p2 ⟩ e
-      BDPWild   : ∀{e} →
-                  binders-disjoint-p wild e
-      BDPEHole  : ∀{u e} →
-                  binders-disjoint-p ⦇-⦈[ u ] e
-      BDPNEHole : ∀{p w τ e} →
-                  binders-disjoint-p p e →
-                  binders-disjoint-p ⦇⌜ p ⌟⦈[ w , τ ] e
-      
-    data binders-disjoint-r : rule → ihexp → Set where
-      BDRule : ∀{p e1 e2} →
-               binders-disjoint-p p e2 →
-               binders-disjoint e1 e2 →
-               binders-disjoint-r (p => e1) e2
-               
-    data binders-disjoint-rs : rules → ihexp → Set where
-      BDNoRules : ∀{e} →
-                  binders-disjoint-rs nil e
-      BDRules   : ∀{r rs e} →
-                  binders-disjoint-r r e →
-                  binders-disjoint-rs rs e →
-                  binders-disjoint-rs (r / rs) e
-                  
-    data binders-disjoint-zrs : zrules → ihexp → Set where
-      BDZRules : ∀{rs-pre r rs-post e} →
-                 binders-disjoint-rs rs-pre e →
-                 binders-disjoint-r r e →
-                 binders-disjoint-rs rs-post e →
-                 binders-disjoint-zrs (rs-pre / r / rs-post) e
-      
-    data binders-disjoint : ihexp → ihexp → Set where
-      BDNum    : ∀{n e} →
-                 binders-disjoint (N n) e
-      BDVar    : ∀{x e} →
-                 binders-disjoint (X x) e
-      BDLam    : ∀{x τ e1 e2} →
-                 binders-disjoint e1 e2 →
-                 unbound-in x e2 →
-                 binders-disjoint (·λ x ·[ τ ] e1) e2
-      BDAp     : ∀{e1 e2 e3} →
-                 binders-disjoint e1 e3 →
-                 binders-disjoint e2 e3 →
-                 binders-disjoint (e1 ∘ e2) e3
-      BDInl    : ∀{e1 e2 τ} →
-                 binders-disjoint e1 e2 →
-                 binders-disjoint (inl τ e1) e2
-      BDInr    : ∀{e1 e2 τ} →
-                 binders-disjoint e1 e2 →
-                 binders-disjoint (inr τ e1) e2
-      BDMatch  : ∀{e1 rs e2} →
-                 binders-disjoint e1 e2 →
-                 binders-disjoint-zrs rs e2 →
-                 binders-disjoint (match e1 rs) e2
-      BDPair   : ∀{e1 e2 e3} →
-                 binders-disjoint e1 e3 →
-                 binders-disjoint e2 e3 →
-                 binders-disjoint ⟨ e1 , e2 ⟩ e3
-      BDFst    : ∀{e1 e2} →
-                 binders-disjoint e1 e2 →
-                 binders-disjoint (fst e1) e2
-      BDSnd    : ∀{e1 e2} →
-                 binders-disjoint e1 e2 →
-                 binders-disjoint (snd e1) e2
-      BDEHole  : ∀{u e} →
-                 binders-disjoint ⦇-⦈[ u ] e
-      BDNEHole : ∀{u e1 e2} →
-                 binders-disjoint e1 e2 →
-                 binders-disjoint ⦇⌜ e1 ⌟⦈[ u ] e2
-
-  -- a bit hacky, but easier than recreating all previous
-  -- judgements with rules rather than an expression
-  data p-binders-disjoint-p : pattrn → pattrn → Set where
-    PBDPattern : ∀{p1 p2} →
-                 binders-disjoint-p p1
-                   (match (N 0) (nil / (p2 => (N 0)) / nil)) →
-                 p-binders-disjoint-p p1 p2
-  
-  data rs-binders-disjoint-r : rule → rules → Set where
-    RSBDRule : ∀{r rs} →
-               binders-disjoint-r r
-                 (match (N 0) (rs / ((N 0) => (N 0)) / nil)) →
-               rs-binders-disjoint-r r rs
-
-  data rs-binders-disjoint-rs : rules → rules → Set where
-    RSBDRules : ∀{rs1 rs2} →
-                binders-disjoint-rs rs1
-                 (match (N 0) (rs2 / ((N 0) => (N 0)) / nil)) →
-               rs-binders-disjoint-rs rs1 rs2
-                  
-  mutual
-    data binders-unique-p : pattrn → Set where
-      BUPNum    : ∀{n} →
-                  binders-unique-p (N n)
-      BUPVar    : ∀{x} →
-                  binders-unique-p (X x)
-      BUPInl    : ∀{p} →
-                  binders-unique-p p →
-                  binders-unique-p (inl p)
-      BUPInr    : ∀{p} →
-                  binders-unique-p p →
-                  binders-unique-p (inr p)
-      BUPPair   : ∀{p1 p2} →
-                  binders-unique-p p1 →
-                  binders-unique-p p2 →
-                  p-binders-disjoint-p p1 p2 →
-                  binders-unique-p ⟨ p1 , p2 ⟩
-      BUPWild   : binders-unique-p wild
-      BUPEHole  : ∀{u} →
-                  binders-unique-p ⦇-⦈[ u ]
-      BUPNEHole : ∀{p w τ} →
-                  binders-unique-p p →
-                  binders-unique-p ⦇⌜ p ⌟⦈[ w , τ ]
-
-    data binders-unique-r : rule → Set where
-      BURule : ∀{p e} →
-               binders-unique-p p →
-               binders-unique e →
-               binders-disjoint-p p e →
-               binders-unique-r (p => e)
-
-    data binders-unique-rs : rules → Set where
-      BUNoRules : binders-unique-rs nil
-      BURules   : ∀{r rs} →
-                  binders-unique-r r →
-                  binders-unique-rs rs →
-                  rs-binders-disjoint-r r rs →
-                  binders-unique-rs (r / rs)
-
-    data binders-unique-zrs : zrules → Set where
-      BUZRules : ∀{rs-pre r rs-post} →
-                 binders-unique-rs rs-pre →
-                 binders-unique-r r →
-                 binders-unique-rs rs-post →
-                 rs-binders-disjoint-r r rs-pre →
-                 rs-binders-disjoint-r r rs-post →
-                 rs-binders-disjoint-rs rs-pre rs-post →
-                 binders-unique-zrs (rs-pre / r / rs-post)
-                 
-    data binders-unique : ihexp → Set where
-      BUNum    : ∀{n} →
-                 binders-unique (N n)
-      BUVar    : ∀{x} →
-                 binders-unique (X x)
-      BULam    : ∀{x τ e} →
-                 binders-unique e →
-                 unbound-in x e →
-                 binders-unique (·λ x ·[ τ ] e)
-      BUEHole  : ∀{u} →
-                 binders-unique ⦇-⦈[ u ]
-      BUNEHole : ∀{u e} →
-                 binders-unique e →
-                 binders-unique ⦇⌜ e ⌟⦈[ u ]
-      BUAp     : ∀{e1 e2} →
-                 binders-unique e1 →
-                 binders-unique e2 →
-                 binders-disjoint e1 e2 →
-                 binders-unique (e1 ∘ e2)
-      BUInl    : ∀{e τ} →
-                 binders-unique e →
-                 binders-unique (inl τ e)
-      BUInr    : ∀{e τ} →
-                 binders-unique e →
-                 binders-unique (inr τ e)
-      BUMatch  : ∀{e rs} →
-                 binders-unique e →
-                 binders-unique-zrs rs →
-                 binders-disjoint-zrs rs e →
-                 binders-unique (match e rs)
-      BUPair   : ∀{e1 e2} →
-                 binders-unique e1 →
-                 binders-unique e2 →
-                 binders-disjoint e1 e2 →
-                 binders-unique ⟨ e1 , e2 ⟩
-      BUFst    : ∀{e} →
-                 binders-unique e →
-                 binders-unique (fst e)
-      BUSnd    : ∀{e} →
-                 binders-unique e →
-                 binders-unique (snd e)
-      
-  unbound-in-p-dec : (x : Nat) →
-                     (p : pattrn) →
-                     (unbound-in-p x p) + (unbound-in-p x p → ⊥)
-  unbound-in-p-dec x (N n) = Inl UBPNum
-  unbound-in-p-dec x (X y)
-    with natEQ x y
-  ... | Inl refl = Inr (λ{(UBPVar x≠x) → x≠x refl})
-  ... | Inr x≠y = Inl (UBPVar x≠y)
-  unbound-in-p-dec x (inl p)
-    with unbound-in-p-dec x p
-  ... | Inl ubp = Inl (UBPInl ubp)
-  ... | Inr ¬ubp = Inr (λ{(UBPInl ubp) → ¬ubp ubp})
-  unbound-in-p-dec x (inr p)
-    with unbound-in-p-dec x p
-  ... | Inl ubp = Inl (UBPInr ubp)
-  ... | Inr ¬ubp = Inr (λ{(UBPInr ubp) → ¬ubp ubp})
-  unbound-in-p-dec x ⟨ p1 , p2 ⟩
-    with unbound-in-p-dec x p1
-  ... | Inr ¬ubp1 = Inr λ{(UBPPair ubp1 ubp2) → ¬ubp1 ubp1}
-  ... | Inl ubp1
-    with unbound-in-p-dec x p2
-  ... | Inr ¬ubp2 = Inr λ{(UBPPair ubp1 ubp2) → ¬ubp2 ubp2}
-  ... | Inl ubp2 = Inl (UBPPair ubp1 ubp2)
-  unbound-in-p-dec x wild = Inl UBPWild
-  unbound-in-p-dec x ⦇-⦈[ w ] = Inl UBPEHole
-  unbound-in-p-dec x ⦇⌜ p ⌟⦈[ w , τ ]
-    with unbound-in-p-dec x p
-  ... | Inl ubp = Inl (UBPNEHole ubp)
-  ... | Inr ¬ubp = Inr (λ{(UBPNEHole ubp) → ¬ubp ubp})
 

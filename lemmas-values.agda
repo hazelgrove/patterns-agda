@@ -4,8 +4,8 @@ open import constraints-core
 open import contexts
 open import core
 open import dynamics-core
+open import lemma-exists-fresh
 open import freshness
-open import lemmas-freshness
 open import lemmas-satisfy
 open import notintro-decidable
 open import patterns-core

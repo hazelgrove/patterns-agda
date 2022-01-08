@@ -3,6 +3,8 @@ open import Prelude
 open import contexts
 open import core
 open import freshness
+open import freshness-decidable
+open import lemmas-freshness
 open import patterns-core
 open import result-judgements
 open import statics-core
@@ -10,7 +12,8 @@ open import substitution-env
 
 module dynamics-core where
   -- e' is one of the possible values of e
-  data _∈[_]values_ : (e' : ihexp) → (Δ : tctx) → (e : ihexp) → Set where
+  data _∈[_]values_ : (e' : ihexp) → (Δ : tctx) →
+                      (e : ihexp) → Set where
     IVVal   : ∀{Δ e τ} →
               e val →
               ∅ , Δ ⊢ e :: τ →
@@ -47,7 +50,8 @@ module dynamics-core where
 
     [_/_]rs : ihexp → Nat → rules → rules
     [ d / y ]rs nil = nil
-    [ d / y ]rs (r / rs) = ([ d / y ]r r) / ([ d / y ]rs rs)
+    [ d / y ]rs (r / rs) =
+      ([ d / y ]r r) / ([ d / y ]rs rs)
 
     [_/_]zrs : ihexp → Nat → zrules → zrules
     [ d / y ]zrs (rs-pre / r / rs-post) =
@@ -58,11 +62,12 @@ module dynamics-core where
     [ d / y ] X x
       with natEQ x y
     [ d / y ] X .y | Inl refl = d
-    [ d / y ] X x  | Inr neq = X x
-    [ d / y ] (·λ x ·[ x₁ ] d')
+    [ d / y ] X x  | Inr x≠y = X x
+    [ d / y ] (·λ x ·[ τ ] d')
       with natEQ x y
     [ d / y ] (·λ .y ·[ τ ] d') | Inl refl = ·λ y ·[ τ ] d'
-    [ d / y ] (·λ x ·[ τ ] d')  | Inr x≠y = ·λ x ·[ τ ] ( [ d / y ] d')
+    [ d / y ] (·λ x ·[ τ ] d')  | Inr x≠y =
+      ·λ x ·[ τ ] ( [ d / y ] d')
     [ d / y ] (d1 ∘ d2) = ([ d / y ] d1) ∘ ([ d / y ] d2)
     [ d / y ] (inl τ d') = inl τ ([ d / y ] d')
     [ d / y ] (inr τ d') = inr τ ([ d / y ] d')

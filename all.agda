@@ -7,6 +7,8 @@ open import contexts
 open import lemmas-contexts
 open import exchange
 open import freshness
+open import freshness-decidable
+open import lemma-exists-fresh
 open import lemmas-freshness
 open import weakening
 
@@ -27,7 +29,6 @@ open import possible-decidable
 open import satisfy-decidable
 open import xrefutable-decidable
 
-
 open import lemmas-values
 open import lemmas-patterns
 open import lemmas-satisfy
@@ -40,5 +41,10 @@ open import material-entailment
 open import matching-determinism
 open import matching-coherence
 
-open import lemmas-substitution
+
+open import lemmas-subst-value
+open import lemmas-subst-result
+open import lemmas-subst-matching
+open import lemmas-subst-satisfy
+open import lemmas-subst-type
 --open import preservation
