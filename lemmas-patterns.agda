@@ -1,9 +1,12 @@
+open import Prelude
 open import constraints-core
+open import contexts
 open import core
+open import lemmas-or-append
 open import patterns-core
 open import statics-core
 
-module lemmas-patterns where
+module lemmas-patterns where  
   pattern-constr-same-type : ∀{p τ ξ Γ Δ} →
                              p :: τ [ ξ ]⊣ Γ , Δ →
                              ξ :c: τ
@@ -64,3 +67,19 @@ module lemmas-patterns where
     RXPairR (pattern-ref-constr-ref pt2 ref2)
   pattern-ref-constr-ref PTEHole ref = RXUnknown
   pattern-ref-constr-ref (PTNEHole pt x) ref = RXUnknown
+
+  -- appending a rule to the end of a list of rules
+  -- ∨+s the emitted constraints
+  rs-constr-append : ∀{rs r rss Γ Δ τ ξrs ξr τ'} →
+                     erase-r (rs / r / nil) rss →
+                     Γ , Δ ⊢ rs ::s τ [ ξrs ]=> τ' →
+                     Γ , Δ ⊢ r :: τ [ ξr ]=> τ' →
+                     Γ , Δ ⊢ rss ::s τ [ ξrs ∨+ ξr ]=> τ'
+  rs-constr-append {rs = r' / .nil} {r = r} {ξr = ξr}
+                 (ERNZPre {er = _ / nil} ERZPre)
+                 (CTOneRule (CTRule pt Γ##Γp Δ##Δp wt'))
+                 rt rewrite (pattern-∨+ pt ξr) =
+    CTRules (CTRule pt Γ##Γp Δ##Δp wt') (CTOneRule rt)
+  rs-constr-append {rs = r' / .(_ / _)}
+                 (ERNZPre (ERNZPre er)) (CTRules rt' rst') rt =
+    CTRules rt' (rs-constr-append (ERNZPre er) rst' rt)

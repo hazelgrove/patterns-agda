@@ -101,10 +101,10 @@ module lemmas-values where
   ... | e1' , e1vals | e2' , e2vals =
     ⟨ e1' , e2' ⟩ ,
     IVPair (IPair ind1 ind2) (TAPair wt1 wt2) e1vals e2vals
-  indet-has-values {Δ = Δ} {τ = τ} (IFst ind1) wt
+  indet-has-values {Δ = Δ} {τ = τ} (IFst npr ind1) wt
     with type-has-val τ Δ
   ... | e , eval , ewt = e , IVIndet NVFst wt eval ewt
-  indet-has-values {Δ = Δ} {τ = τ} (ISnd ind2) wt
+  indet-has-values {Δ = Δ} {τ = τ} (ISnd npr ind2) wt
     with type-has-val τ Δ
   ... | e , eval , ewt = e , IVIndet NVSnd wt eval ewt
   indet-has-values {Δ = Δ} {τ = τ} IEHole wt
@@ -132,9 +132,9 @@ module lemmas-values where
     ¬satm (CSMSMay (CMSNotIntro NVAp RXNum PNum))
   indet-values-not-satormay (IMatch fin mp) vals wt CTNum ¬satm satm' =
     ¬satm (CSMSMay (CMSNotIntro NVMatch RXNum PNum))
-  indet-values-not-satormay (IFst ind) vals wt CTNum ¬satm satm' =
+  indet-values-not-satormay (IFst npr ind) vals wt CTNum ¬satm satm' =
     ¬satm (CSMSMay (CMSNotIntro NVFst RXNum PNum))
-  indet-values-not-satormay (ISnd ind) vals wt CTNum ¬satm satm' =
+  indet-values-not-satormay (ISnd npr ind) vals wt CTNum ¬satm satm' =
     ¬satm (CSMSMay (CMSNotIntro NVSnd RXNum PNum))
   indet-values-not-satormay IEHole vals wt CTNum ¬satm satm' =
     ¬satm (CSMSMay (CMSNotIntro NVEHole RXNum PNum))
@@ -155,9 +155,9 @@ module lemmas-values where
                             (CTInl ct) ¬satm (CSMSMay (CMSNotIntro () _ _))
   indet-values-not-satormay (IMatch fin mp) vals wt (CTInl ct) ¬satm satm' =
     ¬satm (CSMSMay (CMSNotIntro NVMatch RXInl (satormay-pos satm')))
-  indet-values-not-satormay (IFst ind) vals wt (CTInl ct) ¬satm satm' =
+  indet-values-not-satormay (IFst npr ind) vals wt (CTInl ct) ¬satm satm' =
     ¬satm (CSMSMay (CMSNotIntro NVFst RXInl (satormay-pos satm')))
-  indet-values-not-satormay (ISnd ind) vals wt (CTInl ct) ¬satm satm' =
+  indet-values-not-satormay (ISnd npr ind) vals wt (CTInl ct) ¬satm satm' =
     ¬satm (CSMSMay (CMSNotIntro NVSnd RXInl (satormay-pos satm')))
   indet-values-not-satormay IEHole vals wt (CTInl ct) ¬satm satm' =
     ¬satm (CSMSMay (CMSNotIntro NVEHole RXInl (satormay-pos satm')))
@@ -178,9 +178,9 @@ module lemmas-values where
                               (inr-satormay satm')
   indet-values-not-satormay (IMatch x x₁) vals wt (CTInr ct) ¬satm satm' =
     ¬satm (CSMSMay (CMSNotIntro NVMatch RXInr (satormay-pos satm')))
-  indet-values-not-satormay (IFst ind) vals wt (CTInr ct) ¬satm satm' =
+  indet-values-not-satormay (IFst npr ind) vals wt (CTInr ct) ¬satm satm' =
     ¬satm (CSMSMay (CMSNotIntro NVFst RXInr (satormay-pos satm')))
-  indet-values-not-satormay (ISnd ind) vals wt (CTInr ct) ¬satm satm' =
+  indet-values-not-satormay (ISnd npr ind) vals wt (CTInr ct) ¬satm satm' =
     ¬satm (CSMSMay (CMSNotIntro NVSnd RXInr (satormay-pos satm')))
   indet-values-not-satormay IEHole vals wt (CTInr ct) ¬satm satm' =
     ¬satm (CSMSMay (CMSNotIntro NVEHole RXInr (satormay-pos satm')))
@@ -218,8 +218,10 @@ module lemmas-values where
   ... | VPair val1 val2
     with wt'
   ... | TAPair wt1' wt2' =
-    indet-values-not-satormay (ISnd ind) (IVIndet NVSnd (TASnd wt) val2 wt2')
-                              (TASnd wt) ct2 ¬satm2 (π2 (pair-satormay satm'))
+    indet-values-not-satormay
+     (ISnd (λ{e1 e2 refl → contra ni (λ ()) }) ind)
+     (IVIndet NVSnd (TASnd wt) val2 wt2')
+     (TASnd wt) ct2 ¬satm2 (π2 (pair-satormay satm'))
   indet-values-not-satormay {e = e} {ξ = ⟨ ξ1 , ξ2 ⟩} ind vals wt
                             (CTPair ct1 ct2) ¬satm satm' 
       | Inl ni | Inr ¬satm1
@@ -231,8 +233,10 @@ module lemmas-values where
   ... | VPair val1 val2
     with wt'
   ... | TAPair wt1' wt2' =
-    indet-values-not-satormay (IFst ind) (IVIndet NVFst (TAFst wt) val1 wt1')
-                              (TAFst wt) ct1 ¬satm1 (π1 (pair-satormay satm'))
+    indet-values-not-satormay
+      (IFst (λ{e1 e2 refl → contra ni (λ ())}) ind)
+      (IVIndet NVFst (TAFst wt) val1 wt1')
+      (TAFst wt) ct1 ¬satm1 (π1 (pair-satormay satm'))
   indet-values-not-satormay ind vals wt (CTPair ct1 ct2) ¬satm satm'
       | Inr ¬ni
     with vals

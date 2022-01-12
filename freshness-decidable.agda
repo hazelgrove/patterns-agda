@@ -101,16 +101,16 @@ module freshness-decidable where
     fresh-zrs-dec x (rs-pre / r / rs-post)
       with fresh-rs-dec x rs-pre
     ... | Inr ¬frshpre =
-      Inr λ{(FZRules frshpre frshr frshpost) → ¬frshpre frshpre}
+      Inr λ{(FZRules frshpre (FRules frshr frshpost)) → ¬frshpre frshpre}
     ... | Inl frshpre
       with fresh-r-dec x r
     ... | Inr ¬frshr =
-      Inr λ{(FZRules frshpre frshr frshpost) → ¬frshr frshr}
+      Inr λ{(FZRules frshpre (FRules frshr frshpost)) → ¬frshr frshr}
     ... | Inl frshr
       with fresh-rs-dec x rs-post
     ... | Inr ¬frshpost =
-      Inr λ{(FZRules frshpre frshr frshpost) → ¬frshpost frshpost}
-    ... | Inl frshpost = Inl (FZRules frshpre frshr frshpost)
+      Inr λ{(FZRules frshpre (FRules frshr frshpost)) → ¬frshpost frshpost}
+    ... | Inl frshpost = Inl (FZRules frshpre (FRules frshr frshpost))
     
     fresh-rs-dec : (x : Nat) →
                    (rs : rules) →

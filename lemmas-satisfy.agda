@@ -122,45 +122,45 @@ module lemmas-satisfy where
   ... | TAAp wt1 wt2 | FIndet ind =
     CSNotIntroPair NVAp
                    (not-ref-sat ct1 (TAFst wt)
-                                (FIndet (IFst ind)) ¬ref1)
+                                (FIndet (IFst (λ e1 e2 ()) ind)) ¬ref1)
                    (not-ref-sat ct2 (TASnd wt)
-                                (FIndet (ISnd ind)) ¬ref2)
+                                (FIndet (ISnd (λ e1 e2 ()) ind)) ¬ref2)
   ... | TAMatchZPre wt' x | FIndet ind =
     CSNotIntroPair NVMatch
                    (not-ref-sat ct1 (TAFst wt)
-                                (FIndet (IFst ind)) ¬ref1)
+                                (FIndet (IFst (λ e1 e2 ()) ind)) ¬ref1)
                    (not-ref-sat ct2 (TASnd wt)
-                                (FIndet (ISnd ind)) ¬ref2)
+                                (FIndet (ISnd (λ e1 e2 ()) ind)) ¬ref2)
   ... | TAMatchNZPre wt' x x₁ x₂ x₃ | FIndet ind =
     CSNotIntroPair NVMatch
                    (not-ref-sat ct1 (TAFst wt)
-                                (FIndet (IFst ind)) ¬ref1)
+                                (FIndet (IFst (λ e1 e2 ()) ind)) ¬ref1)
                    (not-ref-sat ct2 (TASnd wt)
-                                (FIndet (ISnd ind)) ¬ref2)
+                                (FIndet (ISnd (λ e1 e2 ()) ind)) ¬ref2)
   ... | TAFst wt' | FIndet ind =
     CSNotIntroPair NVFst
                    (not-ref-sat ct1 (TAFst wt)
-                                (FIndet (IFst ind)) ¬ref1)
+                                (FIndet (IFst (λ e1 e2 ()) ind)) ¬ref1)
                    (not-ref-sat ct2 (TASnd wt)
-                                (FIndet (ISnd ind)) ¬ref2)
+                                (FIndet (ISnd (λ e1 e2 ()) ind)) ¬ref2)
   ... | TASnd wt' | FIndet ind =
     CSNotIntroPair NVSnd
                    (not-ref-sat ct1 (TAFst wt)
-                                (FIndet (IFst ind)) ¬ref1)
+                                (FIndet (IFst (λ e1 e2 ()) ind)) ¬ref1)
                    (not-ref-sat ct2 (TASnd wt)
-                                (FIndet (ISnd ind)) ¬ref2)
+                                (FIndet (ISnd (λ e1 e2 ()) ind)) ¬ref2)
   ... | TAEHole x | FIndet ind =
     CSNotIntroPair NVEHole
                    (not-ref-sat ct1 (TAFst wt)
-                                (FIndet (IFst ind)) ¬ref1)
+                                (FIndet (IFst (λ e1 e2 ()) ind)) ¬ref1)
                    (not-ref-sat ct2 (TASnd wt)
-                                (FIndet (ISnd ind)) ¬ref2)
+                                (FIndet (ISnd (λ e1 e2 ()) ind)) ¬ref2)
   ... | TANEHole x wt' | FIndet ind = 
     CSNotIntroPair NVNEHole
                    (not-ref-sat ct1 (TAFst wt)
-                                (FIndet (IFst ind)) ¬ref1)
+                                (FIndet (IFst (λ e1 e2 ()) ind)) ¬ref1)
                    (not-ref-sat ct2 (TASnd wt)
-                                (FIndet (ISnd ind)) ¬ref2)
+                                (FIndet (ISnd (λ e1 e2 ()) ind)) ¬ref2)
   ... | TAPair wt1 wt2 | fin
     with pair-final fin
   ... | fin1 , fin2 =

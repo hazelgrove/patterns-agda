@@ -96,7 +96,7 @@ module weakening where
                 dom Γ' z →
                 fresh-rs z (r / rs)
         frshr z∈Γ' with frsh z∈Γ'
-        ... | FMatch f (FZRules FNoRules fr frs) = FRules fr frs
+        ... | FMatch f (FZRules FNoRules (FRules fr frs)) = FRules fr frs
     weaken-ta-∪Γ {Γ' = Γ'} {e = match e (rs-pre / r / rs-post)}
                  frsh (TAMatchNZPre wt fin pret postt ¬red) =
       TAMatchNZPre (weaken-ta-∪Γ frsh' wt)
@@ -114,12 +114,12 @@ module weakening where
                   dom Γ' z →
                   fresh-rs z rs-pre
         frshpre z∈Γ' with frsh z∈Γ'
-        ... | FMatch f (FZRules fpre fr fpost) = fpre
+        ... | FMatch f (FZRules fpre (FRules fr fpost)) = fpre
         frshpost : ∀{z} →
                    dom Γ' z →
                    fresh-rs z (r / rs-post)
         frshpost z∈Γ' with frsh z∈Γ'
-        ... | FMatch f (FZRules fpre fr fpost) = FRules fr fpost
+        ... | FMatch f (FZRules fpre (FRules fr fpost)) = FRules fr fpost
     weaken-ta-∪Γ {Γ' = Γ'} {e = ⟨ e1 , e2 ⟩} frsh (TAPair wt1 wt2) = 
       TAPair (weaken-ta-∪Γ frsh1 wt1)
            (weaken-ta-∪Γ frsh2 wt2)
@@ -327,7 +327,7 @@ module weakening where
                 dom Δ' z →
                 hole-fresh-rs z (r / rs)
         frshr z∈Δ' with frsh z∈Δ'
-        ... | HFMatch hf (HFZRules HFNoRules hfr hfrs) =
+        ... | HFMatch hf (HFZRules HFNoRules (HFRules hfr hfrs)) =
           HFRules hfr hfrs
     weaken-ta-∪Δ {Δ' = Δ'} {e = match e (rs-pre / r / rs-post)}
                  frsh (TAMatchNZPre wt fin pret postt ¬red) =
@@ -346,12 +346,12 @@ module weakening where
                   dom Δ' z →
                   hole-fresh-rs z rs-pre
         frshpre z∈Δ' with frsh z∈Δ'
-        ... | HFMatch hf (HFZRules hfpre hfr hfpost) = hfpre
+        ... | HFMatch hf (HFZRules hfpre (HFRules hfr hfpost)) = hfpre
         frshpost : ∀{z} →
                    dom Δ' z →
                    hole-fresh-rs z (r / rs-post)
         frshpost z∈Δ' with frsh z∈Δ'
-        ... | HFMatch hf (HFZRules hfpre hfr hfpost) =
+        ... | HFMatch hf (HFZRules hfpre (HFRules hfr hfpost)) =
           HFRules hfr hfpost
     weaken-ta-∪Δ {Δ' = Δ'} {e = ⟨ e1 , e2 ⟩} frsh (TAPair wt1 wt2) =
       TAPair (weaken-ta-∪Δ frsh1 wt1)
@@ -476,7 +476,7 @@ module weakening where
         ... | HFRule hub hf = hf
 
     -- Commutativity of union requires disjointness, so we
-    -- make use of th identity
+    -- make use of the identity
     -- Δ ∪ Δ' = Δ ⊔ (Δ' \ Δ) = (Δ' \ Δ) ⊔ Δ
     weaken-ta-Δ∪ : ∀{Γ Δ Δ' e τ} →
                    (∀{u} →

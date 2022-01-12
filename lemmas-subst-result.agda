@@ -10,6 +10,19 @@ open import patterns-core
 open import result-judgements
 
 module lemmas-subst-result where
+  subst-not-pair : ∀{x e e'} →
+                   e indet →
+                   ((e1 e2 : ihexp) →
+                    e ≠ ⟨ e1 , e2 ⟩) →
+                   ((e1 e2 : ihexp) →
+                    ([ e' / x ] e) ≠ ⟨ e1 , e2 ⟩)
+  subst-not-pair (IPairL ind₁ val₂) npr e1 e2 eq =
+    npr _ _ refl
+  subst-not-pair (IPairR val₁ ind₂) npr e1 e2 eq =
+    npr _ _ refl
+  subst-not-pair (IPair ind₁ ind₂) npr e1 e2 eq =
+    npr _ _ refl
+  
   mutual
     indet-subst-final : ∀{x e1 e2} →
                         e1 indet →
@@ -43,15 +56,14 @@ module lemmas-subst-result where
     indet-subst-final (IPair ind1₁ ind1₂) fin2 =
       IPair (indet-subst-final ind1₁ fin2)
             (indet-subst-final ind1₂ fin2)
-    indet-subst-final (IFst ind1) fin2 =
-      IFst (indet-subst-final ind1 fin2)
-    indet-subst-final (ISnd ind1) fin2 =
-      ISnd (indet-subst-final ind1 fin2)
+    indet-subst-final (IFst npr ind1) fin2 =
+      IFst (subst-not-pair ind1 npr) (indet-subst-final ind1 fin2)
+    indet-subst-final (ISnd npr ind1) fin2 =
+      ISnd (subst-not-pair ind1 npr) (indet-subst-final ind1 fin2)
     indet-subst-final IEHole fin2 = IEHole
     indet-subst-final (INEHole fin1) fin2 =
       INEHole (final-subst-final fin1 fin2)
-    
-    
+ 
     final-subst-final : ∀{x e1 e2} →
                         e1 final →
                         e2 final →

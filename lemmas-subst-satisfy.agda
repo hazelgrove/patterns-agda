@@ -98,9 +98,9 @@ module lemmas-subst-satisfy where
     CSOrL (final-sat-subst (FIndet (IPair ind1 ind2)) sat)
   final-sat-subst (FIndet (IPair ind1 ind2)) (CSOrR sat) =
     CSOrR (final-sat-subst (FIndet (IPair ind1 ind2)) sat)
-  final-sat-subst (FIndet (IFst ind)) sat =
+  final-sat-subst (FIndet (IFst npr ind)) sat =
     all-notintro-sat NVFst sat NVFst
-  final-sat-subst (FIndet (ISnd ind)) sat =
+  final-sat-subst (FIndet (ISnd npr ind)) sat =
     all-notintro-sat NVSnd sat NVSnd
   final-sat-subst (FIndet IEHole) sat =
     all-notintro-sat NVEHole sat NVEHole
@@ -271,9 +271,9 @@ module lemmas-subst-satisfy where
                      (CMSOrR ¬sat1 msat2) =
     CMSOrR (λ{sat1 → ¬sat1 (subst-sat sat1)})
            (final-maysat-subst (FIndet (IPair ind1 ind2)) msat2)
-  final-maysat-subst (FIndet (IFst ind)) msat =
+  final-maysat-subst (FIndet (IFst npr ind)) msat =
     all-notintro-maysat NVFst msat NVFst
-  final-maysat-subst (FIndet (ISnd ind)) msat =
+  final-maysat-subst (FIndet (ISnd npr ind)) msat =
     all-notintro-maysat NVSnd msat NVSnd
   final-maysat-subst (FIndet IEHole) msat =
     all-notintro-maysat NVEHole msat NVEHole

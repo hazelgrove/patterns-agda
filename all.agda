@@ -7,6 +7,11 @@ open import contexts
 open import lemmas-contexts
 open import exchange
 open import freshness
+open import binders-disjointness
+open import binders-disjoint-symmetric
+open import hole-binders-disjoint-symmetric
+open import lemmas-binders-disjointness
+open import binders-uniqueness
 open import freshness-decidable
 open import lemma-exists-fresh
 open import lemmas-freshness
@@ -41,10 +46,12 @@ open import material-entailment
 open import matching-determinism
 open import matching-coherence
 
-
+open import lemmas-subst-disjointness
 open import lemmas-subst-value
 open import lemmas-subst-result
 open import lemmas-subst-matching
 open import lemmas-subst-satisfy
 open import lemmas-subst-type
---open import preservation
+open import finality
+open import lemmas-or-append
+open import preservation

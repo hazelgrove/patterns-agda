@@ -8,37 +8,26 @@ open import result-judgements
 open import statics-core
 open import substitution-env
 
-module matching-determinism where
-
-  data DetMatch (e : ihexp) (p : pattrn) : Set where
-       Match    : (Σ[ θ ∈ env ] e ▹ p ⊣ θ) →
-                  (e ?▹ p → ⊥) →
-                  (e ⊥▹ p → ⊥) →
-                  DetMatch e p
-       MayMatch : ((Σ[ θ ∈ env ] e ▹ p ⊣ θ) → ⊥) →
-                  (e ?▹ p) →
-                  (e ⊥▹ p → ⊥) →
-                  DetMatch e p
-       NotMatch : ((Σ[ θ ∈ env ] e ▹ p ⊣ θ) → ⊥) →
-                  (e ?▹ p → ⊥) →
-                  (e ⊥▹ p) →
-                  DetMatch e p
-       
-  matching-det : ∀{e Δe τ p ξ Γ Δ} →
-                 e final →
-                 ∅ , Δe ⊢ e :: τ →
-                 p :: τ [ ξ ]⊣ Γ , Δ →
-                 DetMatch e p
-  matching-det {e = e} {p = p} fin wt (PTVar {x = x}) =
+module matching-determinism where       
+  data ExhaustMatch (e : ihexp) (p : pattrn) : Set where
+       Match    : Σ[ θ ∈ env ] e ▹ p ⊣ θ →
+                  ExhaustMatch e p
+       MayMatch : e ?▹ p →
+                  ExhaustMatch e p
+       NotMatch : e ⊥▹ p →
+                  ExhaustMatch e p
+                  
+  matching-exhaust : ∀{e Δe τ p ξ Γ Δ} →
+                     e final →
+                     ∅ , Δe ⊢ e :: τ →
+                     p :: τ [ ξ ]⊣ Γ , Δ →
+                     ExhaustMatch e p
+  matching-exhaust {e = e} {p = p} fin wt (PTVar {x = x}) =
     Match (Subst e x (Id ∅) , MVar)
-          (λ{(MMNotIntro ni ())})
-          (λ ())
-  matching-det {e = e} {p = p} fin wt (PTNum {n = n})
+  matching-exhaust {e = e} {p = p} fin wt (PTNum {n = n})
     with notintro-dec e
   ... | Inl ni =
-    MayMatch (λ{(_ , MNum) → contra ni λ ()})
-             (MMNotIntro ni RNum)
-             (λ{(NMNum _) → contra ni λ ()})
+    MayMatch (MMNotIntro ni RNum) 
   ... | Inr ¬ni
     with wt
   ... | TAAp _ _ = abort (¬ni NVAp)
@@ -52,19 +41,12 @@ module matching-determinism where
     with natEQ m n
   ... | Inl refl =
     Match (Id ∅ , MNum)
-          (λ{(MMNotIntro () _)})
-          (λ{(NMNum n≠n) → n≠n refl})
   ... | Inr m≠n =
-    NotMatch (λ{(_ , MNum) → m≠n refl})
-             (λ{(MMNotIntro () _)})
-             (NMNum m≠n)
-  matching-det {e = e} {p = p} fin wt (PTInl pt)
+    NotMatch (NMNum m≠n)
+  matching-exhaust {e = e} {p = p} fin wt (PTInl pt)
     with notintro-dec e
   ... | Inl ni =
-    MayMatch (λ{(θ , MInl mat) → contra ni λ ()})
-             (MMNotIntro ni RInl)
-             (λ{NMConfL → contra ni λ ()
-              ; (NMInl nmat) → contra ni λ ()})
+    MayMatch (MMNotIntro ni RInl) 
   ... | Inr ¬ni
     with wt
   ... | TAAp _ _ = abort (¬ni NVAp)
@@ -75,28 +57,19 @@ module matching-determinism where
   ... | TAEHole _ = abort (¬ni NVEHole)
   ... | TANEHole _ _ = abort (¬ni NVNEHole)
   ... | TAInr wt₁ =
-    NotMatch (λ ()) (λ{(MMNotIntro () _)}) NMConfL
+    NotMatch NMConfL
   ... | TAInl wt₁
-    with matching-det (inl-final fin) wt₁ pt
-  ... | Match (θ , mat) ¬mmat ¬nnat =
+    with matching-exhaust (inl-final fin) wt₁ pt
+  ... | Match (θ , mat) =
     Match (θ , (MInl mat))
-          (λ{(MMInl mmat) → ¬mmat mmat})
-          (λ{(NMInl nmat) → ¬nnat nmat})
-  ... | MayMatch ¬mat mmat ¬nnat =
-    MayMatch (λ{(θ , MInl mat) → ¬mat (θ , mat)})
-             (MMInl mmat)
-             (λ{(NMInl nnat) → ¬nnat nnat})
-  ... | NotMatch ¬mat ¬mmat nnat =
-    NotMatch (λ{(θ , MInl mat) → ¬mat (θ , mat)})
-             (λ{(MMInl mmat) → ¬mmat mmat})
-             (NMInl nnat)
-  matching-det {e = e} {p = p} fin wt (PTInr pt)
+  ... | MayMatch mmat =
+    MayMatch (MMInl mmat)   
+  ... | NotMatch nmat =
+    NotMatch (NMInl nmat)
+  matching-exhaust {e = e} {p = p} fin wt (PTInr pt)
     with notintro-dec e
   ... | Inl ni =
-    MayMatch (λ{(θ , MInr mat) → contra ni λ ()})
-             (MMNotIntro ni RInr)
-             (λ{NMConfR → contra ni λ () ;
-               (NMInr nmat) → contra ni λ ()})
+    MayMatch (MMNotIntro ni RInr) 
   ... | Inr ¬ni
     with wt
   ... | TAAp _ _ = abort (¬ni NVAp)
@@ -107,95 +80,47 @@ module matching-determinism where
   ... | TAEHole _ = abort (¬ni NVEHole)
   ... | TANEHole _ _ = abort (¬ni NVNEHole)
   ... | TAInl wt₁ =
-    NotMatch (λ ()) (λ{(MMNotIntro () _)}) NMConfR
+    NotMatch NMConfR
   ... | TAInr wt₁
-    with matching-det (inr-final fin) wt₁ pt
-  ... | Match (θ , mat) ¬mmat ¬nnat =
+    with matching-exhaust (inr-final fin) wt₁ pt
+  ... | Match (θ , mat) =
     Match (θ , MInr mat)
-          (λ{(MMInr mmat) → ¬mmat mmat})
-          (λ{(NMInr nmat) → ¬nnat nmat})
-  ... | MayMatch ¬mat mmat ¬nnat =
-    MayMatch (λ{(θ , MInr mat) → ¬mat (θ , mat)})
-             (MMInr mmat)
-             (λ{(NMInr nnat) → ¬nnat nnat})
-  ... | NotMatch ¬mat ¬mmat nnat =
-    NotMatch (λ{(θ , MInr mat) → ¬mat (θ , mat)})
-             (λ{(MMInr mmat) → ¬mmat mmat})
-             (NMInr nnat)
-  matching-det {e = e} fin wt (PTPair disj disjh pt1 pt2)
+  ... | MayMatch mmat =
+    MayMatch (MMInr mmat)
+  ... | NotMatch nmat =
+    NotMatch (NMInr nmat)
+  matching-exhaust {e = e} fin wt (PTPair disj disjh pt1 pt2)
     with notintro-dec e
   ... | Inl ni
-    with matching-det (FIndet (IFst (final-notintro-indet fin ni)))
-                      (TAFst wt) pt1 |
-         matching-det (FIndet (ISnd (final-notintro-indet fin ni)))
-                      (TASnd wt) pt2
-  ... | Match (θ1 , mat1) ¬mmat1 ¬nmat1 |
-        Match (θ2 , mat2) ¬mmat2 ¬nmat2 =
+    with matching-exhaust
+           (FIndet (IFst (λ{e1 e2 refl → contra ni (λ ())})
+                         (final-notintro-indet fin ni)))
+           (TAFst wt) pt1 |
+         matching-exhaust
+           (FIndet (ISnd (λ{e1 e2 refl → contra ni λ ()})
+                         (final-notintro-indet fin ni)))
+           (TASnd wt) pt2
+  ... | Match (θ1 , mat1) | Match (θ2 , mat2) =
     Match (θ1 ⊎ θ2 , MNotIntroPair ni mat1 mat2)
-          (λ{(MMNotIntro ni (RPairL ref1)) →
-              ¬mmat1 (MMNotIntro NVFst ref1)
-           ; (MMNotIntro ni (RPairR ref2)) →
-              ¬mmat2 (MMNotIntro NVSnd ref2)})
-          λ{(NMPairL nmat1) → contra ni λ ()
-          ; (NMPairR nmat2) → contra ni λ ()}
-  ... | Match mat1 ¬mmat1 ¬nmat1 |
-        MayMatch ¬mat2 (MMNotIntro ni2 ref2) ¬nmat2 =
-    MayMatch (λ{(_ , MNotIntroPair {θ1 = θ1} {θ2 = θ2} ni mat1 mat2) →
-                ¬mat2 (θ2 , mat2)})
-             (MMNotIntro ni (RPairR ref2))
-             (λ{(NMPairL nmat1) → contra ni λ ()
-              ; (NMPairR nmat2) → contra ni λ ()})
-  ... | Match mat1 ¬mmat1 ¬nmat1 | MayMatch ¬mat2 MMEHole ¬nmat2 =
-    MayMatch (λ{(_ , MPair mat1 ()) 
-              ; (_ , MNotIntroPair ni mat1 ())})
-             (MMNotIntro ni (RPairR REHole))
-             (λ{(NMPairL nmat1) → contra ni λ ()
-              ; (NMPairR nmat2) → contra ni λ ()})
-  ... | Match mat1 ¬mmat1 ¬nmat1 | MayMatch ¬mat2 MMNEHole ¬nmat2 =
-    MayMatch (λ{(_ , MPair mat1 ()) 
-              ; (_ , MNotIntroPair ni mat1 ())})
-             (MMNotIntro ni (RPairR RNEHole))
-             (λ{(NMPairL nmat1) → contra ni λ ()
-              ; (NMPairR nmat2) → contra ni λ ()})
-  ... | MayMatch ¬mat1 (MMNotIntro ni1 ref1) ¬nmat1 |
-        Match mat2 ¬mmat2 ¬nmat2 =
-    MayMatch ((λ{(_ , MNotIntroPair {θ1 = θ1} {θ2 = θ2} ni mat1 mat2) →
-                 ¬mat1 (θ1 , mat1)}))
-             (MMNotIntro ni (RPairL ref1))
-             (λ{(NMPairL nmat1) → contra ni λ ()
-              ; (NMPairR nmat2) → contra ni λ ()})
-  ... | MayMatch ¬mat1 MMEHole ¬nmat1 | Match mat2 ¬mmat2 ¬nmat2 =
-    MayMatch (λ{(_ , MPair () mat2) 
-              ; (_ , MNotIntroPair ni () mat2)})
-             (MMNotIntro ni (RPairL REHole))
-             (λ{(NMPairL nmat1) → contra ni λ ()
-              ; (NMPairR nmat2) → contra ni λ ()})
-  ... | MayMatch ¬mat1 MMNEHole ¬nmat1 | Match mat2 ¬mmat2 ¬nmat2 =
-    MayMatch (λ{(_ , MPair () mat2) 
-              ; (_ , MNotIntroPair ni () mat2)})
-             (MMNotIntro ni (RPairL RNEHole))
-             (λ{(NMPairL nmat1) → contra ni λ ()
-              ; (NMPairR nmat2) → contra ni λ ()})
-  ... | MayMatch ¬mat1 (MMNotIntro ni1 ref1) ¬nmat1 |
-        MayMatch ¬mat2 mmat2 ¬nmat2 =
-    MayMatch ((λ{(_ , MNotIntroPair {θ1 = θ1} {θ2 = θ2} ni mat1 mat2) →
-                 ¬mat1 (θ1 , mat1)}))
-             (MMNotIntro ni (RPairL ref1))
-             (λ{(NMPairL nmat1) → contra ni λ ()
-              ; (NMPairR nmat2) → contra ni λ ()})
-  ... | MayMatch ¬mat1 MMEHole ¬nmat1 | MayMatch ¬mat2 mmat2 ¬nmat2 =
-    MayMatch (λ{(_ , MPair () mat2) 
-              ; (_ , MNotIntroPair ni () mat2)})
-             (MMNotIntro ni (RPairL REHole))
-             (λ{(NMPairL nmat1) → contra ni λ ()
-              ; (NMPairR nmat2) → contra ni λ ()})
-  ... | MayMatch ¬mat1 MMNEHole ¬nmat1 | MayMatch ¬mat2 mmat2 ¬nmat2 =
-    MayMatch (λ{(_ , MPair () mat2) 
-              ; (_ , MNotIntroPair ni () mat2)})
-             (MMNotIntro ni (RPairL RNEHole))
-             (λ{(NMPairL nmat1) → contra ni λ ()
-              ; (NMPairR nmat2) → contra ni λ ()})
-  matching-det {e = e} fin wt (PTPair disj disjh pt1 pt2) | Inr ¬ni
+  ... | Match mat1 | MayMatch (MMNotIntro ni2 ref2) =
+    MayMatch (MMNotIntro ni (RPairR ref2))
+  ... | Match mat1 | MayMatch MMEHole =
+    MayMatch (MMNotIntro ni (RPairR REHole))
+  ... | Match mat1 | MayMatch MMNEHole =
+    MayMatch (MMNotIntro ni (RPairR RNEHole)) 
+  ... | MayMatch (MMNotIntro ni1 ref1) | Match mat2 =
+    MayMatch (MMNotIntro ni (RPairL ref1))  
+  ... | MayMatch MMEHole | Match mat2 =
+    MayMatch (MMNotIntro ni (RPairL REHole))
+  ... | MayMatch MMNEHole | Match mat2 =
+    MayMatch (MMNotIntro ni (RPairL RNEHole))
+  ... | MayMatch (MMNotIntro ni1 ref1) | MayMatch mmat2 =
+    MayMatch (MMNotIntro ni (RPairL ref1))   
+  ... | MayMatch MMEHole | MayMatch mmat2 =
+    MayMatch (MMNotIntro ni (RPairL REHole))
+  ... | MayMatch MMNEHole | MayMatch mmat2 =
+    MayMatch (MMNotIntro ni (RPairL RNEHole))       
+  matching-exhaust {e = e} fin wt (PTPair disj disjh pt1 pt2) | Inr ¬ni
     with wt
   ... | TAAp _ _ = abort (¬ni NVAp)
   ... | TAMatchZPre _ _ = abort (¬ni NVMatch)
@@ -205,59 +130,125 @@ module matching-determinism where
   ... | TAEHole _ = abort (¬ni NVEHole)
   ... | TANEHole _ _ = abort (¬ni NVNEHole)
   ... | TAPair wt1 wt2
-    with matching-det (π1 (pair-final fin)) wt1 pt1 |
-         matching-det (π2 (pair-final fin)) wt2 pt2
-  ... | Match (θ1 , mat1) ¬mmat1 ¬nmat1 | Match (θ2 , mat2) ¬mmat2 ¬nmat2 =
+    with matching-exhaust (π1 (pair-final fin)) wt1 pt1 |
+         matching-exhaust (π2 (pair-final fin)) wt2 pt2
+  ... | Match (θ1 , mat1) | Match (θ2 , mat2) =
     Match (θ1 ⊎ θ2 , MPair mat1 mat2)
-          (λ{(MMPairL mmat1 mat2) → ¬mmat1 mmat1
-           ; (MMPairR mat1 mmat2) → ¬mmat2 mmat2
-           ; (MMPair mmat1 mmat2) → ¬mmat1 mmat1})
-          (λ{(NMPairL nmat1) → ¬nmat1 nmat1
-           ; (NMPairR nmat2) → ¬nmat2 nmat2})
-  ... | Match (θ1 , mat1) ¬mmat1 ¬nmat1 | MayMatch ¬mat2 mmat2 ¬nmat2 =
-    MayMatch (λ{(_ , MPair {θ1 = θ1} {θ2 = θ2} mat1 mat2) →
-                ¬mat2 (θ2 , mat2)})
-             (MMPairR mat1 mmat2)
-             (λ{(NMPairL nmat1) → ¬nmat1 nmat1
-              ; (NMPairR nmat2) → ¬nmat2 nmat2})
-  ... | Match mat1 ¬mmat1 ¬nmat1 | NotMatch ¬mat2 ¬mmat2 nmat2 =
-    NotMatch (λ{(_ , MPair {θ1 = θ1} {θ2 = θ2} mat1 mat2) →
-                ¬mat2 (θ2 , mat2)})
-             (λ{(MMPairL {θ = θ} mmat1 mat2) → ¬mat2 (θ , mat2)
-              ; (MMPairR {θ = θ} mat1 mmat2) → ¬mmat2 mmat2
-              ; (MMPair mmat1 mmat2) → ¬mmat2 mmat2})
-             (NMPairR nmat2)
-  ... | MayMatch ¬mat1 mmat1 ¬nmat1 | Match (θ2 , mat2) ¬mmat2 ¬nmat2 =
-    MayMatch (λ{(_ , MPair {θ1 = θ1} {θ2 = θ2} mat1 mat2) →
-                ¬mat1 (θ1 , mat1)})
-             (MMPairL mmat1 mat2)
-             (λ{(NMPairL nmat1) → ¬nmat1 nmat1
-              ; (NMPairR nmat2) → ¬nmat2 nmat2})
-  ... | MayMatch ¬mat1 mmat1 ¬nmat1 | MayMatch ¬mat2 mmat2 ¬nmat2 =
-    MayMatch (λ{(_ , MPair {θ1 = θ1} {θ2 = θ2} mat1 mat2) →
-                ¬mat1 (θ1 , mat1)})
-             (MMPair mmat1 mmat2)
-             (λ{(NMPairL nmat1) → ¬nmat1 nmat1
-              ; (NMPairR nmat2) → ¬nmat2 nmat2})
-  ... | MayMatch ¬mat1 mmat1 ¬nmat1 | NotMatch ¬mat2 ¬mmat2 nmat2 =
-    NotMatch (λ{(_ , MPair {θ1 = θ1} {θ2 = θ2} mat1 mat2) →
-                ¬mat2 (θ2 , mat2)})
-             (λ{(MMPairL {θ = θ} mmat1 mat2) → ¬mat2 (θ , mat2)
-              ; (MMPairR {θ = θ} mat1 mmat2) → ¬mmat2 mmat2
-              ; (MMPair mmat1 mmat2) → ¬mmat2 mmat2})
-             (NMPairR nmat2)
-  ... | NotMatch ¬mat1 ¬mmat1 nmat1 | md2 =
-    NotMatch (λ{(_ , MPair {θ1 = θ1} {θ2 = θ2} mat1 mat2) →
-                ¬mat1 (θ1 , mat1)})
-             (λ{(MMPairL {θ = θ} mmat1 mat2) → ¬mmat1 mmat1
-              ; (MMPairR {θ = θ} mat1 mmat2) → ¬mat1 (θ , mat1)
-              ; (MMPair mmat1 mmat2) → ¬mmat1 mmat1})
-             (NMPairL nmat1)
-  matching-det {e = e} {p = p} fin wt PTEHole =
-    MayMatch (λ ()) MMEHole (λ ())
-  matching-det {e = e} {p = p} fin wt (PTNEHole pt apt) =
-    MayMatch (λ ()) MMNEHole (λ ())
-  matching-det {e = e} {p = p} fin wt PTWild =
+  ... | Match (θ1 , mat1) | MayMatch mmat2 =
+    MayMatch (MMPairR mat1 mmat2)
+  ... | Match mat1 | NotMatch nmat2 =
+    NotMatch (NMPairR nmat2)
+  ... | MayMatch mmat1 | Match (θ2 , mat2) =
+    MayMatch (MMPairL mmat1 mat2)
+  ... | MayMatch mmat1 | MayMatch mmat2 =
+    MayMatch (MMPair mmat1 mmat2)  
+  ... | MayMatch mmat1 | NotMatch nmat2 =
+    NotMatch (NMPairR nmat2)
+  ... | NotMatch nmat1 | md2 =
+    NotMatch (NMPairL nmat1)
+  matching-exhaust {e = e} {p = p} fin wt PTEHole =
+    MayMatch MMEHole
+  matching-exhaust {e = e} {p = p} fin wt (PTNEHole pt apt) =
+    MayMatch MMNEHole
+  matching-exhaust {e = e} {p = p} fin wt PTWild =
     Match (Id ∅ , MWild)
-          (λ{(MMNotIntro _ ())})
-          (λ ())
+
+  mat-maymat-not : ∀{e p θ} →
+                   e ▹ p ⊣ θ →
+                   e ?▹ p →
+                   ⊥
+  mat-maymat-not MNum (MMNotIntro () ref)
+  mat-maymat-not MVar (MMNotIntro ni ())
+  mat-maymat-not (MInl mat) (MMInl mmat) =
+    mat-maymat-not mat mmat
+  mat-maymat-not (MInr mat) (MMInr mmat) =
+    mat-maymat-not mat mmat
+  mat-maymat-not (MPair mat1 mat2) (MMPairL mmat1 mat2') =
+    mat-maymat-not mat1 mmat1
+  mat-maymat-not (MPair mat1 mat2) (MMPairR mat1' mmat2) =
+    mat-maymat-not mat2 mmat2
+  mat-maymat-not (MPair mat1 mat2) (MMPair mmat1 mmat2) =
+    mat-maymat-not mat1 mmat1
+  mat-maymat-not (MNotIntroPair ni mat1 mat2)
+                 (MMNotIntro ni₁ (RPairL ref1)) =
+    mat-maymat-not mat1 (MMNotIntro NVFst ref1)
+  mat-maymat-not (MNotIntroPair ni mat1 mat2)
+                 (MMNotIntro ni₁ (RPairR ref2)) =
+    mat-maymat-not mat2 (MMNotIntro NVSnd ref2)
+  mat-maymat-not MWild (MMNotIntro ni ())
+
+  mat-notmat-not : ∀{e p θ} →
+                   e ▹ p ⊣ θ →
+                   e ⊥▹ p →
+                   ⊥
+  mat-notmat-not MNum (NMNum n≠n) = n≠n refl
+  mat-notmat-not (MInl mat) (NMInl nmat) =
+    mat-notmat-not mat nmat
+  mat-notmat-not (MInr mat) (NMInr nmat) =
+    mat-notmat-not mat nmat
+  mat-notmat-not (MPair mat mat₁) (NMPairL nmat) =
+    mat-notmat-not mat nmat
+  mat-notmat-not (MPair mat mat₁) (NMPairR nmat) =
+    mat-notmat-not mat₁ nmat
+
+  maymat-notmat-not : ∀{e p} →
+                      e ?▹ p →
+                      e ⊥▹ p →
+                      ⊥
+  maymat-notmat-not (MMInl mmat) (NMInl nmat) =
+    maymat-notmat-not mmat nmat
+  maymat-notmat-not (MMInr mmat) (NMInr nmat) =
+    maymat-notmat-not mmat nmat
+  maymat-notmat-not (MMPairL mmat1 mat2) (NMPairL nmat1) =
+    maymat-notmat-not mmat1 nmat1
+  maymat-notmat-not (MMPairL mmat1 mat2) (NMPairR nmat2) =
+    mat-notmat-not mat2 nmat2
+  maymat-notmat-not (MMPairR mat1 mmat2) (NMPairL nmat1) =
+    mat-notmat-not mat1 nmat1
+  maymat-notmat-not (MMPairR mat1 mmat2) (NMPairR nmat2) =
+    maymat-notmat-not mmat2 nmat2
+  maymat-notmat-not (MMPair mmat1 mmat2) (NMPairL nmat1) =
+    maymat-notmat-not mmat1 nmat1
+  maymat-notmat-not (MMPair mmat1 mmat2) (NMPairR nmat2) =
+    maymat-notmat-not mmat2 nmat2
+  maymat-notmat-not (MMNotIntro () ref) (NMNum n1≠n2)
+  maymat-notmat-not (MMNotIntro () ref) NMConfL
+  maymat-notmat-not (MMNotIntro () ref) NMConfR
+  maymat-notmat-not (MMNotIntro () ref) (NMInl nmat)
+  maymat-notmat-not (MMNotIntro () ref) (NMInr nmat)
+  maymat-notmat-not (MMNotIntro () ref) (NMPairL nmat1)
+  maymat-notmat-not (MMNotIntro () ref) (NMPairR nmat2)
+  
+  data DetMatch (e : ihexp) (p : pattrn) : Set where
+       Match    : (Σ[ θ ∈ env ] e ▹ p ⊣ θ) →
+                  (e ?▹ p → ⊥) →
+                  (e ⊥▹ p → ⊥) →
+                  DetMatch e p
+       MayMatch : ((Σ[ θ ∈ env ] e ▹ p ⊣ θ) → ⊥) →
+                  (e ?▹ p) →
+                  (e ⊥▹ p → ⊥) →
+                  DetMatch e p
+       NotMatch : ((Σ[ θ ∈ env ] e ▹ p ⊣ θ) → ⊥) →
+                  (e ?▹ p → ⊥) →
+                  (e ⊥▹ p) →
+                  DetMatch e p
+                  
+  matching-det : ∀{e Δe τ p ξ Γ Δ} →
+                 e final →
+                 ∅ , Δe ⊢ e :: τ →
+                 p :: τ [ ξ ]⊣ Γ , Δ →
+                 DetMatch e p
+  matching-det fin wt pt
+    with matching-exhaust fin wt pt
+  ... | Match mat =
+    Match mat
+          (λ mmat → mat-maymat-not (π2 mat) mmat)
+          (λ nmat → mat-notmat-not (π2 mat) nmat)
+  ... | MayMatch mmat =
+    MayMatch (λ mat → mat-maymat-not (π2 mat) mmat)
+             mmat
+             (λ nmat → maymat-notmat-not mmat nmat)
+  ... | NotMatch nmat =
+    NotMatch (λ mat → mat-notmat-not (π2 mat) nmat)
+             (λ mmat → maymat-notmat-not mmat nmat)
+             nmat

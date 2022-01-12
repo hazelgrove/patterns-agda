@@ -1,8 +1,8 @@
 open import Nat
 open import Prelude
+open import binders-disjointness
 open import contexts
 open import core
-open import disjointness
 open import freshness
 open import lemmas-contexts
 open import patterns-core
@@ -33,11 +33,12 @@ module lemmas-freshness where
     unbound-in-p-apart-Γp pt ub
   unbound-in-p-apart-Γp PTWild UBPWild = refl
 
-  dom-Γp-unbound-in : ∀{p τ ξ Γp Δp x e} →
+  dom-Γp-unbound-in : ∀{p τ ξ Γp Δp x T t} →
+                      {{_ : UnboundIn T}} →
                       p :: τ [ ξ ]⊣ Γp , Δp →
                       dom Γp x →
-                      binders-disjoint-p p e →
-                      unbound-in x e
+                      binders-disjoint-p {T = T} p t →
+                      unbound-in x t
   dom-Γp-unbound-in PTVar x∈Γp (BDPVar {x = y} ub)
     with dom-singleton-eq x∈Γp
   ... | refl = ub
@@ -109,11 +110,12 @@ module lemmas-freshness where
   ... | Inl u'=u = abort (u≠u' (! u'=u))
   ... | Inr u'≠u = apt
 
-  dom-Δp-unbound-in : ∀{p τ ξ Γp Δp u e} →
+  dom-Δp-unbound-in : ∀{p τ ξ Γp Δp u T t} →
+                      {{_ : HoleUnboundIn T}} →
                       p :: τ [ ξ ]⊣ Γp , Δp →
                       dom Δp u →
-                      hole-binders-disjoint-p p e →
-                      hole-unbound-in u e
+                      hole-binders-disjoint-p {T = T} p t →
+                      hole-unbound-in u t
   dom-Δp-unbound-in PTVar () HBDPVar
   dom-Δp-unbound-in (PTInl pt) u∈Δp (HBDPInl bd) =
      dom-Δp-unbound-in pt u∈Δp bd
@@ -214,32 +216,32 @@ module lemmas-freshness where
     binders-fresh (TAInr wt) (UBInr ub) x#Γ =
       FInr (binders-fresh wt ub x#Γ)
     binders-fresh (TAMatchZPre {r = p => d} wt (CTOneRule rt))
-                  (UBMatch xube (UBZRules UBNoRules ubr _)) x#Γ =
+                  (UBMatch xube (UBZRules UBNoRules (UBRules ubr _))) x#Γ =
       FMatch (binders-fresh wt xube x#Γ)
              (FZRules FNoRules
-                      (binders-fresh-r rt ubr x#Γ)
-                      FNoRules)
+                      (FRules (binders-fresh-r rt ubr x#Γ)
+                              FNoRules))
     binders-fresh (TAMatchZPre {r = p => d} wt (CTRules rt rst))
-                  (UBMatch xube (UBZRules _ ubr xubrs)) x#Γ =
+                  (UBMatch xube (UBZRules _ (UBRules ubr xubrs))) x#Γ =
       FMatch (binders-fresh wt xube x#Γ)
              (FZRules FNoRules
-                      (binders-fresh-r rt ubr x#Γ)
-                      (binders-fresh-rs rst xubrs x#Γ))
+                      (FRules (binders-fresh-r rt ubr x#Γ)
+                              (binders-fresh-rs rst xubrs x#Γ)))
     binders-fresh (TAMatchNZPre wt fin pret (CTOneRule rt) ¬red)
                   (UBMatch xube
-                           (UBZRules xubpre xubr xubpost)) x#Γ =
+                           (UBZRules xubpre (UBRules xubr xubpost))) x#Γ =
       FMatch (binders-fresh wt xube x#Γ)
              (FZRules (binders-fresh-rs pret xubpre x#Γ)
-                      (binders-fresh-r rt xubr x#Γ)
-                      FNoRules)
+                      (FRules (binders-fresh-r rt xubr x#Γ)
+                              FNoRules))
     binders-fresh (TAMatchNZPre wt fin pret
                                 (CTRules rt postt) ¬red)
                   (UBMatch xube
-                           (UBZRules xubpre xubr xubpost)) x#Γ =
+                           (UBZRules xubpre (UBRules xubr xubpost))) x#Γ =
       FMatch (binders-fresh wt xube x#Γ)
              (FZRules (binders-fresh-rs pret xubpre x#Γ)
-                      (binders-fresh-r rt xubr x#Γ)
-                      (binders-fresh-rs postt xubpost x#Γ))
+                      (FRules (binders-fresh-r rt xubr x#Γ)
+                              (binders-fresh-rs postt xubpost x#Γ)))
     binders-fresh (TAPair wt1 wt2) (UBPair ub1 ub2) x#Γ =
       FPair (binders-fresh wt1 ub1 x#Γ)
             (binders-fresh wt2 ub2 x#Γ)
@@ -296,35 +298,35 @@ module lemmas-freshness where
       HFInr (hole-binders-fresh wt ub u#Δ)
     hole-binders-fresh (TAMatchZPre {r = p => d} wt (CTOneRule rt))
                        (HUBMatch ube
-                                 (HUBZRules HUBNoRules ubr _))
+                                 (HUBZRules HUBNoRules (HUBRules ubr _)))
                        u#Δ =
       HFMatch (hole-binders-fresh wt ube u#Δ)
               (HFZRules HFNoRules
-                        (hole-binders-fresh-r rt ubr u#Δ)
-                        HFNoRules)
+                        (HFRules (hole-binders-fresh-r rt ubr u#Δ)
+                                 HFNoRules))
     hole-binders-fresh (TAMatchZPre {r = p => d} wt
                                     (CTRules rt rst))
-                       (HUBMatch ube (HUBZRules _ ubr ubrs)) u#Δ =
+                       (HUBMatch ube (HUBZRules _ (HUBRules ubr ubrs))) u#Δ =
       HFMatch (hole-binders-fresh wt ube u#Δ)
               (HFZRules HFNoRules
-                        (hole-binders-fresh-r rt ubr u#Δ)
-                        (hole-binders-fresh-rs rst ubrs u#Δ))
+                        (HFRules (hole-binders-fresh-r rt ubr u#Δ)
+                                 (hole-binders-fresh-rs rst ubrs u#Δ)))
     hole-binders-fresh (TAMatchNZPre wt fin pret
                                      (CTOneRule rt) ¬red)
-                       (HUBMatch ube (HUBZRules ubpre ubr ubpost))
+                       (HUBMatch ube (HUBZRules ubpre (HUBRules ubr ubpost)))
                        u#Δ =
       HFMatch (hole-binders-fresh wt ube u#Δ)
               (HFZRules (hole-binders-fresh-rs pret ubpre u#Δ)
-                        (hole-binders-fresh-r rt ubr u#Δ)
-                        HFNoRules)
+                        (HFRules (hole-binders-fresh-r rt ubr u#Δ)
+                                 HFNoRules))
     hole-binders-fresh (TAMatchNZPre wt fin pret
                                      (CTRules rt postt) ¬red)
-                       (HUBMatch ube (HUBZRules ubpre ubr ubpost))
+                       (HUBMatch ube (HUBZRules ubpre (HUBRules ubr ubpost)))
                        u#Δ =
       HFMatch (hole-binders-fresh wt ube u#Δ)
               (HFZRules (hole-binders-fresh-rs pret ubpre u#Δ)
-                        (hole-binders-fresh-r rt ubr u#Δ)
-                        (hole-binders-fresh-rs postt ubpost u#Δ))
+                        (HFRules (hole-binders-fresh-r rt ubr u#Δ)
+                                 (hole-binders-fresh-rs postt ubpost u#Δ)))
     hole-binders-fresh (TAPair wt1 wt2) (HUBPair ub1 ub2) u#Δ =
        HFPair (hole-binders-fresh wt1 ub1 u#Δ)
               (hole-binders-fresh wt2 ub2 u#Δ)

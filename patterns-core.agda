@@ -9,6 +9,10 @@ open import value-judgements
 
 module patterns-core where
   -- pointer erasure for pattern rules
+  _◆e : zrules → rules
+  (nil / r / rs) ◆e = r / rs
+  ((r' / rs') / r / rs) ◆e = r' / ((rs' / r / rs) ◆e)
+  
   data erase-r : zrules → rules → Set where
     ERZPre  : ∀{r rs} →
               erase-r (nil / r / rs) (r / rs)
@@ -36,7 +40,6 @@ module patterns-core where
               ⦇⌜ p ⌟⦈[ w , τ ] refutable
 
   -- e matches the pattern p, emitting the substitutions θ
-  -- TODO : Do we need disjointness constraints here?
   data _▹_⊣_ : (e : ihexp) → (p : pattrn) → (θ : env) → Set where
     MNum  : ∀{n} →
             (N n) ▹ (N n) ⊣ Id ∅

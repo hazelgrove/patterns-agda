@@ -32,10 +32,14 @@ module matching-coherence where
   ... | Inl ni
     with sat
   ... | CSNotIntroPair ni sat1 sat2
-    with sat-mat (FIndet (IFst (final-notintro-indet fin ni)))
-                 (TAFst wt) pt1 sat1 |
-         sat-mat (FIndet (ISnd (final-notintro-indet fin ni)))
-                 (TASnd wt) pt2 sat2
+    with sat-mat
+           (FIndet (IFst (λ{e1 e2 refl → contra ni (λ ())})
+                         (final-notintro-indet fin ni)))
+                   (TAFst wt) pt1 sat1 |
+         sat-mat
+           (FIndet (ISnd (λ{e1 e2 refl → contra ni (λ ())})
+                         (final-notintro-indet fin ni)))
+                   (TASnd wt) pt2 sat2
   ... | θ1 , mat1 | θ2 , mat2 =
     θ1 ⊎ θ2 , MNotIntroPair ni mat1 mat2
   sat-mat {e = e} fin wt (PTPair disj disjh pt1 pt2) sat
@@ -69,10 +73,14 @@ module matching-coherence where
   ... | Inl ni
     with mat
   ... | MNotIntroPair ni mat1 mat2
-    with mat-sat (FIndet (IFst (final-notintro-indet fin ni)))
-                 (TAFst wt) pt1 mat1 |
-         mat-sat (FIndet (ISnd (final-notintro-indet fin ni)))
-                 (TASnd wt) pt2 mat2
+    with mat-sat
+           (FIndet (IFst (λ{e1 e2 refl → contra ni (λ ())})
+                         (final-notintro-indet fin ni)))
+           (TAFst wt) pt1 mat1 |
+         mat-sat
+           (FIndet (ISnd (λ{e1 e2 refl → contra ni (λ ())})
+                         (final-notintro-indet fin ni)))
+           (TASnd wt) pt2 mat2
   ... | sat1 | sat2 = CSNotIntroPair ni sat1 sat2
   mat-sat {e = e} fin wt (PTPair disj disjh pt1 pt2) mat
       | Inr ¬ni

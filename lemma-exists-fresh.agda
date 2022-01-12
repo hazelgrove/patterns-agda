@@ -97,9 +97,9 @@ module lemma-exists-fresh where
                      fresh-zrs x zrs
     max<-fresh-zrs {zrs = rs-pre / r / rs-post} max<x =
       FZRules (max<-fresh-rs (max<-arg1< (max<-arg1< max<x)))
-              (max<-fresh-r (max<-arg2< {m = max-var-rs rs-pre} {n = max-var-r r}
-                            (max<-arg1< max<x)))
-              (max<-fresh-rs (max<-arg2< max<x))
+              (FRules (max<-fresh-r (max<-arg2< {m = max-var-rs rs-pre} {n = max-var-r r}
+                                                (max<-arg1< max<x)))
+                      (max<-fresh-rs (max<-arg2< max<x)))
     
   exists-fresh : (e : ihexp) →
                  Σ[ x ∈ Nat ] (fresh x e)

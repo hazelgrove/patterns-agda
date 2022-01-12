@@ -1,8 +1,18 @@
 open import Nat
 open import Prelude
+open import contexts
 open import core
 
 module freshness where
+  -- types T where we can determine if a Nat is unbound in T.
+  -- we use this as a type-class so that the disjointness
+  -- judgements can be generic
+  record UnboundIn {a : Level} (T : Set a) : Set (lsuc a) where
+    field
+      unbound-in : Nat → T → Set
+      
+  open UnboundIn {{...}} public
+  
   -- the variable name x is not bound in e
   mutual
     data unbound-in-p : Nat → pattrn → Set where
@@ -31,65 +41,83 @@ module freshness where
 
     data unbound-in-r : Nat → rule → Set where
       UBRule : ∀{x p e} →
-              unbound-in-p x p →
-              unbound-in x e →
-              unbound-in-r x (p => e)
+               unbound-in-p x p →
+               unbound-in-e x e →
+               unbound-in-r x (p => e)
 
     data unbound-in-rs : Nat → rules → Set where
       UBNoRules : ∀{x} →
-                 unbound-in-rs x nil
+                  unbound-in-rs x nil
       UBRules   : ∀{x r rs} →
-                 unbound-in-r x r →
-                 unbound-in-rs x rs →
-                 unbound-in-rs x (r / rs)
+                  unbound-in-r x r →
+                  unbound-in-rs x rs →
+                  unbound-in-rs x (r / rs)
 
     data unbound-in-zrs : Nat → zrules → Set where
       UBZRules : ∀{x rs-pre r rs-post} →
-                unbound-in-rs x rs-pre →
-                unbound-in-r x r →
-                unbound-in-rs x rs-post →
-                unbound-in-zrs x (rs-pre / r / rs-post)
+                 unbound-in-rs x rs-pre →
+                 unbound-in-rs x (r / rs-post) →
+                 unbound-in-zrs x (rs-pre / r / rs-post)
                 
-    data unbound-in : Nat → ihexp → Set where
+    data unbound-in-e : Nat → ihexp → Set where
       UBNum    : ∀{x n} →
-                 unbound-in x (N n)
+                 unbound-in-e x (N n)
       UBVar    : ∀{x y} →
-                 unbound-in x (X y)
+                 unbound-in-e x (X y)
       UBLam    : ∀{x y τ e} →
                  x ≠ y →
-                 unbound-in x e →
-                 unbound-in x (·λ y ·[ τ ] e)
+                 unbound-in-e x e →
+                 unbound-in-e x (·λ y ·[ τ ] e)
       UBAp     : ∀{x e1 e2} →
-                 unbound-in x e1 →
-                 unbound-in x e2 →
-                 unbound-in x (e1 ∘ e2)
+                 unbound-in-e x e1 →
+                 unbound-in-e x e2 →
+                 unbound-in-e x (e1 ∘ e2)
       UBInl    : ∀{x e τ} →
-                 unbound-in x e →
-                 unbound-in x (inl τ e)
+                 unbound-in-e x e →
+                 unbound-in-e x (inl τ e)
       UBInr    : ∀{x e τ} →
-                 unbound-in x e →
-                 unbound-in x (inr τ e)
+                 unbound-in-e x e →
+                 unbound-in-e x (inr τ e)
       UBMatch  : ∀{x e rs} →
-                 unbound-in x e →
+                 unbound-in-e x e →
                  unbound-in-zrs x rs →
-                 unbound-in x (match e rs)
+                 unbound-in-e x (match e rs)
       UBPair   : ∀{x e1 e2} →
-                 unbound-in x e1 →
-                 unbound-in x e2 →
-                 unbound-in x ⟨ e1 , e2 ⟩
+                 unbound-in-e x e1 →
+                 unbound-in-e x e2 →
+                 unbound-in-e x ⟨ e1 , e2 ⟩
       UBFst    : ∀{x e} →
-                 unbound-in x e →
-                 unbound-in x (fst e)
+                 unbound-in-e x e →
+                 unbound-in-e x (fst e)
       UBSnd    : ∀{x e} →
-                 unbound-in x e →
-                 unbound-in x (snd e)
+                 unbound-in-e x e →
+                 unbound-in-e x (snd e)
       UBEHole  : ∀{x u} →
-                 unbound-in x (⦇-⦈[ u  ])
+                 unbound-in-e x (⦇-⦈[ u  ])
       UBNEHole : ∀{x e u} →
-                 unbound-in x e →
-                 unbound-in x (⦇⌜ e ⌟⦈[ u ])
+                 unbound-in-e x e →
+                 unbound-in-e x (⦇⌜ e ⌟⦈[ u ])
 
-     
+  instance
+    PattrnUB : UnboundIn pattrn
+    PattrnUB = record { unbound-in = unbound-in-p }
+
+  instance
+    RuleUB : UnboundIn rule
+    RuleUB = record { unbound-in = unbound-in-r }
+
+  instance
+    RulesUB : UnboundIn rules
+    RulesUB = record { unbound-in = unbound-in-rs }
+
+  instance
+    ZRulesUB : UnboundIn zrules
+    ZRulesUB = record { unbound-in = unbound-in-zrs }
+
+  instance
+    IHExpUB : UnboundIn ihexp
+    IHExpUB = record { unbound-in = unbound-in-e }
+    
   -- the variable name x is fresh in the term e
   mutual
     data fresh-r : Nat → rule → Set where
@@ -109,8 +137,7 @@ module freshness where
     data fresh-zrs : Nat → zrules → Set where
       FZRules : ∀{x rs-pre r rs-post} →
                 fresh-rs x rs-pre →
-                fresh-r x r →
-                fresh-rs x rs-post →
+                fresh-rs x (r / rs-post) →
                 fresh-zrs x (rs-pre / r / rs-post)
                 
     data fresh : Nat → ihexp → Set where
@@ -153,8 +180,17 @@ module freshness where
                 fresh x e →
                 fresh x (⦇⌜ e ⌟⦈[ u ])
 
+  -- types T where we can determine if a Nat is unbound in T.
+  -- we use this as a type-class so that the disjointness
+  -- judgements can be generic
+  record HoleUnboundIn {a : Level} (T : Set a) : Set (lsuc a) where
+    field
+      hole-unbound-in : Nat → T → Set
+      
+  open HoleUnboundIn {{...}} public
+  
   mutual
-    -- the hole name u is not bound in p
+    -- the hole name u is not bound in e
     data hole-unbound-in-p : Nat → pattrn → Set where
       HUBPNum    : ∀{u n} →
                    hole-unbound-in-p u (N n)
@@ -183,7 +219,7 @@ module freshness where
     data hole-unbound-in-r : Nat → rule → Set where
       HUBRule : ∀{u p e} →
                 hole-unbound-in-p u p →
-                hole-unbound-in u e →
+                hole-unbound-in-e u e →
                 hole-unbound-in-r u (p => e)
 
     data hole-unbound-in-rs : Nat → rules → Set where
@@ -197,48 +233,67 @@ module freshness where
     data hole-unbound-in-zrs : Nat → zrules → Set where
       HUBZRules : ∀{u rs-pre r rs-post} →
                   hole-unbound-in-rs u rs-pre →
-                  hole-unbound-in-r u r →
-                  hole-unbound-in-rs u rs-post →
+                  hole-unbound-in-rs u (r / rs-post) →
                   hole-unbound-in-zrs u (rs-pre / r / rs-post)
                 
-    data hole-unbound-in : Nat → ihexp → Set where
+    data hole-unbound-in-e : Nat → ihexp → Set where
       HUBNum    : ∀{u n} →
-                  hole-unbound-in u (N n)
+                  hole-unbound-in-e u (N n)
       HUBVar    : ∀{u x} →
-                  hole-unbound-in u (X x)
+                  hole-unbound-in-e u (X x)
       HUBLam    : ∀{u x τ e} →
-                  hole-unbound-in u e →
-                  hole-unbound-in u (·λ x ·[ τ ] e)
+                  hole-unbound-in-e u e →
+                  hole-unbound-in-e u (·λ x ·[ τ ] e)
       HUBAp     : ∀{u e1 e2} →
-                  hole-unbound-in u e1 →
-                  hole-unbound-in u e2 →
-                  hole-unbound-in u (e1 ∘ e2)
+                  hole-unbound-in-e u e1 →
+                  hole-unbound-in-e u e2 →
+                  hole-unbound-in-e u (e1 ∘ e2)
       HUBInl    : ∀{u e τ} →
-                  hole-unbound-in u e →
-                  hole-unbound-in u (inl τ e)
+                  hole-unbound-in-e u e →
+                  hole-unbound-in-e u (inl τ e)
       HUBInr    : ∀{u e τ} →
-                  hole-unbound-in u e →
-                  hole-unbound-in u (inr τ e)
+                  hole-unbound-in-e u e →
+                  hole-unbound-in-e u (inr τ e)
       HUBMatch  : ∀{u e rs} →
-                  hole-unbound-in u e →
+                  hole-unbound-in-e u e →
                   hole-unbound-in-zrs u rs →
-                  hole-unbound-in u (match e rs)
+                  hole-unbound-in-e u (match e rs)
       HUBPair   : ∀{u e1 e2} →
-                  hole-unbound-in u e1 →
-                  hole-unbound-in u e2 →
-                  hole-unbound-in u ⟨ e1 , e2 ⟩
+                  hole-unbound-in-e u e1 →
+                  hole-unbound-in-e u e2 →
+                  hole-unbound-in-e u ⟨ e1 , e2 ⟩
       HUBFst    : ∀{u e} →
-                  hole-unbound-in u e →
-                  hole-unbound-in u (fst e)
+                  hole-unbound-in-e u e →
+                  hole-unbound-in-e u (fst e)
       HUBSnd    : ∀{u e} →
-                  hole-unbound-in u e →
-                  hole-unbound-in u (snd e)
+                  hole-unbound-in-e u e →
+                  hole-unbound-in-e u (snd e)
       HUBEHole  : ∀{u u'} →
-                  hole-unbound-in u (⦇-⦈[ u' ])
+                  hole-unbound-in-e u (⦇-⦈[ u' ])
       HUBNEHole : ∀{u e u'} →
-                  hole-unbound-in u e →
-                  hole-unbound-in u (⦇⌜ e ⌟⦈[ u' ])
-                 
+                  hole-unbound-in-e u e →
+                  hole-unbound-in-e u (⦇⌜ e ⌟⦈[ u' ])
+
+  instance
+    PattrnHUB : HoleUnboundIn pattrn
+    PattrnHUB = record { hole-unbound-in = hole-unbound-in-p }
+
+  instance
+    RuleHUB : HoleUnboundIn rule
+    RuleHUB = record { hole-unbound-in = hole-unbound-in-r }
+
+  instance
+    RulesHUB : HoleUnboundIn rules
+    RulesHUB = record { hole-unbound-in = hole-unbound-in-rs }
+
+  instance
+    ZRulesHUB : HoleUnboundIn zrules
+    ZRulesHUB = record { hole-unbound-in = hole-unbound-in-zrs }
+
+  instance
+    IHExpHUB : HoleUnboundIn ihexp
+    IHExpHUB = record { hole-unbound-in = hole-unbound-in-e }
+    
   mutual
     -- the hole name u is fresh in e
     data hole-fresh-r : Nat → rule → Set where
@@ -258,8 +313,7 @@ module freshness where
     data hole-fresh-zrs : Nat → zrules → Set where
       HFZRules : ∀{u rs-pre r rs-post} →
                  hole-fresh-rs u rs-pre →
-                 hole-fresh-r u r →
-                 hole-fresh-rs u rs-post →
+                 hole-fresh-rs u (r / rs-post) →
                  hole-fresh-zrs u (rs-pre / r / rs-post)
                 
     data hole-fresh : Nat → ihexp → Set where

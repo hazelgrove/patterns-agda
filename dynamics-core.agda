@@ -78,10 +78,23 @@ module dynamics-core where
     [ d / y ] ⦇-⦈[ u ] = ⦇-⦈[ u ]
     [ d / y ] ⦇⌜ d' ⌟⦈[ u ] =  ⦇⌜ [ d / y ] d' ⌟⦈[ u ]
 
+  -- substitution typing
+  data _,_⊢_:s:_ : tctx → tctx → env → tctx → Set where
+      STAId    : ∀{Γ Γ' Δ} →
+                 ((x : Nat) (τ : htyp) →
+                  (x , τ) ∈ Γ' →
+                  (x , τ) ∈ Γ) →
+                 Γ , Δ ⊢ Id Γ' :s: Γ'
+      STASubst : ∀{Γ Δ σ y Γ' d τ} →
+                 (Γ ,, (y , τ)) , Δ ⊢ σ :s: Γ' →
+                 Γ , Δ ⊢ d :: τ →
+                 Γ , Δ ⊢ Subst d y σ :s: Γ'
+                 
   -- apply a substitution
   apply-env : env → ihexp → ihexp
   apply-env (Id Γ) d = d
-  apply-env (Subst d y σ) d' = [ d / y ] ( apply-env σ d')
+  apply-env (Subst d y σ) d' =
+    [ d / y ] (apply-env σ d')
   
   -- e takes a step to e'
   data _↦_ : (e : ihexp) → (e' : ihexp) → Set where

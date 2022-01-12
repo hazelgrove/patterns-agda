@@ -1,6 +1,7 @@
 open import Prelude
 open import core
 open import patterns-core
+open import substitution-env
 open import value-judgements
 
 module result-judgements where
@@ -35,9 +36,13 @@ module result-judgements where
                 e2 indet →
                 ⟨ e1 , e2 ⟩ indet
       IFst    : ∀{e} →
+                ((e1 e2 : ihexp) →
+                 e ≠ ⟨ e1 , e2 ⟩) →
                 e indet →
                 (fst e) indet
       ISnd    : ∀{e} →
+                ((e1 e2 : ihexp) →
+                 e ≠ ⟨ e1 , e2 ⟩) →
                 e indet →
                 (snd e) indet
       IEHole  : ∀{u} →
@@ -54,6 +59,15 @@ module result-judgements where
       FIndet : ∀{e} →
                e indet →
                e final
+
+    -- all substitutions in θ are final
+    data _env-final : env → Set where
+      FId    : ∀{Γ} →
+               (Id Γ) env-final
+      FSubst : ∀{d y θ} →
+               θ env-final →
+               d final →
+               (Subst d y θ) env-final
 
     inl-final : ∀{e τ} → (inl τ e) final → e final
     inl-final (FVal (VInl eval)) = FVal eval
