@@ -157,3 +157,5 @@ module constraints-core where
     CSMSMay : ∀{e ξ} →
               e ⊧̇? ξ →
               e ⊧̇†? ξ
+
+

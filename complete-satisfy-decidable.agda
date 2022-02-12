@@ -8,10 +8,10 @@ module complete-satisfy-decidable where
   comp-satisfy-bool : ihexp → comp-constr → Bool
   comp-satisfy-bool e ·⊤ = true
   comp-satisfy-bool e ·⊥ = false
-  comp-satisfy-bool (N n1) (N n2) with natEQ n1 n2
+  comp-satisfy-bool (N n1) (N n2) with nat-dec n1 n2
   ... | Inl _ = true
   ... | Inr _ = false
-  comp-satisfy-bool (N n1) (N̸ n2) with natEQ n1 n2
+  comp-satisfy-bool (N n1) (N̸ n2) with nat-dec n1 n2
   ... | Inl _ = false
   ... | Inr _ = true
   comp-satisfy-bool (inl τ e) (inl ξ) = comp-satisfy-bool e ξ
@@ -28,66 +28,66 @@ module complete-satisfy-decidable where
   comp-satisfy-bool (e1 ∘ e2) (N n) = false
   comp-satisfy-bool (inl τ e) (N n) = false
   comp-satisfy-bool (inr τ e) (N n) = false
-  comp-satisfy-bool (match e rs) (N n) = false
+  comp-satisfy-bool (match e ·: τ of rs) (N n) = false
   comp-satisfy-bool ⟨ e1 , e2 ⟩ (N n) = false
   comp-satisfy-bool (fst e) (N n) = false
   comp-satisfy-bool (snd e) (N n) = false
-  comp-satisfy-bool ⦇-⦈[ u ] (N n) = false
-  comp-satisfy-bool ⦇⌜ e ⌟⦈[ u ] (N n) = false
+  comp-satisfy-bool ⦇-⦈⟨ u , σ ⟩ (N n) = false
+  comp-satisfy-bool ⦇⌜ e ⌟⦈⟨ u , σ ⟩ (N n) = false
   comp-satisfy-bool (X x) (N̸ n) = false
   comp-satisfy-bool (·λ x ·[ τ ] e) (N̸ n) = false
   comp-satisfy-bool (e1 ∘ e2) (N̸ n) = false
   comp-satisfy-bool (inl τ e) (N̸ n) = false
   comp-satisfy-bool (inr τ e) (N̸ n) = false
-  comp-satisfy-bool (match e rs) (N̸ n) = false
+  comp-satisfy-bool (match e ·: τ of rs) (N̸ n) = false
   comp-satisfy-bool ⟨ e1 , e2 ⟩ (N̸ n) = false
   comp-satisfy-bool (fst e) (N̸ n) = false
   comp-satisfy-bool (snd e) (N̸ n) = false
-  comp-satisfy-bool ⦇-⦈[ u ] (N̸ n) = false
-  comp-satisfy-bool ⦇⌜ e ⌟⦈[ u ] (N̸ n) = false
+  comp-satisfy-bool ⦇-⦈⟨ u , σ ⟩ (N̸ n) = false
+  comp-satisfy-bool ⦇⌜ e ⌟⦈⟨ u , σ ⟩ (N̸ n) = false
   comp-satisfy-bool (N n) (inl ξ) = false
   comp-satisfy-bool (X x) (inl ξ) = false
   comp-satisfy-bool (·λ x ·[ τ ] e) (inl ξ) = false
   comp-satisfy-bool (e1 ∘ e2) (inl ξ) = false
   comp-satisfy-bool (inr τ e) (inl ξ) = false
-  comp-satisfy-bool (match e ra) (inl ξ) = false
+  comp-satisfy-bool (match e ·: τ of rs) (inl ξ) = false
   comp-satisfy-bool ⟨ e1 , e2 ⟩ (inl ξ) = false
   comp-satisfy-bool (fst e) (inl ξ) = false
   comp-satisfy-bool (snd e) (inl ξ) = false
-  comp-satisfy-bool ⦇-⦈[ u ] (inl ξ) = false
-  comp-satisfy-bool ⦇⌜ e ⌟⦈[ u ] (inl ξ) = false
+  comp-satisfy-bool ⦇-⦈⟨ u , σ ⟩ (inl ξ) = false
+  comp-satisfy-bool ⦇⌜ e ⌟⦈⟨ u , σ ⟩ (inl ξ) = false
   comp-satisfy-bool (N n) (inr ξ) = false
   comp-satisfy-bool (X x) (inr ξ) = false
   comp-satisfy-bool (·λ x ·[ τ ] e) (inr ξ) = false
   comp-satisfy-bool (e1 ∘ e2) (inr ξ) = false
   comp-satisfy-bool (inl τ e) (inr ξ) = false
-  comp-satisfy-bool (match e rs) (inr ξ) = false
+  comp-satisfy-bool (match e ·: τ of rs) (inr ξ) = false
   comp-satisfy-bool ⟨ e1 , e2 ⟩ (inr ξ) = false
   comp-satisfy-bool (fst e) (inr ξ) = false
   comp-satisfy-bool (snd e) (inr ξ) = false
-  comp-satisfy-bool ⦇-⦈[ u ] (inr ξ) = false
-  comp-satisfy-bool ⦇⌜ e ⌟⦈[ u ] (inr ξ) = false
+  comp-satisfy-bool ⦇-⦈⟨ u , σ ⟩ (inr ξ) = false
+  comp-satisfy-bool ⦇⌜ e ⌟⦈⟨ u , σ ⟩ (inr ξ) = false
   comp-satisfy-bool (N n) ⟨ ξ1 , ξ2 ⟩ = false
   comp-satisfy-bool (X x) ⟨ ξ1 , ξ2 ⟩ = false
   comp-satisfy-bool (·λ x ·[ τ ] e) ⟨ ξ1 , ξ2 ⟩ = false
   comp-satisfy-bool (e1 ∘ e2) ⟨ ξ1 , ξ2 ⟩ = false
   comp-satisfy-bool (inl τ e) ⟨ ξ1 , ξ2 ⟩ = false
   comp-satisfy-bool (inr τ e) ⟨ ξ1 , ξ2 ⟩ = false
-  comp-satisfy-bool (match e rs) ⟨ ξ1 , ξ2 ⟩ = false
+  comp-satisfy-bool (match e ·: τ of rs) ⟨ ξ1 , ξ2 ⟩ = false
   comp-satisfy-bool (fst e) ⟨ ξ1 , ξ2 ⟩ = false
   comp-satisfy-bool (snd e) ⟨ ξ1 , ξ2 ⟩ = false
-  comp-satisfy-bool ⦇-⦈[ u ] ⟨ ξ1 , ξ2 ⟩ = false
-  comp-satisfy-bool ⦇⌜ e ⌟⦈[ u ] ⟨ ξ1 , ξ2 ⟩ = false
+  comp-satisfy-bool ⦇-⦈⟨ u , σ ⟩ ⟨ ξ1 , ξ2 ⟩ = false
+  comp-satisfy-bool ⦇⌜ e ⌟⦈⟨ u , σ ⟩ ⟨ ξ1 , ξ2 ⟩ = false
 
   -- soundness of satisfy function
   comp-satisfy-sound : ∀{e ξ} →
                        e ⊧ ξ →
                        comp-satisfy-bool e ξ == true
   comp-satisfy-sound CSTruth = refl
-  comp-satisfy-sound (CSNum {n = n}) with natEQ n n
+  comp-satisfy-sound (CSNum {n = n}) with nat-dec n n
   ... | Inl refl = refl
   ... | Inr ¬n=n = abort (¬n=n refl)
-  comp-satisfy-sound (CSNotNum {n1 = n1} {n2 = n2} n1≠n2) with natEQ n1 n2
+  comp-satisfy-sound (CSNotNum {n1 = n1} {n2 = n2} n1≠n2) with nat-dec n1 n2
   ... | Inl refl = abort (n1≠n2 refl)
   ... | Inr n1≠n2 = refl
   comp-satisfy-sound (CSInl sat) = comp-satisfy-sound sat
@@ -105,12 +105,12 @@ module complete-satisfy-decidable where
                           e ⊧ ξ
   comp-satisfy-complete {ξ = ·⊤} eq = CSTruth
   comp-satisfy-complete {e = N n1} {ξ = N n2} eq
-    with natEQ n1 n2
+    with nat-dec n1 n2
   ... | Inl refl = CSNum
   ... | Inr ¬n1=n2 with eq
   ... | ()
   comp-satisfy-complete {e = N n1} {ξ = N̸ n2} eq
-    with natEQ n1 n2
+    with nat-dec n1 n2
   ... | Inr ¬n1=n2 = CSNotNum ¬n1=n2
   ... | Inl refl with eq
   ... | ()

@@ -1,10 +1,10 @@
+open import List
 open import Nat
 open import Prelude
 open import constraints-core
 open import contexts
 open import core
 open import dynamics-core
-open import lemma-exists-fresh
 open import freshness
 open import lemmas-satisfy
 open import notintro-decidable
@@ -17,10 +17,10 @@ open import value-judgements
 open import weakening
 
 module lemmas-values where
-  values-same-type : ∀{e e' Δ τ} →
-                     e' ∈[ Δ ]values e →
-                     ∅ , Δ ⊢ e :: τ →
-                     ∅ , Δ ⊢ e' :: τ
+  values-same-type : ∀{e e' Δ Δp τ} →
+                     e' ∈[ Δ , Δp ]values e →
+                     ∅ , Δ , Δp ⊢ e :: τ →
+                     ∅ , Δ , Δp ⊢ e' :: τ
   values-same-type (IVVal eval wt₁) wt = wt
   values-same-type (IVIndet ni wt₁ eval' wt₁') wt
     with expr-type-unicity wt wt₁
@@ -41,8 +41,8 @@ module lemmas-values where
     with values-same-type vals1 wt1₁ | values-same-type vals2 wt2₁
   ... | wt1₁' | wt2₁' = TAPair wt1₁' wt2₁'
 
-  values-val : ∀{e e' Δ} →
-               e' ∈[ Δ ]values e →
+  values-val : ∀{e e' Δ Δp} →
+               e' ∈[ Δ , Δp ]values e →
                e' val
   values-val (IVVal eval wt) = eval
   values-val (IVIndet ni wt eval' wt') = eval'
@@ -51,41 +51,70 @@ module lemmas-values where
   values-val (IVPair ind wt vals1 vals2) =
     VPair (values-val vals1) (values-val vals2)
 
-  type-has-val : (τ : htyp) →
-                 (Δ : tctx) →
-                 Σ[ e ∈ ihexp ] (e val × (∅ , Δ ⊢ e :: τ))
-  type-has-val num Δ = N 0 , VNum , TANum
-  type-has-val (τ1 ==> τ2) Δ
-    with type-has-val τ2 Δ
-  ... | e' , eval' , wt'
-    with exists-fresh e'
-  ... | x , frsh =
-    (·λ x ·[ τ1 ] e') , VLam , TALam refl (weaken-ta-Γ frsh wt')
-  type-has-val (τ1 ⊕ τ2) Δ
-    with type-has-val τ1 Δ | type-has-val τ2 Δ
-  ... | e1 , eval1 , wt1 | e2 , eval2 , wt2 =
-    inl τ2 e1 , VInl eval1 , TAInl wt1
-  type-has-val (τ1 ⊠ τ2) Δ
-    with type-has-val τ1 Δ | type-has-val τ2 Δ
-  ... | e1 , eval1 , wt1 | e2 , eval2 , wt2 =
-    ⟨ e1 , e2 ⟩ , VPair eval1 eval2 , TAPair wt1 wt2
+  max-var : List Nat → Nat
+  max-var [] = 0
+  max-var (x :: xs) = max x (max-var xs)
+
+  elem<sucmax : ∀{x xs} →
+                x ∈l xs →
+                x < suc (max-var xs)
+  elem<sucmax {x = x} {xs = x :: xs} here =
+    arg1<sucmax x (max-var xs)
+  elem<sucmax {x = x} {xs = x' :: xs} (there x∈xs) =
+    <-trans-suc (elem<sucmax x∈xs)
+                (arg2<sucmax x' (max-var xs))
   
-  indet-has-values : ∀{e Δ τ} →
+  type-has-val : (τ : htyp) →
+                 (vars : List Nat) →
+                 (Δ : hctx) →
+                 (Δp : phctx) →
+                 Σ[ e ∈ ihexp ]
+                   e val ×
+                   (∅ , Δ , Δp ⊢ e :: τ) ×
+                   (∀{x} → x ∈l vars → fresh x e)
+  type-has-val num vars Δ Δp =
+    N 0 , VNum , TANum , λ _ → FNum
+  type-has-val (τ1 ==> τ2) vars Δ Δp
+    with type-has-val τ2
+                      (suc (max-var vars) :: vars)
+                      Δ Δp
+  ... | e2 , val2 , wt2 , frsh2 =
+    (·λ (suc (max-var vars)) ·[ τ1 ] e2) , VLam ,
+    TALam refl (weaken-ta-Γ (frsh2 here) wt2) ,
+    λ x∈vars →
+      FLam (<-≠ (elem<sucmax x∈vars))
+           (frsh2 (there x∈vars))
+  type-has-val (τ1 ⊕ τ2) vars Δ Δp
+    with type-has-val τ1 vars Δ Δp
+  ... | e1 , val1 , wt1 , frsh1 =
+    inl τ2 e1 , VInl val1 , TAInl wt1 ,
+      λ x∈vars → FInl (frsh1 x∈vars)
+  type-has-val (τ1 ⊠ τ2) vars Δ Δp
+    with type-has-val τ1 vars Δ Δp |
+         type-has-val τ2 vars Δ Δp
+  ... | e1 , val1 , wt1 , frsh1
+      | e2 , val2 , wt2 , frsh2 =
+    ⟨ e1 , e2 ⟩ , VPair val1 val2 , TAPair wt1 wt2 ,
+    λ x∈vars → FPair (frsh1 x∈vars) (frsh2 x∈vars)
+  
+  indet-has-values : ∀{e Δ Δp τ} →
                      e indet →
-                     ∅ , Δ ⊢ e :: τ →
-                     Σ[ e' ∈ ihexp ] (e' ∈[ Δ ]values e)
-  indet-has-values {Δ = Δ} {τ = τ} (IAp ind1 fin2) (TAAp wt1 wt2)
-    with type-has-val τ Δ
-  ... | e , eval , ewt = e , IVIndet NVAp (TAAp wt1 wt2) eval ewt
+                     ∅ , Δ , Δp ⊢ e :: τ →
+                     Σ[ e' ∈ ihexp ] (e' ∈[ Δ , Δp ]values e)
+  indet-has-values {Δ = Δ} {Δp = Δp} {τ = τ}
+                   (IAp ind1 fin2) (TAAp wt1 wt2)
+    with type-has-val τ [] Δ Δp
+  ... | e , eval , ewt , _ = e , IVIndet NVAp (TAAp wt1 wt2) eval ewt
   indet-has-values (IInl ind) (TAInl wt)
     with indet-has-values ind wt
   ... | e' , evals = inl _ e' , IVInl (IInl ind) (TAInl wt) evals
   indet-has-values (IInr ind) (TAInr wt)
     with indet-has-values ind wt
   ... | e' , evals = inr _ e' , IVInr (IInr ind) (TAInr wt) evals
-  indet-has-values {Δ = Δ} {τ = τ} (IMatch fin mp) wt
-    with type-has-val τ Δ
-  ... | e , eval , ewt = e , IVIndet NVMatch wt eval ewt
+  indet-has-values {Δ = Δ} {Δp = Δp} {τ = τ}
+                   (IMatch fin mp) wt
+    with type-has-val τ [] Δ Δp
+  ... | e , eval , ewt , _ = e , IVIndet NVMatch wt eval ewt
   indet-has-values {e = ⟨ e1 , e2 ⟩} (IPairL ind1 val2) (TAPair wt1 wt2)
     with indet-has-values ind1 wt1
   ... | e1' , e1vals =
@@ -101,23 +130,23 @@ module lemmas-values where
   ... | e1' , e1vals | e2' , e2vals =
     ⟨ e1' , e2' ⟩ ,
     IVPair (IPair ind1 ind2) (TAPair wt1 wt2) e1vals e2vals
-  indet-has-values {Δ = Δ} {τ = τ} (IFst npr ind1) wt
-    with type-has-val τ Δ
-  ... | e , eval , ewt = e , IVIndet NVFst wt eval ewt
-  indet-has-values {Δ = Δ} {τ = τ} (ISnd npr ind2) wt
-    with type-has-val τ Δ
-  ... | e , eval , ewt = e , IVIndet NVSnd wt eval ewt
-  indet-has-values {Δ = Δ} {τ = τ} IEHole wt
-    with type-has-val τ Δ
-  ... | e , eval , ewt = e , IVIndet NVEHole wt eval ewt
-  indet-has-values {Δ = Δ} {τ = τ} (INEHole x) wt
-    with type-has-val τ Δ
-  ... | e , eval , ewt = e , IVIndet NVNEHole wt eval ewt
+  indet-has-values {Δ = Δ} {Δp = Δp} {τ = τ} (IFst npr ind1) wt
+    with type-has-val τ [] Δ Δp
+  ... | e , eval , ewt , _ = e , IVIndet NVFst wt eval ewt
+  indet-has-values {Δ = Δ} {Δp = Δp} {τ = τ} (ISnd npr ind2) wt
+    with type-has-val τ [] Δ Δp
+  ... | e , eval , ewt , _ = e , IVIndet NVSnd wt eval ewt
+  indet-has-values {Δ = Δ} {Δp = Δp} {τ = τ} IEHole wt
+    with type-has-val τ [] Δ Δp
+  ... | e , eval , ewt , _ = e , IVIndet NVEHole wt eval ewt
+  indet-has-values {Δ = Δ} {Δp = Δp} {τ = τ} (INEHole x) wt
+    with type-has-val τ [] Δ Δp
+  ... | e , eval , ewt , _ = e , IVIndet NVNEHole wt eval ewt
 
-  indet-values-not-satormay : ∀{e Δ τ ξ e'} →
+  indet-values-not-satormay : ∀{e Δ Δp τ ξ e'} →
                              e indet →
-                             e' ∈[ Δ ]values e →
-                             ∅ , Δ ⊢ e :: τ →
+                             e' ∈[ Δ , Δp ]values e →
+                             ∅ , Δ , Δp ⊢ e :: τ →
                              ξ :c: τ →
                              (e ⊧̇†? ξ → ⊥) →
                              e' ⊧̇†? ξ →

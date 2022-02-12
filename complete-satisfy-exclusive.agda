@@ -10,20 +10,20 @@ open import value-judgements
 
 module complete-satisfy-exclusive where
 
-  val-not-sat-sat-dual : ∀{Δ e τ ξ} →
+  val-not-sat-sat-dual : ∀{Δ Δp e τ ξ} →
                          e val →
-                         ∅ , Δ ⊢ e :: τ →
+                         ∅ , Δ , Δp ⊢ e :: τ →
                          ξ :cc: τ →
                          (e ⊧ ξ → ⊥) →
                          e ⊧ (ξ ◆d)
   val-not-sat-sat-dual {ξ = ·⊤} eval wt ct ¬sat = abort (¬sat CSTruth)
   val-not-sat-sat-dual {ξ = ·⊥} eval wt ct ¬sat = CSTruth
   val-not-sat-sat-dual {ξ = N n} eval (TANum {n = m}) ct ¬sat
-    with natEQ m n
+    with nat-dec m n
   ... | Inl refl = CSNotNum (λ _ → ¬sat CSNum)
   ... | Inr m≠n = CSNotNum m≠n
   val-not-sat-sat-dual {ξ = N̸ n} eval (TANum {n = m}) ct ¬sat
-    with natEQ m n
+    with nat-dec m n
   ... | Inl refl = CSNum
   ... | Inr m≠n = abort (¬sat (CSNotNum m≠n))
   val-not-sat-sat-dual {e = inl τ e} {ξ = inl ξ}
@@ -103,11 +103,11 @@ module complete-satisfy-exclusive where
     Satisfy     : (e ⊧ ξ)     → (e ⊧ (ξ ◆d) → ⊥) → ExCompSat e ξ
     SatisfyDual : (e ⊧ ξ → ⊥) → (e ⊧ (ξ ◆d))     → ExCompSat e ξ
 
-  comp-satisfy-exclusive : ∀{ξ τ Δ e} →
-                            ξ :cc: τ →
-                            ∅ , Δ ⊢ e :: τ →
-                            e val →
-                            ExCompSat e ξ
+  comp-satisfy-exclusive : ∀{ξ τ Δ Δp e} →
+                           ξ :cc: τ →
+                           ∅ , Δ , Δp ⊢ e :: τ →
+                           e val →
+                           ExCompSat e ξ
   comp-satisfy-exclusive {ξ = ξ} {e = e} ct wt eval
     with comp-satisfy-dec e ξ | comp-satisfy-dec e (ξ ◆d)
   ... | Inl sat | Inl satd =
@@ -116,3 +116,5 @@ module complete-satisfy-exclusive where
     abort (¬satd (val-not-sat-sat-dual eval wt ct ¬sat))
   ... | Inl sat | Inr ¬satd = Satisfy sat ¬satd
   ... | Inr ¬sat | Inl satd = SatisfyDual ¬sat satd
+
+  

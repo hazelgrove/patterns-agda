@@ -8,12 +8,12 @@ module notintro-decidable where
   notintro-bool (e1 ∘ e2) = true
   notintro-bool (fst e) = true
   notintro-bool (snd e) = true
-  notintro-bool (match e rs) = true
-  notintro-bool ⦇-⦈[ u ] = true
-  notintro-bool ⦇⌜ e ⌟⦈[ u ] = true
+  notintro-bool (match e ·: τ of rs) = true
+  notintro-bool ⦇-⦈⟨ u , σ ⟩ = true
+  notintro-bool ⦇⌜ e ⌟⦈⟨ u , σ ⟩ = true
   notintro-bool (N n) = false
   notintro-bool (X x) = false
-  notintro-bool (·λ x ·[ u ] e) = false
+  notintro-bool (·λ x ·[ τ ] e) = false
   notintro-bool (inl τ e) = false
   notintro-bool (inr τ e) = false
   notintro-bool ⟨ e1 , e2 ⟩ = false
@@ -32,11 +32,11 @@ module notintro-decidable where
                       notintro-bool e == true →
                       e notintro
   notintro-complete {e = e1 ∘ e2} nieq = NVAp
-  notintro-complete {e = match e rs} nieq = NVMatch
+  notintro-complete {e = match e ·: τ of rs} nieq = NVMatch
   notintro-complete {e = fst e} nieq = NVFst
   notintro-complete {e = snd e} nieq = NVSnd
-  notintro-complete {e = ⦇-⦈[ u ]} nieq = NVEHole
-  notintro-complete {e = ⦇⌜ e ⌟⦈[ u ]} nieq = NVNEHole
+  notintro-complete {e = ⦇-⦈⟨ u , σ ⟩} nieq = NVEHole
+  notintro-complete {e = ⦇⌜ e ⌟⦈⟨ u , σ ⟩} nieq = NVNEHole
   
   notintro-dec : (e : ihexp) →
                  (e notintro) + (e notintro → ⊥)

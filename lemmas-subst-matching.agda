@@ -1,3 +1,4 @@
+open import List
 open import Nat
 open import Prelude
 open import constraints-core
@@ -10,15 +11,15 @@ open import patterns-core
 open import result-judgements
 open import satisfy-decidable
 open import statics-core
-open import substitution-env
 
 module lemmas-subst-matching where
-  subst-mat : ∀{x e1 e2 p θ1} →
-              e1 ▹ p ⊣ θ1 →
-              Σ[ θ2 ∈ env ] (([ e2 / x ] e1) ▹ p ⊣ θ2)
-  subst-mat MNum = Id ∅ , MNum
-  subst-mat {x = x} {e1 = e1} {e2 = e2} (MVar {x = y}) =
-    Subst ([ e2 / x ] e1) y (Id ∅) , MVar
+  subst-mat : ∀{x e1 e2 τ p θ1} →
+              e1 ·: τ ▹ p ⊣ θ1 →
+              Σ[ θ2 ∈ subst-list ] (([ e2 / x ] e1) ·: τ ▹ p ⊣ θ2)
+  subst-mat MNum = [] , MNum
+  subst-mat {x = x} {e1 = e1} {e2 = e2} {τ = τ}
+            (MVar {x = y}) =
+    ([ e2 / x ] e1 , τ , y) :: [] , MVar
   subst-mat (MInl mat)
     with subst-mat mat
   ... | θ1 , smat = θ1 , MInl smat
@@ -28,17 +29,17 @@ module lemmas-subst-matching where
   subst-mat (MPair mat1 mat2)
     with subst-mat mat1 | subst-mat mat2
   ... | θ1 , smat1 | θ2 , smat2 =
-    θ1 ⊎ θ2 , MPair smat1 smat2
+    θ1 ++ θ2 , MPair smat1 smat2
   subst-mat (MNotIntroPair ni mat1 mat2)
     with subst-mat mat1 | subst-mat mat2
   ... | θ1 , smat1 | θ2 , smat2 =
-    θ1 ⊎ θ2 ,
+    θ1 ++ θ2 ,
     MNotIntroPair (subst-notintro ni) smat1 smat2
-  subst-mat MWild = Id (λ _ → None) , MWild
+  subst-mat MWild = [] , MWild
   
-  subst-maymat : ∀{x e1 e2 p} →
-                 e1 ?▹ p →
-                 ([ e2 / x ] e1) ?▹ p
+  subst-maymat : ∀{x e1 e2 τ p} →
+                 e1 ·: τ ?▹ p →
+                 ([ e2 / x ] e1) ·: τ ?▹ p
   subst-maymat (MMNotIntro ni ref) =
     MMNotIntro (subst-notintro ni) ref
   subst-maymat (MMInl mmat) =

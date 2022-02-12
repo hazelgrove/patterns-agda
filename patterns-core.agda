@@ -4,7 +4,6 @@ open import Prelude
 open import contexts
 open import constraints-core
 open import core
-open import substitution-env
 open import value-judgements
 
 module patterns-core where
@@ -39,58 +38,64 @@ module patterns-core where
     RNEHole : ∀{p w τ} →
               ⦇⌜ p ⌟⦈[ w , τ ] refutable
 
+  -- lists of substitutions as emitted by pattern matches
+  subst-list : Set
+  subst-list = List (ihexp × htyp × Nat)
+
   -- e matches the pattern p, emitting the substitutions θ
-  data _▹_⊣_ : (e : ihexp) → (p : pattrn) → (θ : env) → Set where
+  data _·:_▹_⊣_ : (e : ihexp) → (τ : htyp) →
+                  (p : pattrn) → (θ : subst-list) → Set where
     MNum  : ∀{n} →
-            (N n) ▹ (N n) ⊣ Id ∅
-    MVar  : ∀{e x} →
-            e ▹ (X x) ⊣ Subst e x (Id ∅)
-    MInl  : ∀{e τ p θ} →
-            e ▹ p ⊣ θ →
-            inl τ e ▹ inl p ⊣ θ
-    MInr  : ∀{e τ p θ} →
-            e ▹ p ⊣ θ →
-            inr τ e ▹ inr p ⊣ θ
-    MPair : ∀{e1 e2 p1 p2 θ1 θ2} →
-            e1 ▹ p1 ⊣ θ1 →
-            e2 ▹ p2 ⊣ θ2 →
-            ⟨ e1 , e2 ⟩ ▹ ⟨ p1 , p2 ⟩ ⊣ (θ1 ⊎ θ2)
-    MNotIntroPair : ∀{e p1 p2 θ1 θ2} →
+            (N n) ·: num ▹ (N n) ⊣ []
+    MVar  : ∀{e τ x} →
+            e ·: τ ▹ (X x) ⊣ ((e , τ , x) :: [])
+    MInl  : ∀{e τ1 τ2 p θ} →
+            e ·: τ1 ▹ p ⊣ θ →
+            inl τ2 e ·: τ1 ⊕ τ2 ▹ inl p ⊣ θ
+    MInr  : ∀{e τ1 τ2 p θ} →
+            e ·: τ2 ▹ p ⊣ θ →
+            inr τ1 e ·: τ1 ⊕ τ2 ▹ inr p ⊣ θ
+    MPair : ∀{e1 e2 τ1 τ2 p1 p2 θ1 θ2} →
+            e1 ·: τ1 ▹ p1 ⊣ θ1 →
+            e2 ·: τ2 ▹ p2 ⊣ θ2 →
+            ⟨ e1 , e2 ⟩ ·: τ1 ⊠ τ2 ▹ ⟨ p1 , p2 ⟩ ⊣ (θ1 ++ θ2)
+    MNotIntroPair : ∀{e τ1 τ2 p1 p2 θ1 θ2} →
                     e notintro →
-                    fst e ▹ p1 ⊣ θ1 →
-                    snd e ▹ p2 ⊣ θ2 →
-                    e ▹ ⟨ p1 , p2 ⟩ ⊣ (θ1 ⊎ θ2)
-    MWild : ∀{e} →
-            e ▹ wild ⊣ Id ∅
+                    fst e ·: τ1 ▹ p1 ⊣ θ1 →
+                    snd e ·: τ2 ▹ p2 ⊣ θ2 →
+                    e ·: τ1 ⊠ τ2 ▹ ⟨ p1 , p2 ⟩ ⊣ (θ1 ++ θ2)
+    MWild : ∀{e τ} →
+            e ·: τ ▹ wild ⊣ []
 
   -- e may match p
-  data _?▹_ : (e : ihexp) → (p : pattrn) → Set where
-    MMNotIntro : ∀{e p} →
+  data _·:_?▹_ : (e : ihexp) → (τ : htyp) →
+                 (p : pattrn) → Set where
+    MMNotIntro : ∀{e τ p} →
                  e notintro →
                  p refutable →
-                 e ?▹ p
-    MMInl      : ∀{e τ p} →
-                 e ?▹ p →
-                 inl τ e ?▹ inl p
-    MMInr      : ∀{e τ p} →
-                 e ?▹ p →
-                 inr τ e ?▹ inr p
-    MMPairL    : ∀{e1 e2 p1 p2 θ} →
-                 e1 ?▹ p1 →
-                 e2 ▹ p2 ⊣ θ →
-                 ⟨ e1 , e2 ⟩ ?▹ ⟨ p1 , p2 ⟩
-    MMPairR    : ∀{e1 e2 p1 p2 θ} →
-                 e1 ▹ p1 ⊣ θ →
-                 e2 ?▹ p2 →
-                 ⟨ e1 , e2 ⟩ ?▹ ⟨ p1 , p2 ⟩
-    MMPair     : ∀{e1 e2 p1 p2} →
-                 e1 ?▹ p1 →
-                 e2 ?▹ p2 →
-                 ⟨ e1 , e2 ⟩ ?▹ ⟨ p1 , p2 ⟩
-    MMEHole    : ∀{e w} →
-                 e ?▹ ⦇-⦈[ w ]
-    MMNEHole   : ∀{e p w τ} →
-                 e ?▹ ⦇⌜ p ⌟⦈[ w , τ ]
+                 e ·: τ ?▹ p
+    MMInl      : ∀{e τ1 τ2 p} →
+                 e ·: τ1 ?▹ p →
+                 inl τ2 e ·: (τ1 ⊕ τ2) ?▹ inl p
+    MMInr      : ∀{e τ1 τ2 p} →
+                 e ·: τ2 ?▹ p →
+                 inr τ1 e ·: τ1 ⊕ τ2 ?▹ inr p
+    MMPairL    : ∀{e1 e2 τ1 τ2 p1 p2 θ} →
+                 e1 ·: τ1 ?▹ p1 →
+                 e2 ·: τ2 ▹ p2 ⊣ θ →
+                 ⟨ e1 , e2 ⟩ ·: τ1 ⊠ τ2 ?▹ ⟨ p1 , p2 ⟩
+    MMPairR    : ∀{e1 e2 τ1 τ2 p1 p2 θ} →
+                 e1 ·: τ1 ▹ p1 ⊣ θ →
+                 e2 ·: τ2 ?▹ p2 →
+                 ⟨ e1 , e2 ⟩ ·: τ1 ⊠ τ2 ?▹ ⟨ p1 , p2 ⟩
+    MMPair     : ∀{e1 e2 τ1 τ2 p1 p2} →
+                 e1 ·: τ1 ?▹ p1 →
+                 e2 ·: τ2 ?▹ p2 →
+                 ⟨ e1 , e2 ⟩ ·: τ1 ⊠ τ2 ?▹ ⟨ p1 , p2 ⟩
+    MMEHole    : ∀{e τ w} →
+                 e ·: τ ?▹ ⦇-⦈[ w ]
+    MMNEHole   : ∀{e τ p w τ'} →
+                 e ·: τ ?▹ ⦇⌜ p ⌟⦈[ w , τ' ]
     
   -- e does not match p
   data _⊥▹_ : (e : ihexp) → (p : pattrn) → Set where
@@ -115,33 +120,33 @@ module patterns-core where
               ⟨ e1 , e2 ⟩ ⊥▹ ⟨ p1 , p2 ⟩
     
 
-  -- p is assigned type τ and emits constraint ξ, where Γ records
-  -- assumptions about the type of free variables and Δ records
-  -- assumptions about the type of pattern holes
-  data _::_[_]⊣_,_ : (p : pattrn) → (τ : htyp) →
-                     (ξ : constr) → (Γ : tctx) → (Δ : tctx) → Set where
-    PTVar    : ∀{x τ} →
-               X x :: τ [ ·⊤ ]⊣ ■ (x , τ) , ∅
-    PTNum    : ∀{n} →
-               N n :: num [ N n ]⊣ ∅ , ∅
-    PTInl    : ∀{p τ1 τ2 ξ Γ Δ} →
-               p :: τ1 [ ξ ]⊣ Γ , Δ →
-               inl p :: (τ1 ⊕ τ2) [ inl ξ ]⊣ Γ , Δ
-    PTInr    : ∀{p τ1 τ2 ξ Γ Δ} →
-               p :: τ2 [ ξ ]⊣ Γ , Δ →
-               inr p :: (τ1 ⊕ τ2) [ inr ξ ]⊣ Γ , Δ
-    PTPair   : ∀{p1 p2 τ1 τ2 ξ1 ξ2 Γ1 Γ2 Δ1 Δ2} →
+  -- in the pattern hole context Δp, p is assigned type τ and
+  -- emits constraint ξ, where Γ records assumptions about the
+  -- type of free variables
+  data _⊢_::_[_]⊣_ : (Δp : phctx) → (p : pattrn) → (τ : htyp) →
+                     (ξ : constr) → (Γ : tctx) → Set where
+    PTVar    : ∀{Δp x τ} →
+               Δp ⊢ X x :: τ [ ·⊤ ]⊣ (■ (x , τ))
+    PTNum    : ∀{Δp n} →
+               Δp ⊢ N n :: num [ N n ]⊣ ∅
+    PTInl    : ∀{Δp p τ1 τ2 ξ Γ} →
+               Δp ⊢ p :: τ1 [ ξ ]⊣ Γ →
+               Δp ⊢ inl p :: (τ1 ⊕ τ2) [ inl ξ ]⊣ Γ
+    PTInr    : ∀{Δp p τ1 τ2 ξ Γ} →
+               Δp ⊢ p :: τ2 [ ξ ]⊣ Γ →
+               Δp ⊢ inr p :: (τ1 ⊕ τ2) [ inr ξ ]⊣ Γ
+    PTPair   : ∀{Δp p1 p2 τ1 τ2 ξ1 ξ2 Γ1 Γ2} →
                Γ1 ## Γ2 →
-               Δ1 ## Δ2 →
-               p1 :: τ1 [ ξ1 ]⊣ Γ1 , Δ1 →
-               p2 :: τ2 [ ξ2 ]⊣ Γ2 , Δ2 →
-               ⟨ p1 , p2 ⟩ :: (τ1 ⊠ τ2) [ ⟨ ξ1 , ξ2 ⟩ ]⊣ (Γ1 ∪ Γ2) , (Δ1 ∪ Δ2)
-    PTEHole  : ∀{w τ} →
-               ⦇-⦈[ w ] :: τ [ ·? ]⊣ ∅ , ■ (w , τ)
-    PTNEHole : ∀{p w τ τ' ξ Γ Δ} →
-               p :: τ [ ξ ]⊣ Γ , Δ →
-               w # Δ →
-               ⦇⌜ p ⌟⦈[ w , τ ] :: τ' [ ·? ]⊣ Γ , (Δ ,, (w , τ))
-    PTWild   : ∀{τ} →
-               wild :: τ [ ·⊤ ]⊣ ∅ , ∅
+               Δp ⊢ p1 :: τ1 [ ξ1 ]⊣ Γ1 →
+               Δp ⊢ p2 :: τ2 [ ξ2 ]⊣ Γ2  →
+               Δp ⊢ ⟨ p1 , p2 ⟩ :: (τ1 ⊠ τ2) [ ⟨ ξ1 , ξ2 ⟩ ]⊣ (Γ1 ∪ Γ2)
+    PTEHole  : ∀{Δp w τ} →
+               (w , τ) ∈ Δp →
+               Δp ⊢ ⦇-⦈[ w ] :: τ [ ·? ]⊣ ∅
+    PTNEHole : ∀{Δp p w τ τ' ξ Γ} →
+               (w , τ') ∈ Δp →
+               Δp ⊢ p :: τ [ ξ ]⊣ Γ →
+               Δp ⊢ ⦇⌜ p ⌟⦈[ w , τ ] :: τ' [ ·? ]⊣ Γ
+    PTWild   : ∀{Δp τ} →
+               Δp ⊢ wild :: τ [ ·⊤ ]⊣ ∅
     

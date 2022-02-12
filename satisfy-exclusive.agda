@@ -20,9 +20,9 @@ module satisfy-exclusive where
   
 
   -- exclusivity of satisfaction
-  satisfy-exclusive : ∀{ξ τ Δ e} →
+  satisfy-exclusive : ∀{ξ τ Δ Δp e} →
                       ξ :c: τ →
-                      ∅ , Δ ⊢ e :: τ →
+                      ∅ , Δ , Δp ⊢ e :: τ →
                       e final →
                       ExSat e ξ
   satisfy-exclusive CTTruth wt fin =
@@ -34,7 +34,7 @@ module satisfy-exclusive where
     
   -- num cases
   satisfy-exclusive {e = N n} (CTNum {n = m})
-                    TANum fin with natEQ n m
+                    TANum fin with nat-dec n m
   ... | Inl refl = Satisfy CSNum (λ{ (CMSNotIntro () ref pos)})
                            (CSMSSat CSNum)
   ... | Inr n≠m = NotSatisfy (λ{CSNum → n≠m refl})
@@ -56,10 +56,10 @@ module satisfy-exclusive where
   satisfy-exclusive CTNum (TASnd wt) fin =
     MaySatisfy (λ ()) (CMSNotIntro NVSnd RXNum PNum)
                (CSMSMay (CMSNotIntro NVSnd RXNum PNum))
-  satisfy-exclusive CTNum (TAEHole x) fin =
+  satisfy-exclusive CTNum (TAEHole u∈Δ st) fin =
     MaySatisfy (λ ()) (CMSNotIntro NVEHole RXNum PNum)
                (CSMSMay (CMSNotIntro NVEHole RXNum PNum))
-  satisfy-exclusive CTNum (TANEHole x wt) fin =
+  satisfy-exclusive CTNum (TANEHole u∈Δ st wt) fin =
     MaySatisfy (λ ()) (CMSNotIntro NVNEHole RXNum PNum)
                (CSMSMay (CMSNotIntro NVNEHole RXNum PNum))
 
@@ -88,8 +88,8 @@ module satisfy-exclusive where
   ... | TAMatchNZPre _ _ _ _ _ = abort (¬ni NVMatch)
   ... | TAFst _ = abort (¬ni NVFst)
   ... | TASnd _ = abort (¬ni NVSnd)
-  ... | TAEHole _ = abort (¬ni NVEHole)
-  ... | TANEHole _ _ = abort (¬ni NVNEHole)
+  ... | TAEHole _ _ = abort (¬ni NVEHole)
+  ... | TANEHole _ _ _ = abort (¬ni NVNEHole)
   ... | TAInr _ =
     NotSatisfy (λ ())
                (λ{(CMSNotIntro () _ _)})
@@ -135,8 +135,8 @@ module satisfy-exclusive where
   ... | TAMatchNZPre _ _ _ _ _ = abort (¬ni NVMatch)
   ... | TAFst _ = abort (¬ni NVFst)
   ... | TASnd _ = abort (¬ni NVSnd)
-  ... | TAEHole _ = abort (¬ni NVEHole)
-  ... | TANEHole _ _ = abort (¬ni NVNEHole)
+  ... | TAEHole _ _ = abort (¬ni NVEHole)
+  ... | TANEHole _ _ _ = abort (¬ni NVNEHole)
   ... | TAInl _ =
     NotSatisfy (λ ())
                (λ{(CMSNotIntro () _ _)})
@@ -299,8 +299,8 @@ module satisfy-exclusive where
   ... | TAMatchNZPre _ _ _ _ _ = abort (¬ni NVMatch)
   ... | TAFst _ = abort (¬ni NVFst)
   ... | TASnd _ = abort (¬ni NVSnd)
-  ... | TAEHole _ = abort (¬ni NVEHole)
-  ... | TANEHole _ _ = abort (¬ni NVNEHole)
+  ... | TAEHole _ _ = abort (¬ni NVEHole)
+  ... | TANEHole _ _ _ = abort (¬ni NVNEHole)
   ... | TAPair wt1 wt2
     with pair-final fin
   ... | fin1 , fin2 
@@ -476,3 +476,4 @@ module satisfy-exclusive where
                 ; (CSMSMay (CMSNotIntro ni (RXOr ref1 ref2)
                                         (POrR pos2))) →
                   ¬satm2 (CSMSMay (CMSNotIntro ni ref2 pos2))})
+

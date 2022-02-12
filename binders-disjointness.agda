@@ -1,9 +1,10 @@
+open import List
 open import Nat
 open import Prelude
 open import contexts
 open import core
 open import freshness
-open import substitution-env
+open import patterns-core
 
 module binders-disjointness where
   mutual
@@ -54,7 +55,17 @@ module binders-disjointness where
                  binders-disjoint-rs rs-pre t →
                  binders-disjoint-rs (r / rs-post) t →
                  binders-disjoint-zrs (rs-pre / r / rs-post) t
-      
+
+    data binders-disjoint-σ {T : Set} {{_ : UnboundIn T}} :
+                            env → T → Set where
+      BDσId    : ∀{Γ t} →
+                 binders-disjoint-σ (Id Γ) t
+      BDσSubst : ∀{d y σ t} →
+                 binders-disjoint d t →
+                 unbound-in y t →
+                 binders-disjoint-σ σ t →
+                 binders-disjoint-σ (Subst d y σ) t
+                 
     data binders-disjoint {T : Set} {{_ : UnboundIn T}} :
                           ihexp → T → Set where
       BDNum    : ∀{n t} →
@@ -75,10 +86,10 @@ module binders-disjointness where
       BDInr    : ∀{e τ t} →
                  binders-disjoint e t →
                  binders-disjoint (inr τ e) t
-      BDMatch  : ∀{e rs t} →
+      BDMatch  : ∀{e τ rs t} →
                  binders-disjoint e t →
                  binders-disjoint-zrs rs t →
-                 binders-disjoint (match e rs) t
+                 binders-disjoint (match e ·: τ of rs) t
       BDPair   : ∀{e1 e2 t} →
                  binders-disjoint e1 t →
                  binders-disjoint e2 t →
@@ -89,20 +100,13 @@ module binders-disjointness where
       BDSnd    : ∀{e t} →
                  binders-disjoint e t →
                  binders-disjoint (snd e) t
-      BDEHole  : ∀{u t} →
-                 binders-disjoint ⦇-⦈[ u ] t
-      BDNEHole : ∀{u e t} →
+      BDEHole  : ∀{u σ t} →
+                 binders-disjoint-σ σ t →
+                 binders-disjoint ⦇-⦈⟨ u , σ ⟩ t
+      BDNEHole : ∀{e u σ t} →
+                 binders-disjoint-σ σ t →
                  binders-disjoint e t →
-                 binders-disjoint ⦇⌜ e ⌟⦈[ u ] t
-
-  data binders-disjoint-env : env → ihexp → Set where
-    BDId    : ∀{Γ e} →
-              binders-disjoint-env (Id Γ) e
-    BDSubst : ∀{d y θ e} →
-              binders-disjoint d e →
-              unbound-in y e →
-              binders-disjoint-env θ e →
-              binders-disjoint-env (Subst d y θ) e
+                 binders-disjoint ⦇⌜ e ⌟⦈⟨ u , σ ⟩ t
                   
   mutual
     data hole-binders-disjoint-p {T : Set} {{_ : HoleUnboundIn T}} :
@@ -153,7 +157,16 @@ module binders-disjointness where
                   hole-binders-disjoint-rs rs-pre t →
                   hole-binders-disjoint-rs (r / rs-post) t →
                   hole-binders-disjoint-zrs (rs-pre / r / rs-post) t
-      
+
+    data hole-binders-disjoint-σ {T : Set} {{_ : HoleUnboundIn T}} :
+                                 env → T → Set where
+      HBDσId    : ∀{Γ t} →
+                  hole-binders-disjoint-σ (Id Γ) t
+      HBDσSubst : ∀{d y σ t} →
+                  hole-binders-disjoint d t →
+                  hole-binders-disjoint-σ σ t →
+                  hole-binders-disjoint-σ (Subst d y σ) t
+                  
     data hole-binders-disjoint {T : Set} {{_ : HoleUnboundIn T}} :
                                ihexp → T → Set where
       HBDNum    : ∀{n t} →
@@ -173,10 +186,10 @@ module binders-disjointness where
       HBDInr    : ∀{e τ t} →
                   hole-binders-disjoint e t →
                   hole-binders-disjoint (inr τ e) t
-      HBDMatch  : ∀{e rs t} →
+      HBDMatch  : ∀{e τ rs t} →
                   hole-binders-disjoint e t →
                   hole-binders-disjoint-zrs rs t →
-                  hole-binders-disjoint (match e rs) t
+                  hole-binders-disjoint (match e ·: τ of rs) t
       HBDPair   : ∀{e1 e2 t} →
                   hole-binders-disjoint e1 t →
                   hole-binders-disjoint e2 t →
@@ -187,16 +200,11 @@ module binders-disjointness where
       HBDSnd    : ∀{e t} →
                   hole-binders-disjoint e t →
                   hole-binders-disjoint (snd e) t
-      HBDEHole  : ∀{u t} →
-                  hole-binders-disjoint ⦇-⦈[ u ] t
-      HBDNEHole : ∀{u e t} →
+      HBDEHole  : ∀{u σ t} →
+                  hole-binders-disjoint-σ σ t →
+                  hole-binders-disjoint ⦇-⦈⟨ u , σ ⟩ t
+      HBDNEHole : ∀{e u σ t} →
+                  hole-binders-disjoint-σ σ t →
                   hole-binders-disjoint e t →
-                  hole-binders-disjoint ⦇⌜ e ⌟⦈[ u ] t
+                  hole-binders-disjoint ⦇⌜ e ⌟⦈⟨ u , σ ⟩ t
 
-  data hole-binders-disjoint-env : env → ihexp → Set where
-    HBDId    : ∀{Γ e} →
-               hole-binders-disjoint-env (Id Γ) e
-    HBDSubst : ∀{d y θ e} →
-               hole-binders-disjoint d e →
-               hole-binders-disjoint-env θ e →
-               hole-binders-disjoint-env (Subst d y θ) e

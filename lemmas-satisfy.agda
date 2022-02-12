@@ -1,5 +1,6 @@
 open import Prelude
 open import constraints-core
+open import contexts
 open import core
 open import notintro-decidable
 open import result-judgements
@@ -98,9 +99,9 @@ module lemmas-satisfy where
   satormay-pos (CSMSSat sat) = sat-pos sat
   satormay-pos (CSMSMay msat) = maysat-pos msat
   
-  not-ref-sat : ∀{ξ Γ Δ e τ} →
+  not-ref-sat : ∀{ξ Γ Δ Δp e τ} →
                 ξ :c: τ →
-                Γ , Δ ⊢ e :: τ →
+                Γ , Δ , Δp ⊢ e :: τ →
                 e final →
                 (ξ xrefutable → ⊥) →
                 e ⊧̇ ξ
@@ -149,13 +150,13 @@ module lemmas-satisfy where
                                 (FIndet (IFst (λ e1 e2 ()) ind)) ¬ref1)
                    (not-ref-sat ct2 (TASnd wt)
                                 (FIndet (ISnd (λ e1 e2 ()) ind)) ¬ref2)
-  ... | TAEHole x | FIndet ind =
+  ... | TAEHole u∈Δ st | FIndet ind =
     CSNotIntroPair NVEHole
                    (not-ref-sat ct1 (TAFst wt)
                                 (FIndet (IFst (λ e1 e2 ()) ind)) ¬ref1)
                    (not-ref-sat ct2 (TASnd wt)
                                 (FIndet (ISnd (λ e1 e2 ()) ind)) ¬ref2)
-  ... | TANEHole x wt' | FIndet ind = 
+  ... | TANEHole u∈Δ st wt' | FIndet ind = 
     CSNotIntroPair NVNEHole
                    (not-ref-sat ct1 (TAFst wt)
                                 (FIndet (IFst (λ e1 e2 ()) ind)) ¬ref1)

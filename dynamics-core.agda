@@ -1,45 +1,45 @@
+open import List
 open import Nat
 open import Prelude
 open import contexts
 open import core
 open import freshness
 open import freshness-decidable
-open import lemmas-freshness
 open import patterns-core
 open import result-judgements
 open import statics-core
-open import substitution-env
 
 module dynamics-core where
   -- e' is one of the possible values of e
-  data _∈[_]values_ : (e' : ihexp) → (Δ : tctx) →
-                      (e : ihexp) → Set where
-    IVVal   : ∀{Δ e τ} →
+  data _∈[_,_]values_ : (e' : ihexp) →
+                        (Δ : hctx) → (Δp : phctx) →
+                        (e : ihexp) → Set where
+    IVVal   : ∀{Δ Δp e τ} →
               e val →
-              ∅ , Δ ⊢ e :: τ →
-              e ∈[ Δ ]values e
-    IVIndet : ∀{Δ e e' τ} →
+              ∅ , Δ , Δp ⊢ e :: τ →
+              e ∈[ Δ , Δp ]values e
+    IVIndet : ∀{Δ Δp e e' τ} →
               e notintro →
-              ∅ , Δ ⊢ e :: τ →
+              ∅ , Δ , Δp ⊢ e :: τ →
               e' val →
-              ∅ , Δ ⊢ e' :: τ →
-              e' ∈[ Δ ]values e
-    IVInl   : ∀{Δ e1 e1' τ2 τ} →
+              ∅ , Δ , Δp ⊢ e' :: τ →
+              e' ∈[ Δ , Δp ]values e
+    IVInl   : ∀{Δ Δp e1 e1' τ2 τ} →
               (inl τ2 e1) indet →
-              ∅ , Δ ⊢ inl τ2 e1 :: τ →
-              e1' ∈[ Δ ]values e1 →
-              (inl τ2 e1') ∈[ Δ ]values (inl τ2 e1)
-    IVInr   : ∀{Δ e2 e2' τ1 τ} →
+              ∅ , Δ , Δp ⊢ inl τ2 e1 :: τ →
+              e1' ∈[ Δ , Δp ]values e1 →
+              (inl τ2 e1') ∈[ Δ , Δp ]values (inl τ2 e1)
+    IVInr   : ∀{Δ Δp e2 e2' τ1 τ} →
               (inr τ1 e2) indet →
-              ∅ , Δ ⊢ inr τ1 e2 :: τ →
-              e2' ∈[ Δ ]values e2 →
-              (inr τ1 e2') ∈[ Δ ]values (inr τ1 e2)
-    IVPair  : ∀{Δ e1 e1' e2 e2' τ} →
+              ∅ , Δ , Δp ⊢ inr τ1 e2 :: τ →
+              e2' ∈[ Δ , Δp ]values e2 →
+              (inr τ1 e2') ∈[ Δ , Δp ]values (inr τ1 e2)
+    IVPair  : ∀{Δ Δp e1 e1' e2 e2' τ} →
               ⟨ e1 , e2 ⟩ indet →
-              ∅ , Δ ⊢ ⟨ e1 , e2 ⟩ :: τ →
-              e1' ∈[ Δ ]values e1 →
-              e2' ∈[ Δ ]values e2 →
-              ⟨ e1' , e2' ⟩ ∈[ Δ ]values ⟨ e1 , e2 ⟩
+              ∅ , Δ , Δp ⊢ ⟨ e1 , e2 ⟩ :: τ →
+              e1' ∈[ Δ , Δp ]values e1 →
+              e2' ∈[ Δ , Δp ]values e2 →
+              ⟨ e1' , e2' ⟩ ∈[ Δ , Δp ]values ⟨ e1 , e2 ⟩
 
   -- substitution
   mutual
@@ -60,87 +60,90 @@ module dynamics-core where
     [_/_]_ : ihexp → Nat → ihexp → ihexp
     [ d / y ] (N n) = N n
     [ d / y ] X x
-      with natEQ x y
+      with nat-dec x y
     [ d / y ] X .y | Inl refl = d
     [ d / y ] X x  | Inr x≠y = X x
     [ d / y ] (·λ x ·[ τ ] d')
-      with natEQ x y
+      with nat-dec x y
     [ d / y ] (·λ .y ·[ τ ] d') | Inl refl = ·λ y ·[ τ ] d'
     [ d / y ] (·λ x ·[ τ ] d')  | Inr x≠y =
       ·λ x ·[ τ ] ( [ d / y ] d')
     [ d / y ] (d1 ∘ d2) = ([ d / y ] d1) ∘ ([ d / y ] d2)
     [ d / y ] (inl τ d') = inl τ ([ d / y ] d')
     [ d / y ] (inr τ d') = inr τ ([ d / y ] d')
-    [ d / y ] match d' rs = match ([ d / y ] d') ([ d / y ]zrs rs) 
+    [ d / y ] match d' ·: τ of rs =
+      match ([ d / y ] d') ·: τ of ([ d / y ]zrs rs) 
     [ d / y ] ⟨ d1 , d2 ⟩ = ⟨ [ d / y ] d1 , [ d / y ] d2 ⟩
     [ d / y ] (fst d') = fst ([ d / y ] d')
     [ d / y ] (snd d') = snd ([ d / y ] d')
-    [ d / y ] ⦇-⦈[ u ] = ⦇-⦈[ u ]
-    [ d / y ] ⦇⌜ d' ⌟⦈[ u ] =  ⦇⌜ [ d / y ] d' ⌟⦈[ u ]
+    [ d / y ] ⦇-⦈⟨ u , σ ⟩ = ⦇-⦈⟨ u , Subst d y σ ⟩
+    [ d / y ] ⦇⌜ d' ⌟⦈⟨ u , σ ⟩ =
+      ⦇⌜ [ d / y ] d' ⌟⦈⟨ u , Subst d y σ ⟩
 
-  -- substitution typing
-  data _,_⊢_:s:_ : tctx → tctx → env → tctx → Set where
-      STAId    : ∀{Γ Γ' Δ} →
-                 ((x : Nat) (τ : htyp) →
-                  (x , τ) ∈ Γ' →
-                  (x , τ) ∈ Γ) →
-                 Γ , Δ ⊢ Id Γ' :s: Γ'
-      STASubst : ∀{Γ Δ σ y Γ' d τ} →
-                 (Γ ,, (y , τ)) , Δ ⊢ σ :s: Γ' →
-                 Γ , Δ ⊢ d :: τ →
-                 Γ , Δ ⊢ Subst d y σ :s: Γ'
-                 
-  -- apply a substitution
-  apply-env : env → ihexp → ihexp
-  apply-env (Id Γ) d = d
-  apply-env (Subst d y σ) d' =
-    [ d / y ] (apply-env σ d')
+  -- apply a list of substitutions one by one
+  -- in contrast to the paper, rather than actually
+  -- applying each substitution, we expand the given
+  -- expression to a bunch of lambdas and applications.
+  -- this is semantically the same, but allows us to
+  -- assume all binders have been made unique a la
+  -- Barendregt's convention before each susbstitution
+  -- is applied
+  apply-substs : subst-list → ihexp → ihexp
+  apply-substs [] e = e
+  apply-substs ((d , τ , y) :: θ) e =
+    (·λ y ·[ τ ] (apply-substs θ e)) ∘ d
   
   -- e takes a step to e'
   data _↦_ : (e : ihexp) → (e' : ihexp) → Set where
-    ITApFun  : ∀{e1 e1' e2} →
-               e1 ↦ e1' →
-               (e1 ∘ e2) ↦ (e1' ∘ e2)
-    ITApArg  : ∀{e1 e2 e2'} →
-               e1 val →
-               e2 ↦ e2' →
-               (e1 ∘ e2) ↦ (e1 ∘ e2')
-    ITAp     : ∀{x τ e1 e2} →
-               e2 val →
-               ((·λ x ·[ τ ] e1) ∘ e2) ↦ ([ e2 / x ] e1)
-    ITPairL  : ∀{e1 e1' e2} →
-               e1 ↦ e1' →
-               ⟨ e1 , e2 ⟩ ↦ ⟨ e1' , e2 ⟩
-    ITPairR  : ∀{e1 e2 e2'} →
-               e1 val →
-               e2 ↦ e2' →
-               ⟨ e1 , e2 ⟩ ↦ ⟨ e1 , e2' ⟩
-    ITFst    : ∀{e1 e2} →
-               ⟨ e1 , e2 ⟩ final →
-               fst ⟨ e1 , e2 ⟩ ↦ e1
-    ITSnd    : ∀{e1 e2} →
-               ⟨ e1 , e2 ⟩ final →
-               snd ⟨ e1 , e2 ⟩ ↦ e2
-    ITInl    : ∀{e e' τ} →
-               e ↦ e' →
-               inl τ e ↦ inl τ e'
-    ITInr    : ∀{e e' τ} →
-               e ↦ e' →
-               inr τ e ↦ inr τ e'
-    ITExpMatch  : ∀{e e' rs} →
+    ITApFun   : ∀{e1 e1' e2} →
+                e1 ↦ e1' →
+                (e1 ∘ e2) ↦ (e1' ∘ e2)
+    ITApArg   : ∀{e1 e2 e2'} →
+                e1 final →
+                e2 ↦ e2' →
+                (e1 ∘ e2) ↦ (e1 ∘ e2')
+    ITAp      : ∀{x τ e1 e2} →
+                e2 final →
+                ((·λ x ·[ τ ] e1) ∘ e2) ↦ ([ e2 / x ] e1)
+    ITPairL   : ∀{e1 e1' e2} →
+                e1 ↦ e1' →
+                ⟨ e1 , e2 ⟩ ↦ ⟨ e1' , e2 ⟩
+    ITPairR   : ∀{e1 e2 e2'} →
+                e1 final →
+                e2 ↦ e2' →
+                ⟨ e1 , e2 ⟩ ↦ ⟨ e1 , e2' ⟩
+    ITFst     : ∀{e e'} →
+                e ↦ e' →
+                (fst e) ↦ (fst e')
+    ITFstPair : ∀{e1 e2} →
+                ⟨ e1 , e2 ⟩ final →
+                fst ⟨ e1 , e2 ⟩ ↦ e1
+    ITSnd     : ∀{e e'} →
+                e ↦ e' →
+                (snd e) ↦ (snd e')
+    ITSndPair : ∀{e1 e2} →
+                ⟨ e1 , e2 ⟩ final →
+                snd ⟨ e1 , e2 ⟩ ↦ e2
+    ITInl     : ∀{e e' τ} →
+                e ↦ e' →
+                inl τ e ↦ inl τ e'
+    ITInr     : ∀{e e' τ} →
+                e ↦ e' →
+                inr τ e ↦ inr τ e'
+    ITExpMatch  : ∀{e e' τ rs} →
                   e ↦ e' →
-                  match e rs ↦ match e' rs
-    ITSuccMatch : ∀{e θ rs-pre pr er rs-post} →
+                  match e ·: τ of rs ↦ match e' ·: τ of rs
+    ITSuccMatch : ∀{e τ θ rs-pre pr er rs-post} →
                   e final →
-                  e ▹ pr ⊣ θ →
-                  match e (rs-pre / (pr => er) / rs-post) ↦
-                    apply-env θ er
-    ITFailMatch : ∀{e rs pr er rss r' rs'} →
+                  e ·: τ ▹ pr ⊣ θ →
+                  match e ·: τ of (rs-pre / (pr => er) / rs-post) ↦
+                    apply-substs θ er
+    ITFailMatch : ∀{e τ rs pr er rss r' rs'} →
                   e final →
                   e ⊥▹ pr →
                   erase-r (rs / (pr => er) / nil) rss →
-                  match e (rs / (pr => er) / (r' / rs')) ↦
-                    match e (rss / r' / rs')
-    ITNEHole : ∀{e e' u} →
+                  match e ·: τ of (rs / (pr => er) / (r' / rs')) ↦
+                    match e ·: τ of (rss / r' / rs')
+    ITNEHole : ∀{e e' u σ} →
                e ↦ e' →
-               ⦇⌜ e ⌟⦈[ u ] ↦ ⦇⌜ e' ⌟⦈[ u ]
+               ⦇⌜ e ⌟⦈⟨ u , σ ⟩ ↦ ⦇⌜ e' ⌟⦈⟨ u , σ ⟩

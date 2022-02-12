@@ -1,10 +1,10 @@
+open import List
 open import Nat
 open import Prelude
 open import constraints-core
 open import core
 
 module complete-constraints-core where
-
    -- complete match constraints
   data comp-constr : Set where
     ·⊤    : comp-constr
@@ -109,3 +109,42 @@ module complete-constraints-core where
   (inr ξ) ◆⊥ = inr (ξ ◆⊥)
   ⟨ ξ1 , ξ2 ⟩ ◆⊥ = ⟨ ξ1 ◆⊥ , ξ2 ◆⊥ ⟩
   (ξ1 ∨ ξ2) ◆⊥ = (ξ1 ◆⊥) ∨ (ξ2 ◆⊥)
+
+  dual-same-type : ∀{ξ τ} →
+                   ξ :cc: τ →
+                   (ξ ◆d) :cc: τ
+  dual-same-type CTTruth = CTFalsity
+  dual-same-type CTFalsity = CTTruth
+  dual-same-type CTNum = CTNotNum
+  dual-same-type CTNotNum = CTNum
+  dual-same-type (CTInl ct) =
+    CTOr (CTInl (dual-same-type ct)) (CTInr CTTruth)
+  dual-same-type (CTInr ct) =
+    CTOr (CTInr (dual-same-type ct)) (CTInl CTTruth)
+  dual-same-type (CTPair ct1 ct2) =
+    CTOr (CTOr (CTPair ct1 (dual-same-type ct2))
+               (CTPair (dual-same-type ct1) ct2))
+               (CTPair (dual-same-type ct1) (dual-same-type ct2))
+  dual-same-type (CTOr ct1 ct2) =
+    CTAnd (dual-same-type ct1) (dual-same-type ct2)
+  dual-same-type (CTAnd ct1 ct2) =
+    CTOr (dual-same-type ct1) (dual-same-type ct2)
+  
+  same-type-dual : ∀{ξ τ} →
+                   (ξ ◆d) :cc: τ →
+                   ξ :cc: τ
+  same-type-dual {ξ = ·⊤} CTFalsity = CTTruth
+  same-type-dual {ξ = ·⊥} CTTruth = CTFalsity
+  same-type-dual {ξ = N n} CTNotNum = CTNum
+  same-type-dual {ξ = N̸ n} CTNum = CTNotNum
+  same-type-dual {ξ = inl ξ} {τ = τ1 ⊕ τ2} (CTOr (CTInl dct1) dct2) =
+    CTInl (same-type-dual dct1)
+  same-type-dual {ξ = inr ξ} {τ = τ1 ⊕ τ2} (CTOr (CTInr dct1) dct2) =
+    CTInr (same-type-dual dct1)
+  same-type-dual {ξ = ⟨ ξ1 , ξ2 ⟩} {τ = τ1 ⊠ τ2}
+                 (CTOr (CTOr (CTPair dct1 dct2) (CTPair dct3 dct4)) dct5) =
+    CTPair dct1 dct4
+  same-type-dual {ξ = ξ1 ∨ ξ2} (CTAnd dct1 dct2) =
+    CTOr (same-type-dual dct1) (same-type-dual dct2)
+  same-type-dual {ξ = ξ1 ∧ ξ2} (CTOr dct1 dct2) =
+    CTAnd (same-type-dual dct1) (same-type-dual dct2)

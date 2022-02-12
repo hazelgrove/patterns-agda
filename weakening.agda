@@ -1,4 +1,4 @@
-
+open import List
 open import Nat
 open import Prelude
 open import constraints-core
@@ -14,12 +14,12 @@ open import result-judgements
 
 module weakening where
   mutual
-    weaken-ta-∪Γ : ∀{Γ' Γ Δ e τ} →
+    weaken-ta-∪Γ : ∀{Γ' Γ Δ Δp e τ} →
                    (∀{x} →
                     dom Γ' x →
                     fresh x e) →
-                    Γ , Δ ⊢ e :: τ →
-                   (Γ' ∪ Γ) , Δ ⊢ e :: τ
+                    Γ , Δ , Δp ⊢ e :: τ →
+                   (Γ' ∪ Γ) , Δ , Δp ⊢ e :: τ
     weaken-ta-∪Γ frsh TANum = TANum
     weaken-ta-∪Γ {Γ' = Γ'} {Γ = Γ} {τ = τ} frsh (TAVar {x = x} x∈Γ)
       with Γ' x in Γ'x
@@ -33,11 +33,12 @@ module weakening where
     ... | Some τ'
       with frsh (τ' , Γ'x)
     ... | FLam x≠x f = abort (x≠x refl)
-    weaken-ta-∪Γ {Γ' = Γ'} {Γ = Γ} {Δ = Δ} {e = ·λ x ·[ τ1 ] e}
+    weaken-ta-∪Γ {Γ' = Γ'} {Γ = Γ} {Δ = Δ} {Δp = Δp}
+                 {e = ·λ x ·[ τ1 ] e}
                  frsh (TALam {τ2 = τ2} x#Γ wt)
         | None =
       TALam (apart-parts Γ' Γ x Γ'x x#Γ)
-            (tr (λ qq → qq , Δ ⊢ e :: τ2) eq
+            (tr (λ qq → qq , Δ , Δp ⊢ e :: τ2) eq
                 (weaken-ta-∪Γ frsh' wt))
       where
         frsh' : ∀{z} →
@@ -50,7 +51,7 @@ module weakening where
         eq = ! (∪-assoc Γ' (■ (x , τ1)) Γ) ·
              (ap1 (λ qq → qq ∪ Γ)
                   (∪-comm Γ' (■ (x , τ1))
-                         (##-comm (apart-singleton-disjoint Γ'x))) ·
+                         (##-sym (apart-singleton-disjoint Γ'x))) ·
               (∪-assoc (■ (x , τ1)) Γ' Γ))
     weaken-ta-∪Γ {Γ' = Γ'} {e = e1 ∘ e2} frsh (TAAp wt1 wt2) =
       TAAp (weaken-ta-∪Γ frsh1 wt1)
@@ -82,7 +83,7 @@ module weakening where
                 fresh z e
         frsh' z∈Γ' with frsh z∈Γ'
         ... | FInr f = f
-    weaken-ta-∪Γ {Γ' = Γ'} {e = match e (nil / r / rs)}
+    weaken-ta-∪Γ {Γ' = Γ'} {e = match e ·: τ of (nil / r / rs)}
                  frsh (TAMatchZPre wt rst) =
       TAMatchZPre (weaken-ta-∪Γ frsh' wt)
                   (weaken-rules-∪Γ frshr rst)
@@ -97,7 +98,7 @@ module weakening where
                 fresh-rs z (r / rs)
         frshr z∈Γ' with frsh z∈Γ'
         ... | FMatch f (FZRules FNoRules (FRules fr frs)) = FRules fr frs
-    weaken-ta-∪Γ {Γ' = Γ'} {e = match e (rs-pre / r / rs-post)}
+    weaken-ta-∪Γ {Γ' = Γ'} {e = match e ·: τ of (rs-pre / r / rs-post)}
                  frsh (TAMatchNZPre wt fin pret postt ¬red) =
       TAMatchNZPre (weaken-ta-∪Γ frsh' wt)
                    fin
@@ -150,23 +151,116 @@ module weakening where
                 fresh z e
         frsh' z∈Γ' with frsh z∈Γ'
         ... | FSnd f = f 
-    weaken-ta-∪Γ frsh (TAEHole u∈Δ) = TAEHole u∈Δ
-    weaken-ta-∪Γ {Γ' = Γ'} {e = ⦇⌜ e ⌟⦈[ u ]} frsh (TANEHole u∈Δ wt) =
-      TANEHole u∈Δ
-               (weaken-ta-∪Γ frsh' wt)
+    weaken-ta-∪Γ {Γ' = Γ'} {e = ⦇-⦈⟨ u , σ ⟩} frsh (TAEHole u∈Δ st) =
+      TAEHole u∈Δ (weaken-σ-∪Γ frshσ st)
       where
+        frshσ : ∀{z} →
+                dom Γ' z →
+                fresh-σ z σ
+        frshσ z∈Γ' with frsh z∈Γ'
+        ... | FEHole hfσ = hfσ
+    weaken-ta-∪Γ {Γ' = Γ'} {e = ⦇⌜ e ⌟⦈⟨ u , σ ⟩} frsh (TANEHole u∈Δ st wt) =
+      TANEHole u∈Δ
+               (weaken-σ-∪Γ frshσ st)
+               (weaken-ta-∪Γ frsh' wt) 
+      where
+        frshσ : ∀{z} →
+                dom Γ' z →
+                fresh-σ z σ
+        frshσ z∈Γ' with frsh z∈Γ'
+        ... | FNEHole hfσ hf = hfσ
         frsh' : ∀{z} →
                 dom Γ' z →
                 fresh z e
         frsh' z∈Γ' with frsh z∈Γ'
-        ... | FNEHole f = f
+        ... | FNEHole hfσ hf = hf
 
-    weaken-rules-∪Γ : ∀{Γ' Γ Δ rs τ1 ξ τ2} →
+    weaken-θ-∪Γ : ∀{Γ' Γ Δ Δp θ Γθ} →
+                  (∀{x} →
+                   dom Γ' x →
+                   fresh-θ x θ) →
+                  Γ , Δ , Δp ⊢ θ :ls: Γθ →
+                  (Γ' ∪ Γ) , Δ , Δp ⊢ θ :ls: Γθ
+    weaken-θ-∪Γ frshθ STAEmpty = STAEmpty
+    weaken-θ-∪Γ {Γ' = Γ'} {Γ = Γ} frshθ
+                (STAExtend {θ = θ} {d = d} {y = y} y#Γ wst wt) =
+      STAExtend (apart-parts Γ' Γ y y#Γ' y#Γ)
+                (weaken-θ-∪Γ {Γ' = Γ'} frshθ' wst)
+                (weaken-ta-∪Γ {Γ' = Γ'} frsh wt)
+      where
+        y#Γ' : y # Γ'
+        y#Γ' with Γ' y in Γ'y
+        ... | None = refl
+        ... | Some τ'
+          with frshθ (τ' , Γ'y)
+        ... | FθExtend f x≠y fθ = abort (x≠y refl)
+        
+        frshθ' : ∀{x} →
+                 dom Γ' x →
+                 fresh-θ x θ
+        frshθ' x∈Γ' with frshθ x∈Γ'
+        ... | FθExtend f x≠y fθ = fθ
+        frsh : ∀{x} →
+               dom Γ' x →
+               fresh x d
+        frsh x∈Γ' with frshθ x∈Γ'
+        ... | FθExtend f x≠y fθ = f
+       
+    weaken-σ-∪Γ : ∀{Γ' Γ Δ Δp σ Γσ} →
+                  (∀{x} →
+                   dom Γ' x →
+                   fresh-σ x σ) →
+                  Γ , Δ , Δp ⊢ σ :s: Γσ →
+                  (Γ' ∪ Γ) , Δ , Δp ⊢ σ :s: Γσ
+    weaken-σ-∪Γ {Γ' = Γ'} {Γ = Γ} {Γσ = Γσ}
+                frsh (STAId Γσ⊆Γ) =
+      STAId Γσ⊆Γ'∪Γ
+      where
+        Γσ⊆Γ'∪Γ : (x : Nat) (τ : htyp) →
+                  (x , τ) ∈ Γσ →
+                  (x , τ) ∈ (Γ' ∪ Γ)
+        Γσ⊆Γ'∪Γ x τ x∈Γσ
+          with Γ' x in Γ'x
+        ... | None = Γσ⊆Γ x τ x∈Γσ
+        ... | Some τ'
+          with frsh (τ' , Γ'x)
+        ... | FσId x#Γσ = abort (some-not-none (! x∈Γσ · x#Γσ))
+    weaken-σ-∪Γ {Γ' = Γ'} {Γ = Γ} {Δ = Δ} {Δp = Δp}
+                {σ = Subst d y σ} {Γσ = Γσ}
+                frsh (STASubst {τ = τ} st wt) =
+      STASubst (tr (λ qq → qq , Δ , Δp ⊢ σ :s: Γσ)
+                   ((! (∪-assoc Γ' (■ (y , τ)) Γ) ·
+                     ap1 (λ qq → qq ∪ Γ)
+                         (∪-comm Γ'
+                                 (■ (y , τ))
+                                 (##-sym
+                                   (apart-singleton-disjoint y#Γ')))) ·
+                     ∪-assoc (■ (y , τ)) Γ' Γ)
+                   (weaken-σ-∪Γ {Γ' = Γ'} frshσ st))
+               (weaken-ta-∪Γ frsh' wt)
+      where
+        y#Γ' : y # Γ'
+        y#Γ' with Γ' y in Γ'y
+        ... | None = refl
+        ... | Some τ with frsh (τ , Γ'y)
+        ... | FσSubst f y≠y fσ = abort (y≠y refl) 
+        frshσ : ∀{z} →
+                dom Γ' z  →
+                fresh-σ z σ
+        frshσ z∈Γ' with frsh z∈Γ'
+        ... | FσSubst f z≠y fσ = fσ
+        frsh' : ∀{z} →
+                dom Γ' z →
+                fresh z d
+        frsh' z∈Γ' with frsh z∈Γ'
+        ... | FσSubst f z≠y fσ = f
+              
+    weaken-rules-∪Γ : ∀{Γ' Γ Δ Δp rs τ1 ξ τ2} →
                       (∀{x} →
                        dom Γ' x →
                        fresh-rs x rs) →
-                      Γ , Δ ⊢ rs ::s τ1 [ ξ ]=> τ2 →
-                      (Γ' ∪ Γ) , Δ ⊢ rs ::s τ1 [ ξ ]=> τ2
+                      Γ , Δ , Δp ⊢ rs ::s τ1 [ ξ ]=> τ2 →
+                      (Γ' ∪ Γ) , Δ , Δp ⊢ rs ::s τ1 [ ξ ]=> τ2
     weaken-rules-∪Γ {Γ' = Γ'} frsh (CTOneRule {r = p => e} rt) =
       CTOneRule (weaken-rule-∪Γ frsh' rt)
       where
@@ -190,18 +284,19 @@ module weakening where
         frshrs z∈Γ' with frsh z∈Γ'
         ... | FRules f frs = frs
     
-    weaken-rule-∪Γ : ∀{Γ' Γ Δ r τ1 ξ τ2} →
+    weaken-rule-∪Γ : ∀{Γ' Γ Δ Δp r τ1 ξ τ2} →
                      (∀{x} →
                       dom Γ' x →
                       fresh-r x r) →
-                     Γ , Δ ⊢ r :: τ1 [ ξ ]=> τ2 →
-                     (Γ' ∪ Γ) , Δ ⊢ r :: τ1 [ ξ ]=> τ2
-    weaken-rule-∪Γ {Γ' = Γ'} {Γ = Γ} {Δ = Δ} {τ2 = τ2} frsh
-                   (CTRule {e = e} {Γp = Γp} {Δp = Δp} pt Γ##Γp Δ##Δp wt) =
+                     Γ , Δ , Δp ⊢ r :: τ1 [ ξ ]=> τ2 →
+                     (Γ' ∪ Γ) , Δ , Δp ⊢ r :: τ1 [ ξ ]=> τ2
+    weaken-rule-∪Γ {Γ' = Γ'} {Γ = Γ} {Δ = Δ} {Δp = Δp}
+                   {τ2 = τ2} frsh
+                   (CTRule {e = e} {Γp = Γp} 
+                           pt Γ##Γp wt) =
       CTRule pt
              (disjoint-parts Γ'##Γp Γ##Γp)
-             Δ##Δp
-             (tr (λ qq → qq , Δ ∪ Δp ⊢ e :: τ2)
+             (tr (λ qq → qq , Δ , Δp ⊢ e :: τ2)
                  (! (∪-assoc Γ' Γ Γp))
                  (weaken-ta-∪Γ frsh' wt))
       where
@@ -232,14 +327,15 @@ module weakening where
     -- Commutativity of union requires disjointness, so we
     -- make use of th identity
     -- Γ ∪ Γ' = Γ ⊔ (Γ' \ Γ) = (Γ' \ Γ) ⊔ Γ
-    weaken-ta-Γ∪ : ∀{Γ Γ' Δ e τ} →
+    weaken-ta-Γ∪ : ∀{Γ Γ' Δ Δp e τ} →
                    (∀{x} →
                     dom Γ' x →
                     fresh x e) →
-                   Γ , Δ ⊢ e :: τ →
-                   (Γ ∪ Γ') , Δ ⊢ e :: τ
-    weaken-ta-Γ∪ {Γ = Γ} {Γ' = Γ'} {Δ = Δ} {e = e} {τ = τ} frsh wt =
-      tr (λ qq → qq , Δ ⊢ e :: τ)
+                   Γ , Δ , Δp ⊢ e :: τ →
+                   (Γ ∪ Γ') , Δ , Δp ⊢ e :: τ
+    weaken-ta-Γ∪ {Γ = Γ} {Γ' = Γ'} {Δ = Δ} {Δp = Δp}
+                 {e = e} {τ = τ} frsh wt =
+      tr (λ qq → qq , Δ , Δp ⊢ e :: τ)
          (! (union-with-diff Γ Γ' ·
              ∪-comm Γ (Γ' ∖ Γ) (r-disjoint-diff-r Γ' Γ)))
          (weaken-ta-∪Γ frsh' wt)
@@ -250,11 +346,11 @@ module weakening where
         frsh' {z = z} (τ , z∈Γ'∖Γ) =
           frsh (τ , dom-diff-dom-l {Γ1 = Γ'} {Γ2 = Γ} z∈Γ'∖Γ)
          
-    -- convenience function
-    weaken-ta-Γ : ∀{Γ x τ' Δ e τ} →
+    -- convenience functions
+    weaken-ta-Γ : ∀{Γ x τ' Δ Δp e τ} →
                   fresh x e →
-                  Γ , Δ ⊢ e :: τ →
-                  (Γ ,, (x , τ')) , Δ ⊢ e :: τ
+                  Γ , Δ , Δp ⊢ e :: τ →
+                  (Γ ,, (x , τ')) , Δ , Δp ⊢ e :: τ
     weaken-ta-Γ {x = x} {τ' = τ'} {e = e} frsh wt =
       weaken-ta-∪Γ frsh' wt
       where
@@ -263,14 +359,14 @@ module weakening where
                 fresh z e
         frsh' d with dom-singleton-eq d
         ... | refl = frsh
-        
+
   mutual
-    weaken-ta-∪Δ : ∀{Γ Δ' Δ e τ} →
+    weaken-ta-∪Δ : ∀{Γ Δ' Δ Δp e τ} →
                    (∀{u} →
                     dom Δ' u →
                     hole-fresh u e) →
-                   Γ , Δ ⊢ e :: τ →
-                   Γ , (Δ' ∪ Δ) ⊢ e :: τ
+                   Γ , Δ , Δp ⊢ e :: τ →
+                   Γ , (Δ' ∪ Δ) , Δp ⊢ e :: τ
     weaken-ta-∪Δ frsh TANum = TANum
     weaken-ta-∪Δ frsh (TAVar x∈Γ) = TAVar x∈Γ
     weaken-ta-∪Δ {Δ' = Δ'} {e = ·λ x ·[ τ1 ] e}
@@ -313,7 +409,7 @@ module weakening where
                 hole-fresh z e
         frsh' z∈Δ' with frsh z∈Δ'
         ... | HFInr hf = hf
-    weaken-ta-∪Δ {Δ' = Δ'} {e = match e (nil / r / rs)}
+    weaken-ta-∪Δ {Δ' = Δ'} {e = match e ·: τ of (nil / r / rs)}
                  frsh (TAMatchZPre wt rst) =
       TAMatchZPre (weaken-ta-∪Δ frsh' wt)
                   (weaken-rules-∪Δ frshr rst)
@@ -329,7 +425,7 @@ module weakening where
         frshr z∈Δ' with frsh z∈Δ'
         ... | HFMatch hf (HFZRules HFNoRules (HFRules hfr hfrs)) =
           HFRules hfr hfrs
-    weaken-ta-∪Δ {Δ' = Δ'} {e = match e (rs-pre / r / rs-post)}
+    weaken-ta-∪Δ {Δ' = Δ'} {e = match e ·: τ of (rs-pre / r / rs-post)}
                  frsh (TAMatchNZPre wt fin pret postt ¬red) =
       TAMatchNZPre (weaken-ta-∪Δ frsh' wt)
                    fin
@@ -383,36 +479,73 @@ module weakening where
                 hole-fresh z e
         frsh' z∈Δ' with frsh z∈Δ'
         ... | HFSnd hf = hf
-    weaken-ta-∪Δ {Δ' = Δ'} {Δ = Δ} frsh (TAEHole {u = u} {τ = τ} u∈Δ)
+    weaken-ta-∪Δ {Δ' = Δ'} {Δ = Δ} frsh (TAEHole {u = u} {τ = τ} u∈Δ st)
       with Δ' u in Δ'u
     ... | Some τ'
       with frsh (τ' , Δ'u)
-    ... | HFEHole u≠u = abort (u≠u refl)
-    weaken-ta-∪Δ {Δ' = Δ'} {Δ = Δ} frsh (TAEHole {u = u} {τ = τ} u∈Δ)
-        | None = TAEHole (dom-r-union Δ' Δ u τ u∈Δ Δ'u)
-    weaken-ta-∪Δ {Δ' = Δ'} {Δ = Δ} frsh (TANEHole {u = u} {τ = τ} u∈Δ wt)
-      with Δ' u in Δ'u
-    ... | Some τ'
-      with frsh (τ' , Δ'u)
-    ... | HFNEHole u≠u hf = abort (u≠u refl)
-    weaken-ta-∪Δ {Δ' = Δ'} {Δ = Δ} {e = ⦇⌜ e ⌟⦈[ u ]}
-                 frsh (TANEHole {τ = τ} u∈Δ wt)
+    ... | HFEHole u≠u hfσ = abort (u≠u refl)
+    weaken-ta-∪Δ {Δ' = Δ'} {Δ = Δ} {e = ⦇-⦈⟨ u , σ ⟩}
+                 frsh (TAEHole {u = u} {Γ' = Γ'} {τ = τ} u∈Δ st)
         | None =
-      TANEHole (dom-r-union Δ' Δ u τ u∈Δ Δ'u)
+      TAEHole (dom-r-union Δ' Δ u (Γ' , τ) u∈Δ Δ'u)
+              (weaken-σ-∪Δ frshσ st)
+      where
+        frshσ : ∀{z} →
+                dom Δ' z →
+                hole-fresh-σ z σ
+        frshσ z∈Δ' with frsh z∈Δ'
+        ... | HFEHole z≠u hfσ = hfσ
+    weaken-ta-∪Δ {Δ' = Δ'} {Δ = Δ} frsh (TANEHole {u = u} {τ = τ} u∈Δ st wt)
+      with Δ' u in Δ'u
+    ... | Some τ'
+      with frsh (τ' , Δ'u)
+    ... | HFNEHole u≠u hfσ hf = abort (u≠u refl)
+    weaken-ta-∪Δ {Δ' = Δ'} {Δ = Δ} {e = ⦇⌜ e ⌟⦈⟨ u , σ ⟩}
+                 frsh (TANEHole {Γ' = Γ'} {τ = τ} u∈Δ st wt)
+        | None =
+      TANEHole (dom-r-union Δ' Δ u (Γ' , τ) u∈Δ Δ'u)
+               (weaken-σ-∪Δ frshσ st)
                (weaken-ta-∪Δ frsh' wt)
       where
+        frshσ : ∀{z} →
+                dom Δ' z →
+                hole-fresh-σ z σ
+        frshσ z∈Δ' with frsh z∈Δ'
+        ... | HFNEHole z≠u hfσ hf = hfσ
         frsh' : ∀{z} →
                 dom Δ' z →
                 hole-fresh z e
         frsh' z∈Δ' with frsh z∈Δ'
-        ... | HFNEHole z≠u hf = hf
-        
-    weaken-rules-∪Δ : ∀{Γ Δ' Δ rs τ1 ξ τ2} →
+        ... | HFNEHole z≠u hfσ hf = hf
+
+    weaken-σ-∪Δ : ∀{Γ Δ' Δ Δp σ Γσ} →
+                  (∀{x} →
+                   dom Δ' x →
+                   hole-fresh-σ x σ) →
+                  Γ , Δ , Δp ⊢ σ :s: Γσ →
+                  Γ , (Δ' ∪ Δ) , Δp ⊢ σ :s: Γσ
+    weaken-σ-∪Δ frsh (STAId Γσ⊆Γ) = STAId Γσ⊆Γ
+    weaken-σ-∪Δ {Δ' = Δ'} {σ = Subst d y σ}
+                frsh (STASubst st wt) =
+      STASubst (weaken-σ-∪Δ frshσ st)
+               (weaken-ta-∪Δ frsh' wt)
+      where
+        frshσ : ∀{z} →
+                dom Δ' z →
+                hole-fresh-σ z σ
+        frshσ z∈Δ' with frsh z∈Δ'
+        ... | HFσSubst hf hfσ = hfσ
+        frsh' : ∀{z} →
+                dom Δ' z →
+                hole-fresh z d
+        frsh' z∈Δ' with frsh z∈Δ'
+        ... | HFσSubst hf hfσ = hf
+    weaken-rules-∪Δ : ∀{Γ Δ' Δ Δp rs τ1 ξ τ2} →
                       (∀{u} →
                        dom Δ' u →
                        hole-fresh-rs u rs) →
-                      Γ , Δ ⊢ rs ::s τ1 [ ξ ]=> τ2 →
-                      Γ , (Δ' ∪ Δ) ⊢ rs ::s τ1 [ ξ ]=> τ2
+                      Γ , Δ , Δp ⊢ rs ::s τ1 [ ξ ]=> τ2 →
+                      Γ , (Δ' ∪ Δ) , Δp ⊢ rs ::s τ1 [ ξ ]=> τ2
     weaken-rules-∪Δ {Δ' = Δ'} frsh (CTOneRule {r = p => e} rt) =
       CTOneRule (weaken-rule-∪Δ frsh' rt)
       where
@@ -436,39 +569,24 @@ module weakening where
         frshrs z∈Δ' with frsh z∈Δ'
         ... | HFRules hf hfrs = hfrs
         
-    weaken-rule-∪Δ : ∀{Γ Δ' Δ r τ1 ξ τ2} →
+    weaken-rule-∪Δ : ∀{Γ Δ' Δ Δp r τ1 ξ τ2} →
                      (∀{u} →
                       dom Δ' u →
                       hole-fresh-r u r) →
-                     Γ , Δ ⊢ r :: τ1 [ ξ ]=> τ2 →
-                     Γ , (Δ' ∪ Δ) ⊢ r :: τ1 [ ξ ]=> τ2
-    weaken-rule-∪Δ {Γ = Γ} {Δ' = Δ'} {Δ = Δ} {τ2 = τ2} frsh
-                   (CTRule {e = e} {Γp = Γp} {Δp = Δp} pt Γ##Γp Δ##Δp wt) =
-      CTRule pt
-             Γ##Γp
-             (disjoint-parts Δ'##Δp Δ##Δp)
-             (tr (λ qq → (Γ ∪ Γp) , qq ⊢ e :: τ2)
-                 (! (∪-assoc Δ' Δ Δp))
-                 (weaken-ta-∪Δ frsh' wt))
+                     Γ , Δ , Δp ⊢ r :: τ1 [ ξ ]=> τ2 →
+                     Γ , (Δ' ∪ Δ) , Δp ⊢ r :: τ1 [ ξ ]=> τ2
+    weaken-rule-∪Δ {Γ = Γ} {Δ' = Δ'} {Δ = Δ} {Δp = Δp}
+                   {τ1 = τ1} {ξ = ξ} {τ2 = τ2} frsh
+                   (CTRule {p = p} {e = e}
+                           {Γp = Γp} 
+                           pt Γ##Γp wt) =
+      CTRule pt Γ##Γp (weaken-ta-∪Δ frsh' wt)
+      -- tr (λ qq → Γ , qq , Δp ⊢ p => e :: τ1 [ ξ ]=> τ2)
+      --    (∪-assoc Δ' Δe Δp)
+      --    (CTRule pt Γ##Γp
+      --            (disjoint-parts Δ'##Δp Δe##Δp)
+      --            (weaken-ta-∪Δ frsh' wt))
       where
-        Δ'##Δp : Δ' ## Δp
-        Δ'##Δp = disj1 , disj2
-          where
-            disj1 : (x : Nat) →
-                    dom Δ' x →
-                    x # Δp
-            disj1 x x∈Δ' with frsh x∈Δ'
-            ... | HFRule hub hf = hole-unbound-in-p-apart-Δp pt hub
-            disj2 : (x : Nat) →
-                    dom Δp x →
-                    x # Δ'
-            disj2 x x∈Δp
-              with Δ' x in Δ'x
-            ... | None = refl
-            ... | Some τ1 
-              with disj1 x (τ1 , Δ'x)
-            ... | x#Δp = abort (some-not-none (! (π2 x∈Δp) · x#Δp))
-
         frsh' : ∀{z} →
                 dom Δ' z →
                 hole-fresh z e
@@ -478,14 +596,15 @@ module weakening where
     -- Commutativity of union requires disjointness, so we
     -- make use of the identity
     -- Δ ∪ Δ' = Δ ⊔ (Δ' \ Δ) = (Δ' \ Δ) ⊔ Δ
-    weaken-ta-Δ∪ : ∀{Γ Δ Δ' e τ} →
+    weaken-ta-Δ∪ : ∀{Γ Δ Δ' Δp e τ} →
                    (∀{u} →
                     dom Δ' u →
                     hole-fresh u e) →
-                   Γ , Δ ⊢ e :: τ →
-                   Γ , (Δ ∪ Δ') ⊢ e :: τ
-    weaken-ta-Δ∪ {Γ = Γ} {Δ = Δ} {Δ' = Δ'} {e = e} {τ = τ} frsh wt =
-      tr (λ qq → Γ , qq ⊢ e :: τ)
+                   Γ , Δ , Δp ⊢ e :: τ →
+                   Γ , (Δ ∪ Δ') , Δp ⊢ e :: τ
+    weaken-ta-Δ∪ {Γ = Γ} {Δ = Δ} {Δ' = Δ'} {Δp = Δp}
+                 {e = e} {τ = τ} frsh wt =
+      tr (λ qq → Γ , qq , Δp ⊢ e :: τ)
          (! (union-with-diff Δ Δ' ·
              ∪-comm Δ (Δ' ∖ Δ) (r-disjoint-diff-r Δ' Δ)))
          (weaken-ta-∪Δ frsh' wt)
@@ -497,10 +616,10 @@ module weakening where
           frsh (τ , dom-diff-dom-l {Γ1 = Δ'} {Γ2 = Δ} z∈Δ'∖Δ)
          
     -- convenience function
-    weaken-ta-Δ : ∀{Γ Δ u τ' e τ} →
+    weaken-ta-Δ : ∀{Γ Δ Δp u τ' e τ} →
                   hole-fresh u e →
-                  Γ , Δ ⊢ e :: τ →
-                  Γ , (Δ ,, (u , τ')) ⊢ e :: τ
+                  Γ , Δ , Δp ⊢ e :: τ →
+                  Γ , (Δ ,, (u , τ')) , Δp ⊢ e :: τ
     weaken-ta-Δ {u = u} {τ' = τ'} {e = e} frsh wt =
       weaken-ta-∪Δ frsh' wt
       where

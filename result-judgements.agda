@@ -1,7 +1,7 @@
+open import List
 open import Prelude
 open import core
 open import patterns-core
-open import substitution-env
 open import value-judgements
 
 module result-judgements where
@@ -19,10 +19,10 @@ module result-judgements where
       IInr    : ∀{e τ} →
                 e indet →
                 (inr τ e) indet
-      IMatch  : ∀{e rs-pre pr er rs-post} →
+      IMatch  : ∀{e τ rs-pre pr er rs-post} →
                 e final →
-                e ?▹ pr →
-                (match e (rs-pre / (pr => er) / rs-post)) indet
+                e ·: τ ?▹ pr →
+                (match e ·: τ of (rs-pre / (pr => er) / rs-post)) indet
       IPairL  : ∀{e1 e2} →
                 e1 indet →
                 e2 val →
@@ -45,11 +45,11 @@ module result-judgements where
                  e ≠ ⟨ e1 , e2 ⟩) →
                 e indet →
                 (snd e) indet
-      IEHole  : ∀{u} →
-                ⦇-⦈[ u ] indet
-      INEHole : ∀{e u} →
+      IEHole  : ∀{u σ} →
+                ⦇-⦈⟨ u , σ ⟩ indet
+      INEHole : ∀{e u σ} →
                 e final →
-                ⦇⌜ e ⌟⦈[ u ] indet
+                ⦇⌜ e ⌟⦈⟨ u , σ ⟩ indet
                 
     -- e is final
     data _final : (e : ihexp) → Set where
@@ -61,13 +61,12 @@ module result-judgements where
                e final
 
     -- all substitutions in θ are final
-    data _env-final : env → Set where
-      FId    : ∀{Γ} →
-               (Id Γ) env-final
-      FSubst : ∀{d y θ} →
-               θ env-final →
-               d final →
-               (Subst d y θ) env-final
+    data _final-θ : subst-list → Set where
+      FθEmpty  : [] final-θ
+      FθExtend : ∀{d y θ} →
+                 θ final-θ →
+                 d final →
+                 ((d , y) :: θ) final-θ
 
     inl-final : ∀{e τ} → (inl τ e) final → e final
     inl-final (FVal (VInl eval)) = FVal eval
@@ -108,7 +107,7 @@ module result-judgements where
       FIndet (IPairL ind1 val2)
     final-pair (FIndet ind1) (FIndet ind2) =
       FIndet (IPair ind1 ind2)
-
+    
     final-notintro-indet : ∀{e} →
                            e final →
                            e notintro →
@@ -127,8 +126,10 @@ module result-judgements where
                     ⊥
     val-indet-not VNum ()
     val-indet-not VLam ()
-    val-indet-not (VInl eval) (IInl ind) = val-indet-not eval ind
-    val-indet-not (VInr eval) (IInr ind) = val-indet-not eval ind
+    val-indet-not (VInl eval) (IInl ind) =
+      val-indet-not eval ind
+    val-indet-not (VInr eval) (IInr ind) =
+      val-indet-not eval ind
     val-indet-not (VPair eval1 eval2) (IPairL ind1 val2) =
       val-indet-not eval1 ind1
     val-indet-not (VPair eval1 eval2) (IPairR val1 ind2) =
@@ -136,3 +137,4 @@ module result-judgements where
     val-indet-not (VPair eval1 eval2) (IPair ind1 ind2) =
       val-indet-not eval1 ind1
 
+                        

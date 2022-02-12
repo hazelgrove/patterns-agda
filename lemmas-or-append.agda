@@ -263,15 +263,15 @@ module lemmas-or-append where
   
   -- a pattern by itself should never emit a constraint involving
   -- an ∨, so ξp ∨+ ξ behaves just like ξp ∨ ξ
-  pattern-∨+ : ∀{p τ ξp Γp Δp} →
-               p :: τ [ ξp ]⊣ Γp , Δp →
+  pattern-∨+ : ∀{Δp p τ ξp Γp} →
+               Δp ⊢ p :: τ [ ξp ]⊣ Γp →
                (ξ : constr) →
                ξp ∨+ ξ == ξp ∨ ξ
   pattern-∨+ PTVar ξ = refl
   pattern-∨+ PTNum ξ = refl
   pattern-∨+ (PTInl pt) ξ = refl
   pattern-∨+ (PTInr pt) ξ = refl
-  pattern-∨+ (PTPair Γ1##Γ2 Δ1##Δ2 pt1 pt2) ξ = refl
-  pattern-∨+ PTEHole ξ = refl
-  pattern-∨+ (PTNEHole pt w#Δ) ξ = refl
+  pattern-∨+ (PTPair Γ1##Γ2 pt1 pt2) ξ = refl
+  pattern-∨+ (PTEHole w∈Δp) ξ = refl
+  pattern-∨+ (PTNEHole w∈Δp pt) ξ = refl
   pattern-∨+ PTWild ξ = refl

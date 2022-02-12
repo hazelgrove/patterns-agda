@@ -1,10 +1,10 @@
-open import Prelude
+open import List
 open import Nat
+open import Prelude
 open import binders-disjointness
 open import core
 open import freshness
 open import patterns-core
-open import substitution-env
 
 module binders-uniqueness where
   mutual
@@ -52,7 +52,16 @@ module binders-uniqueness where
                  binders-unique-rs (r / rs-post) →
                  binders-disjoint-rs rs-pre (r / rs-post) →
                  binders-unique-zrs (rs-pre / r / rs-post)
-                 
+
+    data binders-unique-σ : env → Set where
+      BUσId    : ∀{Γ} →
+                 binders-unique-σ (Id Γ)
+      BUσSubst : ∀{d y σ} →
+                 binders-unique d →
+                 binders-unique-σ σ →
+                 binders-disjoint-σ σ d →
+                 binders-unique-σ (Subst d y σ)
+              
     data binders-unique : ihexp → Set where
       BUNum    : ∀{n} →
                  binders-unique (N n)
@@ -60,13 +69,16 @@ module binders-uniqueness where
                  binders-unique (X x)
       BULam    : ∀{x τ e} →
                  binders-unique e →
-                 unbound-in x e →
+                 unbound-in-e x e →
                  binders-unique (·λ x ·[ τ ] e)
-      BUEHole  : ∀{u} →
-                 binders-unique ⦇-⦈[ u ]
-      BUNEHole : ∀{u e} →
+      BUEHole  : ∀{u σ} →
+                 binders-unique-σ σ →
+                 binders-unique ⦇-⦈⟨ u , σ ⟩
+      BUNEHole : ∀{e u σ} →
+                 binders-unique-σ σ →
                  binders-unique e →
-                 binders-unique ⦇⌜ e ⌟⦈[ u ]
+                 binders-disjoint-σ σ e →
+                 binders-unique ⦇⌜ e ⌟⦈⟨ u , σ ⟩
       BUAp     : ∀{e1 e2} →
                  binders-unique e1 →
                  binders-unique e2 →
@@ -78,11 +90,11 @@ module binders-uniqueness where
       BUInr    : ∀{e τ} →
                  binders-unique e →
                  binders-unique (inr τ e)
-      BUMatch  : ∀{e rs} →
+      BUMatch  : ∀{e τ rs} →
                  binders-unique e →
                  binders-unique-zrs rs →
                  binders-disjoint-zrs rs e →
-                 binders-unique (match e rs)
+                 binders-unique (match e ·: τ of rs)
       BUPair   : ∀{e1 e2} →
                  binders-unique e1 →
                  binders-unique e2 →
@@ -94,15 +106,6 @@ module binders-uniqueness where
       BUSnd    : ∀{e} →
                  binders-unique e →
                  binders-unique (snd e)
-
-  data binders-unique-env : env → Set where
-    BUId    : ∀{Γ} →
-              binders-unique-env (Id Γ)
-    BUSubst : ∀{d y θ} →
-              binders-unique d →
-              binders-unique-env θ →
-              binders-disjoint-env θ d →
-              binders-unique-env (Subst d y θ)
               
   mutual
     data hole-binders-unique-p : pattrn → Set where
@@ -150,7 +153,16 @@ module binders-uniqueness where
                   hole-binders-unique-rs (r / rs-post) →
                   hole-binders-disjoint-rs rs-pre (r / rs-post) →
                   hole-binders-unique-zrs (rs-pre / r / rs-post)
-                 
+
+    data hole-binders-unique-σ : env → Set where
+      HBUσId    : ∀{Γ} →
+                  hole-binders-unique-σ (Id Γ)
+      HBUσSubst : ∀{d y σ} →
+                  hole-binders-unique d →
+                  hole-binders-unique-σ σ →
+                  hole-binders-disjoint-σ σ d →
+                  hole-binders-unique-σ (Subst d y σ)
+
     data hole-binders-unique : ihexp → Set where
       HBUNum    : ∀{n} →
                   hole-binders-unique (N n)
@@ -159,11 +171,14 @@ module binders-uniqueness where
       HBULam    : ∀{x τ e} →
                   hole-binders-unique e →
                   hole-binders-unique (·λ x ·[ τ ] e)
-      HBUEHole  : ∀{u} →
-                  hole-binders-unique ⦇-⦈[ u ]
-      HBUNEHole : ∀{u e} →
+      HBUEHole  : ∀{u σ} →
+                  hole-binders-unique-σ σ →
+                  hole-binders-unique ⦇-⦈⟨ u , σ ⟩
+      HBUNEHole : ∀{e u σ} →
+                  hole-binders-unique-σ σ →
                   hole-binders-unique e →
-                  hole-binders-unique ⦇⌜ e ⌟⦈[ u ]
+                  hole-binders-disjoint-σ σ e →
+                  hole-binders-unique ⦇⌜ e ⌟⦈⟨ u , σ ⟩
       HBUAp     : ∀{e1 e2} →
                   hole-binders-unique e1 →
                   hole-binders-unique e2 →
@@ -175,11 +190,11 @@ module binders-uniqueness where
       HBUInr    : ∀{e τ} →
                   hole-binders-unique e →
                   hole-binders-unique (inr τ e)
-      HBUMatch  : ∀{e rs} →
+      HBUMatch  : ∀{e τ rs} →
                   hole-binders-unique e →
                   hole-binders-unique-zrs rs →
                   hole-binders-disjoint-zrs rs e →
-                  hole-binders-unique (match e rs)
+                  hole-binders-unique (match e ·: τ of rs)
       HBUPair   : ∀{e1 e2} →
                   hole-binders-unique e1 →
                   hole-binders-unique e2 →
@@ -191,12 +206,3 @@ module binders-uniqueness where
       HBUSnd    : ∀{e} →
                   hole-binders-unique e →
                   hole-binders-unique (snd e)
-
-  data hole-binders-unique-env : env → Set where
-    HBUId    : ∀{Γ} →
-               hole-binders-unique-env (Id Γ)
-    HBUSubst : ∀{d y θ} →
-               hole-binders-unique d →
-               hole-binders-unique-env θ →
-               hole-binders-disjoint-env θ d →
-               hole-binders-unique-env (Subst d y θ)

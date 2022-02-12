@@ -20,7 +20,7 @@ module lemmas-subst-value where
                 ([ e2 / x ] e1) val
     subst-val VNum = VNum
     subst-val {x = x} (VLam {x = y})
-      with natEQ y x
+      with nat-dec y x
     ... | Inl refl = VLam
     ... | Inr y≠x = VLam
     subst-val (VInl val1) =

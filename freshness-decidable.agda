@@ -10,7 +10,7 @@ module freshness-decidable where
                      (unbound-in-p x p) + (unbound-in-p x p → ⊥)
   unbound-in-p-dec x (N n) = Inl UBPNum
   unbound-in-p-dec x (X y)
-    with natEQ x y
+    with nat-dec x y
   ... | Inl refl = Inr (λ{(UBPVar x≠x) → x≠x refl})
   ... | Inr x≠y = Inl (UBPVar x≠y)
   unbound-in-p-dec x (inl p)
@@ -23,10 +23,12 @@ module freshness-decidable where
   ... | Inr ¬ubp = Inr (λ{(UBPInr ubp) → ¬ubp ubp})
   unbound-in-p-dec x ⟨ p1 , p2 ⟩
     with unbound-in-p-dec x p1
-  ... | Inr ¬ubp1 = Inr λ{(UBPPair ubp1 ubp2) → ¬ubp1 ubp1}
+  ... | Inr ¬ubp1 =
+    Inr λ{(UBPPair ubp1 ubp2) → ¬ubp1 ubp1}
   ... | Inl ubp1
     with unbound-in-p-dec x p2
-  ... | Inr ¬ubp2 = Inr λ{(UBPPair ubp1 ubp2) → ¬ubp2 ubp2}
+  ... | Inr ¬ubp2 =
+    Inr λ{(UBPPair ubp1 ubp2) → ¬ubp2 ubp2}
   ... | Inl ubp2 = Inl (UBPPair ubp1 ubp2)
   unbound-in-p-dec x wild = Inl UBPWild
   unbound-in-p-dec x ⦇-⦈[ w ] = Inl UBPEHole
@@ -41,11 +43,11 @@ module freshness-decidable where
                 (fresh x e) + (fresh x e → ⊥)
     fresh-dec x (N n) = Inl FNum
     fresh-dec x (X y)
-      with natEQ x y
+      with nat-dec x y
     ... | Inl refl = Inr λ{(FVar x≠x) → x≠x refl}
     ... | Inr x≠y = Inl (FVar x≠y)
     fresh-dec x (·λ y ·[ τ ] e)
-      with natEQ x y
+      with nat-dec x y
     ... | Inl refl = Inr λ{(FLam x≠x f) → x≠x refl}
     ... | Inr x≠y
       with fresh-dec x e
@@ -53,10 +55,12 @@ module freshness-decidable where
     ... | Inr ¬frsh = Inr λ{(FLam x≠y f) → ¬frsh f}
     fresh-dec x (e1 ∘ e2)
       with fresh-dec x e1
-    ... | Inr ¬frsh1 = Inr λ{(FAp frsh1 frsh2) → ¬frsh1 frsh1}
+    ... | Inr ¬frsh1 =
+      Inr λ{(FAp frsh1 frsh2) → ¬frsh1 frsh1}
     ... | Inl frsh1
       with fresh-dec x e2
-    ... | Inr ¬frsh2 = Inr λ{(FAp frsh1 frsh2) → ¬frsh2 frsh2}
+    ... | Inr ¬frsh2 =
+      Inr λ{(FAp frsh1 frsh2) → ¬frsh2 frsh2}
     ... | Inl frsh2 = Inl (FAp frsh1 frsh2)
     fresh-dec x (inl τ e)
       with fresh-dec x e
@@ -66,9 +70,10 @@ module freshness-decidable where
       with fresh-dec x e
     ... | Inl frsh = Inl (FInr frsh)
     ... | Inr ¬frsh = Inr λ{(FInr frsh) → ¬frsh frsh}
-    fresh-dec x (match e rs)
+    fresh-dec x (match e ·: τ of rs)
       with fresh-dec x e
-    ... | Inr ¬frsh = Inr λ{(FMatch frsh frshrs) → ¬frsh frsh}
+    ... | Inr ¬frsh =
+      Inr λ{(FMatch frsh frshrs) → ¬frsh frsh}
     ... | Inl frsh
       with fresh-zrs-dec x rs
     ... | Inr ¬frshrs =
@@ -76,10 +81,12 @@ module freshness-decidable where
     ... | Inl frshrs = Inl (FMatch frsh frshrs)
     fresh-dec x ⟨ e1 , e2 ⟩
       with fresh-dec x e1
-    ... | Inr ¬frsh1 = Inr λ{(FPair frsh1 frsh2) → ¬frsh1 frsh1}
+    ... | Inr ¬frsh1 =
+      Inr λ{(FPair frsh1 frsh2) → ¬frsh1 frsh1}
     ... | Inl frsh1
       with fresh-dec x e2
-    ... | Inr ¬frsh2 = Inr λ{(FPair frsh1 frsh2) → ¬frsh2 frsh2}
+    ... | Inr ¬frsh2 =
+      Inr λ{(FPair frsh1 frsh2) → ¬frsh2 frsh2}
     ... | Inl frsh2 = Inl (FPair frsh1 frsh2)
     fresh-dec x (fst e)
       with fresh-dec x e
@@ -89,11 +96,43 @@ module freshness-decidable where
       with fresh-dec x e
     ... | Inl frsh = Inl (FSnd frsh)
     ... | Inr ¬frsh = Inr λ{(FSnd frsh) → ¬frsh frsh}
-    fresh-dec x ⦇-⦈[ u ] = Inl FEHole
-    fresh-dec x ⦇⌜ e ⌟⦈[ u ]
+    fresh-dec x ⦇-⦈⟨ u , σ ⟩
+      with fresh-σ-dec x σ
+    ... | Inl frshσ = Inl (FEHole frshσ)
+    ... | Inr ¬frshσ =
+      Inr (λ{(FEHole frshσ) → ¬frshσ frshσ})
+    fresh-dec x ⦇⌜ e ⌟⦈⟨ u , σ ⟩
+      with fresh-σ-dec x σ
+    ... | Inr ¬frshσ =
+      Inr λ{(FNEHole frshσ frsh) → ¬frshσ frshσ}
+    ... | Inl frshσ
       with fresh-dec x e
-    ... | Inl frsh = Inl (FNEHole frsh)
-    ... | Inr ¬frsh = Inr λ{(FNEHole frsh) → ¬frsh frsh}
+    ... | Inr ¬frsh =
+      Inr λ{(FNEHole frshσ frsh) → ¬frsh frsh}
+    ... | Inl frsh = Inl (FNEHole frshσ frsh)
+    
+    fresh-σ-dec : (x : Nat) →
+                  (σ : env) →
+                  (fresh-σ x σ) + (fresh-σ x σ → ⊥)
+    fresh-σ-dec x (Id Γ)
+      with Γ x in Γx
+    ... | Some τ =
+      Inr (λ{(FσId x#Γ) → abort (some-not-none (! Γx · x#Γ))})
+    ... | None = Inl (FσId Γx)
+    fresh-σ-dec x (Subst d y σ)
+      with fresh-dec x d
+    ... | Inr ¬frsh =
+      Inr (λ{(FσSubst frsh x≠y frshσ) → ¬frsh frsh})
+    ... | Inl frsh
+      with nat-dec x y
+    ... | Inl refl =
+      Inr (λ{(FσSubst frsh x≠y frshσ) → x≠y refl})
+    ... | Inr x≠y
+      with fresh-σ-dec x σ
+    ... | Inr ¬frshσ =
+      Inr (λ{(FσSubst frsh x≠y frshσ) → ¬frshσ frshσ})
+    ... | Inl frshσ =
+      Inl (FσSubst frsh x≠y frshσ)
     
     fresh-zrs-dec : (x : Nat) →
                     (zrs : zrules) →
@@ -101,16 +140,20 @@ module freshness-decidable where
     fresh-zrs-dec x (rs-pre / r / rs-post)
       with fresh-rs-dec x rs-pre
     ... | Inr ¬frshpre =
-      Inr λ{(FZRules frshpre (FRules frshr frshpost)) → ¬frshpre frshpre}
+      Inr λ{(FZRules frshpre (FRules frshr frshpost)) →
+                     ¬frshpre frshpre}
     ... | Inl frshpre
       with fresh-r-dec x r
     ... | Inr ¬frshr =
-      Inr λ{(FZRules frshpre (FRules frshr frshpost)) → ¬frshr frshr}
+      Inr λ{(FZRules frshpre (FRules frshr frshpost)) →
+                     ¬frshr frshr}
     ... | Inl frshr
       with fresh-rs-dec x rs-post
     ... | Inr ¬frshpost =
-      Inr λ{(FZRules frshpre (FRules frshr frshpost)) → ¬frshpost frshpost}
-    ... | Inl frshpost = Inl (FZRules frshpre (FRules frshr frshpost))
+      Inr λ{(FZRules frshpre (FRules frshr frshpost)) →
+                     ¬frshpost frshpost}
+    ... | Inl frshpost =
+      Inl (FZRules frshpre (FRules frshr frshpost))
     
     fresh-rs-dec : (x : Nat) →
                    (rs : rules) →
@@ -118,7 +161,8 @@ module freshness-decidable where
     fresh-rs-dec x nil = Inl FNoRules
     fresh-rs-dec x (r / rs)
       with fresh-r-dec x r
-    ... | Inr ¬frshr = Inr λ{(FRules frshr frshrs) → ¬frshr frshr}
+    ... | Inr ¬frshr =
+      Inr λ{(FRules frshr frshrs) → ¬frshr frshr}
     ... | Inl frshr
       with fresh-rs-dec x rs
     ... | Inr ¬frshrs =

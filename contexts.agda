@@ -44,7 +44,7 @@ module contexts where
   
   -- the singleton context
   ■_ : {A : Set} → (Nat × A) → A ctx
-  (■ (x , τ)) y with natEQ x y
+  (■ (x , τ)) y with nat-dec x y
   ... | Inl refl = Some τ
   ... | Inr _ = None
 

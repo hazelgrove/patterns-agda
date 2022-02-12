@@ -8,7 +8,7 @@ module lemmas-contexts where
                 (x , τ) ∈ Γ →
                 (x , τ') ∈ Γ →
                 τ == τ'
-  ctx-unicity {x = x} p q with natEQ x x
+  ctx-unicity {x = x} p q with nat-dec x x
   ... | Inl refl = some-inj (! p · q)
   ... | Inr x≠x = abort (x≠x refl)
 
@@ -24,22 +24,23 @@ module lemmas-contexts where
       eq : (z : Nat) →
            ((Γ ,, (x , τ1)) ,, (y , τ2)) z ==
              ((Γ ,, (y , τ2)) ,, (x , τ1)) z
-      eq z with natEQ y z
-      ... | Inr y≠z with natEQ x z
+      eq z with nat-dec y z
+      ... | Inr y≠z with nat-dec x z
       ... | Inl refl = refl
-      ... | Inr x≠z with natEQ y z
+      ... | Inr x≠z with nat-dec y z
       ... | Inl refl = abort (y≠z refl)
       ... | Inr y≠z' = refl
-      eq z | Inl refl with natEQ x z
+      eq z | Inl refl with nat-dec x z
       ... | Inl refl = abort (x≠y refl)
-      ... | Inr x≠z with natEQ z z
+      ... | Inr x≠z with nat-dec z z
       ... | Inl refl = refl
       ... | Inr z≠z = abort (z≠z refl)
-  
+
+
   -- an element is in the context formed with just itself
   self-dom-singleton : {A : Set} (x : Nat) (τ : A) →
                        (x , τ) ∈ (■ (x , τ))
-  self-dom-singleton x τ with natEQ x x
+  self-dom-singleton x τ with nat-dec x x
   ... | Inl refl = refl
   ... | Inr x≠x = abort (x≠x refl)
   
@@ -48,7 +49,7 @@ module lemmas-contexts where
   dom-singleton-eq : {A : Set} {τ : A} {x y : Nat} →
                      dom (■ (y , τ)) x →
                      x == y
-  dom-singleton-eq {x = x} {y = y} (τ' , x∈■) with natEQ y x
+  dom-singleton-eq {x = x} {y = y} (τ' , x∈■) with nat-dec y x
   ... | Inl refl = refl
   ... | Inr y≠x = abort (some-not-none (! x∈■))
 
@@ -64,7 +65,7 @@ module lemmas-contexts where
       ... | refl = x#Γ
 
       disj2 : (y : Nat) → dom Γ y → y # (■ (x , τ))
-      disj2 y (τ' , y∈■) with natEQ x y
+      disj2 y (τ' , y∈■) with nat-dec x y
       ... | Inl refl = abort (some-not-none (! y∈■ · x#Γ ))
       ... | Inr x≠y = refl
 
@@ -81,7 +82,7 @@ module lemmas-contexts where
   apart-singleton-neq : {A : Set} {x y : Nat} {τ : A} →
                         x # (■ (y , τ)) →
                         x ≠ y
-  apart-singleton-neq {x = x} {y = y} x#■  with natEQ y x
+  apart-singleton-neq {x = x} {y = y} x#■  with nat-dec y x
   ... | Inl refl = abort (some-not-none x#■)
   ... | Inr y≠x = flip y≠x
 
@@ -90,10 +91,33 @@ module lemmas-contexts where
   neq-apart-singleton : {A : Set} {x y : Nat} {τ : A} →
                         x ≠ y →
                         x # (■ (y , τ))
-  neq-apart-singleton {x = x} {y = y} x≠y with natEQ y x
+  neq-apart-singleton {x = x} {y = y} x≠y with nat-dec y x
   ... | Inl refl = abort (x≠y refl)
   ... | Inr y≠x = refl
 
+  -- empty is the identity wrt unions
+  ∪-identityʳ : {A : Set} (Γ : A ctx) →
+                Γ ∪ ∅ == Γ
+  ∪-identityʳ Γ = funext eq
+    where
+      eq : (x : Nat) →
+           (Γ ∪ ∅) x == Γ x
+      eq x
+        with Γ x
+      ... | Some τ = refl
+      ... | None = refl
+      
+  ∪-identityˡ : {A : Set} (Γ : A ctx) →
+                ∅ ∪ Γ == Γ
+  ∪-identityˡ {A = A} Γ = funext eq
+    where
+      eq : (x : Nat) →
+           (∅ ∪ Γ) x == Γ x
+      eq x
+        with (∅ {A = A}) x
+      ... | Some τ = refl
+      ... | None = refl
+                
   -- union is associative
   ∪-assoc : {A : Set} (Γ1 Γ2 Γ3 : A ctx) →
             (Γ1 ∪ Γ2) ∪ Γ3 == Γ1 ∪ (Γ2 ∪ Γ3)
@@ -126,7 +150,18 @@ module lemmas-contexts where
   union-extend-assoc : {A : Set} (Γ1 Γ2 : A ctx) (x : Nat) (τ : A) →
                        (Γ1 ∪ Γ2) ,, (x , τ) == (Γ1 ,, (x , τ)) ∪ Γ2
   union-extend-assoc Γ1 Γ2 x τ = ! (∪-assoc (■ (x , τ)) Γ1 Γ2)
-  
+
+  -- union with yourself is yourself
+  union-with-self : {A : Set} (Γ : A ctx) →
+                    Γ ∪ Γ == Γ
+  union-with-self Γ = funext eq
+    where
+      eq : (x : Nat) →
+           (Γ ∪ Γ) x == Γ x
+      eq x with Γ x in Γx
+      ... | Some τ = refl
+      ... | None = Γx
+
   -- an element in the left of a union is in the union
   dom-l-union : {A : Set} →
                 (Γ1 Γ2 : A ctx) (x : Nat) (τ : A) →
@@ -155,11 +190,12 @@ module lemmas-contexts where
   dom-union-part Γ1 Γ2 x τ x∈Γ1∪Γ2 with Γ1 x
   ... | Some τ1 = Inl x∈Γ1∪Γ2
   ... | None = Inr x∈Γ1∪Γ2
-
+  
   -- since unions prefer the left hand side context for overlaps,
   -- removing the overlap from the right hand side produces
   -- the same context
-  union-with-diff : {A : Set} (Γ1 Γ2 : A ctx) →
+  union-with-diff : {A : Set} →
+                    (Γ1 Γ2 : A ctx) →
                     (Γ1 ∪ Γ2) == Γ1 ∪ (Γ2 ∖ Γ1)
   union-with-diff Γ1 Γ2 = funext eq
     where
@@ -216,15 +252,15 @@ module lemmas-contexts where
                      x ≠ y →
                      x # Γ →
                      x # (Γ ,, (y , τ))
-  neq-apart-extend {x = x} {y = y} Γ x≠y x#Γ with natEQ y x
+  neq-apart-extend {x = x} {y = y} Γ x≠y x#Γ with nat-dec y x
   ... | Inl refl = abort (x≠y refl)
   ... | Inr y≠x = x#Γ
   
   -- if an index is apart from a union,
   -- then it is apart from the left unand
   apart-union-l : {A : Set} (Γ1 Γ2 : A ctx) (x : Nat) →
-                 x # (Γ1 ∪ Γ2) →
-                 x # Γ1
+                  x # (Γ1 ∪ Γ2) →
+                  x # Γ1
   apart-union-l Γ1 Γ2 n aprt with Γ1 n
   apart-union-l Γ1 Γ2 n () | Some x
   apart-union-l Γ1 Γ2 n aprt | None = refl
@@ -232,8 +268,8 @@ module lemmas-contexts where
   -- if an index is apart from a union,
   -- then it is apart from the right unand
   apart-union-r : {A : Set} (Γ1 Γ2 : A ctx) (n : Nat) →
-                 n # (Γ1 ∪ Γ2) →
-                 n # Γ2
+                  n # (Γ1 ∪ Γ2) →
+                  n # Γ2
   apart-union-r Γ1 Γ2 n aprt with Γ1 n
   apart-union-r Γ3 Γ4 n () | Some x
   apart-union-r Γ3 Γ4 n aprt | None = aprt
@@ -248,15 +284,67 @@ module lemmas-contexts where
   apart-parts Γ1 Γ2 x refl apt2 | .None = apt2
 
   -- disjointness is commutative
-  ##-comm : {A : Set} {Γ1 Γ2 : A ctx} →
-            Γ1 ## Γ2 →
-            Γ2 ## Γ1
-  ##-comm (disj1 , disj2) = disj2 , disj1
+  ##-sym : {A : Set} {Γ1 Γ2 : A ctx} →
+           Γ1 ## Γ2 →
+           Γ2 ## Γ1
+  ##-sym (disj1 , disj2) = disj2 , disj1
 
+  
+  disj-union-unicity-l : {A : Set} {Γ1 Γ1' Γ2 : A ctx} →
+                         Γ1 ## Γ2 →
+                         Γ1' ## Γ2 →
+                         (Γ1 ∪ Γ2) == (Γ1' ∪ Γ2) →
+                         Γ1 == Γ1'
+  disj-union-unicity-l {Γ1 = Γ1} {Γ1' = Γ1'} {Γ2 = Γ2}
+                       Γ1##Γ2 Γ1'##Γ2 eq∪ =
+    funext eq 
+    where
+      eq : (x : Nat) → Γ1 x == Γ1' x
+      eq x with Γ2 x in Γ2x
+      ... | Some τ2 =
+        π2 Γ1##Γ2 x (τ2 , Γ2x) ·
+          ! (π2 Γ1'##Γ2 x (τ2 , Γ2x))
+      ... | None
+         with Γ1 x in Γ1x | Γ1' x in Γ1'x
+      eq x | None | Some τ1 | Some τ1'
+        with dom-union-part Γ1 Γ2 x τ1'
+                            (tr (λ qq → (x , τ1') ∈ qq )
+                                (! eq∪)
+                                (dom-l-union Γ1' Γ2 x τ1' Γ1'x))
+      ... | Inl x∈Γ1 = ! Γ1x · x∈Γ1
+      ... | Inr x∈Γ2 = abort (some-not-none (! x∈Γ2 · Γ2x))
+      eq x | None | None | Some τ1'
+        with dom-union-part Γ1 Γ2 x τ1'
+                            (tr (λ qq → (x , τ1') ∈ qq )
+                                (! eq∪)
+                                (dom-l-union Γ1' Γ2 x τ1' Γ1'x))
+      ... | Inl x∈Γ1 = abort (some-not-none (! x∈Γ1 · Γ1x))
+      ... | Inr x∈Γ2 = abort (some-not-none (! x∈Γ2 · Γ2x))
+      eq x | None | Some τ1 | None
+        with dom-union-part Γ1' Γ2 x τ1
+                            (tr (λ qq → (x , τ1) ∈ qq )
+                                eq∪
+                                (dom-l-union Γ1 Γ2 x τ1 Γ1x))
+      ... | Inl x∈Γ1' = abort (some-not-none (! x∈Γ1' · Γ1'x))
+      ... | Inr x∈Γ2 = abort (some-not-none (! x∈Γ2 · Γ2x))
+      eq x | None | None | None = refl
+
+  disj-union-unicity-r : {A : Set} {Γ1 Γ2 Γ2' : A ctx} →
+                         Γ1 ## Γ2 →
+                         Γ1 ## Γ2' →
+                         (Γ1 ∪ Γ2) == (Γ1 ∪ Γ2') →
+                         Γ2 == Γ2'
+  disj-union-unicity-r {Γ1 = Γ1} {Γ2 = Γ2} {Γ2' = Γ2'}
+                       Γ1##Γ2 Γ1##Γ2' eq∪ =
+    disj-union-unicity-l (##-sym Γ1##Γ2)
+                         (##-sym Γ1##Γ2')
+                         (∪-comm Γ2 Γ1 (##-sym Γ1##Γ2) ·
+                           (eq∪ · ∪-comm Γ1 Γ2' Γ1##Γ2'))
+  
   -- if a union is disjoint with a target, so is the left unand
   union-disjoint-l : {A : Set} {Γ1 Γ2 Γ3 : A ctx} →
-                    (Γ1 ∪ Γ2) ## Γ3 →
-                    Γ1 ## Γ3
+                     (Γ1 ∪ Γ2) ## Γ3 →
+                     Γ1 ## Γ3
   union-disjoint-l {Γ1 = Γ1} {Γ2 = Γ2} {Γ3 = Γ3} (ud1 , ud2) = du11 , du12
     where
       dom-union1 : {A : Set} (Γ1 Γ2 : A ctx) (n : Nat) →
@@ -291,7 +379,7 @@ module lemmas-contexts where
       du22 : (n : Nat) → dom Δ n → n # Γ2
       du22 n dom = apart-union-r Γ1 Γ2 n (ud2 n dom)
 
-
+  
   -- if both parts of a union are disjoint with a target, so is the union
   disjoint-parts : {A : Set} {Γ1 Γ2 Γ3 : A ctx} →
                    Γ1 ## Γ3 →
@@ -307,3 +395,8 @@ module lemmas-contexts where
 
       disj3∪ : (x : Nat) → dom Γ3 x → x # (Γ1 ∪ Γ2)
       disj3∪ x x∈Γ3 = apart-parts Γ1 Γ2 x (disj31 x x∈Γ3) (disj32 x x∈Γ3)
+  
+
+  disjoint-empty : {A : Set} {Γ : A ctx} →
+                   Γ ## ∅
+  disjoint-empty = (λ _ _ → refl) , (λ _ ())

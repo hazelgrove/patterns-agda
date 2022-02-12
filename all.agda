@@ -13,12 +13,10 @@ open import hole-binders-disjoint-symmetric
 open import lemmas-binders-disjointness
 open import binders-uniqueness
 open import freshness-decidable
-open import lemma-exists-fresh
 open import lemmas-freshness
 open import weakening
 
 open import core
-open import substitution-env
 open import result-judgements
 open import value-judgements
 open import constraints-core
@@ -28,7 +26,7 @@ open import dynamics-core
 open import statics-core
 
 open import complete-satisfy-decidable
-open import htype-decidable
+open import htyp-decidable
 open import notintro-decidable
 open import possible-decidable
 open import satisfy-decidable

@@ -1,7 +1,9 @@
+open import List
 open import Nat
 open import Prelude
 open import contexts
 open import core
+open import patterns-core
 
 module freshness where
   -- types T where we can determine if a Nat is unbound in T.
@@ -58,7 +60,25 @@ module freshness where
                  unbound-in-rs x rs-pre →
                  unbound-in-rs x (r / rs-post) →
                  unbound-in-zrs x (rs-pre / r / rs-post)
-                
+
+    data unbound-in-σ : Nat → env → Set where
+      UBσId    : ∀{x Γ} →
+                 unbound-in-σ x (Id Γ)
+      UBσSubst : ∀{x d y σ} →
+                 unbound-in-e x d →
+                 x ≠ y →
+                 unbound-in-σ x σ →
+                 unbound-in-σ x (Subst d y σ)
+
+    data unbound-in-θ : Nat → subst-list → Set where
+      UBθEmpty  : ∀{x} →
+                  unbound-in-θ x []
+      UBθExtend : ∀{x d τ y θ} →
+                  unbound-in-e x d →
+                  x ≠ y →
+                  unbound-in-θ x θ →
+                  unbound-in-θ x ((d , τ , y) :: θ)
+                  
     data unbound-in-e : Nat → ihexp → Set where
       UBNum    : ∀{x n} →
                  unbound-in-e x (N n)
@@ -78,10 +98,10 @@ module freshness where
       UBInr    : ∀{x e τ} →
                  unbound-in-e x e →
                  unbound-in-e x (inr τ e)
-      UBMatch  : ∀{x e rs} →
+      UBMatch  : ∀{x e τ rs} →
                  unbound-in-e x e →
                  unbound-in-zrs x rs →
-                 unbound-in-e x (match e rs)
+                 unbound-in-e x (match e ·: τ of rs)
       UBPair   : ∀{x e1 e2} →
                  unbound-in-e x e1 →
                  unbound-in-e x e2 →
@@ -92,12 +112,14 @@ module freshness where
       UBSnd    : ∀{x e} →
                  unbound-in-e x e →
                  unbound-in-e x (snd e)
-      UBEHole  : ∀{x u} →
-                 unbound-in-e x (⦇-⦈[ u  ])
-      UBNEHole : ∀{x e u} →
+      UBEHole  : ∀{x u σ} →
+                 unbound-in-σ x σ →
+                 unbound-in-e x (⦇-⦈⟨ u , σ ⟩)
+      UBNEHole : ∀{x e u σ} →
+                 unbound-in-σ x σ →
                  unbound-in-e x e →
-                 unbound-in-e x (⦇⌜ e ⌟⦈[ u ])
-
+                 unbound-in-e x (⦇⌜ e ⌟⦈⟨ u , σ ⟩)
+    
   instance
     PattrnUB : UnboundIn pattrn
     PattrnUB = record { unbound-in = unbound-in-p }
@@ -113,6 +135,14 @@ module freshness where
   instance
     ZRulesUB : UnboundIn zrules
     ZRulesUB = record { unbound-in = unbound-in-zrs }
+
+  instance
+    EnvUB : UnboundIn env
+    EnvUB = record { unbound-in = unbound-in-σ }
+
+  instance
+    SubstsUB : UnboundIn subst-list
+    SubstsUB = record { unbound-in = unbound-in-θ }
 
   instance
     IHExpUB : UnboundIn ihexp
@@ -139,7 +169,26 @@ module freshness where
                 fresh-rs x rs-pre →
                 fresh-rs x (r / rs-post) →
                 fresh-zrs x (rs-pre / r / rs-post)
-                
+
+    data fresh-σ : Nat → env → Set where
+      FσId    : ∀{x Γ} →
+                x # Γ →
+                fresh-σ x (Id Γ)
+      FσSubst : ∀{x d y σ} →
+                fresh x d →
+                x ≠ y →
+                fresh-σ x σ →
+                fresh-σ x (Subst d y σ)
+
+    data fresh-θ : Nat → subst-list → Set where
+      FθEmpty  : ∀{x} →
+                 fresh-θ x []
+      FθExtend : ∀{x d τ y θ} →
+                 fresh x d →
+                 x ≠ y →
+                 fresh-θ x θ →
+                 fresh-θ x ((d , τ , y) :: θ)
+                 
     data fresh : Nat → ihexp → Set where
       FNum    : ∀{x n} →
                 fresh x (N n)
@@ -160,10 +209,10 @@ module freshness where
       FInr    : ∀{x e τ} →
                 fresh x e →
                 fresh x (inr τ e)
-      FMatch  : ∀{x e rs} →
+      FMatch  : ∀{x e τ rs} →
                 fresh x e →
                 fresh-zrs x rs →
-                fresh x (match e rs)
+                fresh x (match e ·: τ of rs)
       FPair   : ∀{x e1 e2} →
                 fresh x e1 →
                 fresh x e2 →
@@ -174,11 +223,14 @@ module freshness where
       FSnd    : ∀{x e} →
                 fresh x e →
                 fresh x (snd e)
-      FEHole   : ∀{x u} →
-                fresh x (⦇-⦈[ u  ])
-      FNEHole : ∀{x e u} →
+      FEHole  : ∀{x u σ} →
+                fresh-σ x σ →
+                fresh x (⦇-⦈⟨ u , σ ⟩)
+      FNEHole : ∀{x e u σ} →
+                fresh-σ x σ →
                 fresh x e →
-                fresh x (⦇⌜ e ⌟⦈[ u ])
+                fresh x (⦇⌜ e ⌟⦈⟨ u , σ ⟩)
+
 
   -- types T where we can determine if a Nat is unbound in T.
   -- we use this as a type-class so that the disjointness
@@ -235,7 +287,23 @@ module freshness where
                   hole-unbound-in-rs u rs-pre →
                   hole-unbound-in-rs u (r / rs-post) →
                   hole-unbound-in-zrs u (rs-pre / r / rs-post)
-                
+
+    data hole-unbound-in-σ : Nat → env → Set where
+      HUBσId    : ∀{u Γ} →
+                  hole-unbound-in-σ u (Id Γ)
+      HUBσSubst : ∀{u d y σ} →
+                  hole-unbound-in-e u d →
+                  hole-unbound-in-σ u σ →
+                  hole-unbound-in-σ u (Subst d y σ)
+
+    data hole-unbound-in-θ : Nat → subst-list → Set where
+      HUBθEmpty  : ∀{u} →
+                   hole-unbound-in-θ u []
+      HUBθExtend : ∀{u d τ y θ} →
+                   hole-unbound-in-e u d →
+                   hole-unbound-in-θ u θ →
+                   hole-unbound-in-θ u ((d , τ , y) :: θ)
+                  
     data hole-unbound-in-e : Nat → ihexp → Set where
       HUBNum    : ∀{u n} →
                   hole-unbound-in-e u (N n)
@@ -254,10 +322,10 @@ module freshness where
       HUBInr    : ∀{u e τ} →
                   hole-unbound-in-e u e →
                   hole-unbound-in-e u (inr τ e)
-      HUBMatch  : ∀{u e rs} →
+      HUBMatch  : ∀{u e τ rs} →
                   hole-unbound-in-e u e →
                   hole-unbound-in-zrs u rs →
-                  hole-unbound-in-e u (match e rs)
+                  hole-unbound-in-e u (match e ·: τ of rs)
       HUBPair   : ∀{u e1 e2} →
                   hole-unbound-in-e u e1 →
                   hole-unbound-in-e u e2 →
@@ -268,11 +336,13 @@ module freshness where
       HUBSnd    : ∀{u e} →
                   hole-unbound-in-e u e →
                   hole-unbound-in-e u (snd e)
-      HUBEHole  : ∀{u u'} →
-                  hole-unbound-in-e u (⦇-⦈[ u' ])
-      HUBNEHole : ∀{u e u'} →
+      HUBEHole  : ∀{u u' σ} →
+                  hole-unbound-in-σ u σ →
+                  hole-unbound-in-e u (⦇-⦈⟨ u' , σ ⟩)
+      HUBNEHole : ∀{u e u' σ} →
+                  hole-unbound-in-σ u σ →
                   hole-unbound-in-e u e →
-                  hole-unbound-in-e u (⦇⌜ e ⌟⦈[ u' ])
+                  hole-unbound-in-e u (⦇⌜ e ⌟⦈⟨ u' , σ ⟩)
 
   instance
     PattrnHUB : HoleUnboundIn pattrn
@@ -290,6 +360,14 @@ module freshness where
     ZRulesHUB : HoleUnboundIn zrules
     ZRulesHUB = record { hole-unbound-in = hole-unbound-in-zrs }
 
+  instance
+    EnvHUB : HoleUnboundIn env
+    EnvHUB = record { hole-unbound-in = hole-unbound-in-σ }
+
+  instance
+    SubstsHUB : HoleUnboundIn subst-list
+    SubstsHUB = record { hole-unbound-in = hole-unbound-in-θ }
+    
   instance
     IHExpHUB : HoleUnboundIn ihexp
     IHExpHUB = record { hole-unbound-in = hole-unbound-in-e }
@@ -315,7 +393,23 @@ module freshness where
                  hole-fresh-rs u rs-pre →
                  hole-fresh-rs u (r / rs-post) →
                  hole-fresh-zrs u (rs-pre / r / rs-post)
-                
+
+    data hole-fresh-σ : Nat → env → Set where
+      HFσId    : ∀{x Γ} →
+                 hole-fresh-σ x (Id Γ)
+      HFσSubst : ∀{x d y σ} →
+                 hole-fresh x d →
+                 hole-fresh-σ x σ →
+                 hole-fresh-σ x (Subst d y σ)
+
+    data hole-fresh-θ : Nat → subst-list → Set where
+      HFθEmpty  : ∀{x} →
+                  hole-fresh-θ x []
+      HFθExtend : ∀{x d τ y θ} →
+                  hole-fresh x d →
+                  hole-fresh-θ x θ →
+                  hole-fresh-θ x ((d , τ , y) :: θ)
+                 
     data hole-fresh : Nat → ihexp → Set where
       HFNum    : ∀{u n} →
                  hole-fresh u (N n)
@@ -334,10 +428,10 @@ module freshness where
       HFInr    : ∀{u e τ} →
                  hole-fresh u e →
                  hole-fresh u (inr τ e)
-      HFMatch  : ∀{u e rs} →
+      HFMatch  : ∀{u e τ rs} →
                  hole-fresh u e →
                  hole-fresh-zrs u rs →
-                 hole-fresh u (match e rs)
+                 hole-fresh u (match e ·: τ of rs)
       HFPair   : ∀{u e1 e2} →
                  hole-fresh u e1 →
                  hole-fresh u e2 →
@@ -348,11 +442,13 @@ module freshness where
       HFSnd    : ∀{u e} →
                  hole-fresh u e →
                  hole-fresh u (snd e)
-      HFEHole   : ∀{u u'} →
+      HFEHole   : ∀{u u' σ} →
                  u ≠ u' →
-                 hole-fresh u (⦇-⦈[ u' ])
-      HFNEHole : ∀{u e u'} →
+                 hole-fresh-σ u σ →
+                 hole-fresh u (⦇-⦈⟨ u' , σ ⟩)
+      HFNEHole : ∀{u e u' σ} →
                  u ≠ u' →
+                 hole-fresh-σ u σ →
                  hole-fresh u e →
-                 hole-fresh u (⦇⌜ e ⌟⦈[ u' ])
+                 hole-fresh u (⦇⌜ e ⌟⦈⟨ u' , σ ⟩)
 

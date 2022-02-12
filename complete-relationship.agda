@@ -157,24 +157,24 @@ module complete-relationship where
   
   final-val-satorymay : ∀{ξ τ} →
                         ξ :c: τ →
-                        (∀{Δ e} →
-                         ∅ , Δ ⊢ e :: τ →
+                        (∀{Δ Δp e} →
+                         ∅ , Δ , Δp ⊢ e :: τ →
                          e final →
                          e ⊧̇†? ξ) →
-                        (∀{Δ e} →
-                        ∅ , Δ ⊢ e :: τ →
+                        (∀{Δ Δp e} →
+                        ∅ , Δ , Δp ⊢ e :: τ →
                         e val →
                         e ⊧̇†? ξ)
   final-val-satorymay ct finsat wt eval = finsat wt (FVal eval)                    
 
   val-final-satormay : ∀{ξ τ} →
                        ξ :c: τ →
-                       (∀{Δ e} →
-                        ∅ , Δ ⊢ e :: τ →
+                       (∀{Δ Δp e} →
+                        ∅ , Δ , Δp ⊢ e :: τ →
                         e val →
                         e ⊧̇†? ξ) →
-                       (∀{Δ e} →
-                        ∅ , Δ ⊢ e :: τ →
+                       (∀{Δ Δp e} →
+                        ∅ , Δ , Δp ⊢ e :: τ →
                         e final →
                         e ⊧̇†? ξ)
   val-final-satormay {ξ = ξ} ct valsat {e = e} wt (FVal eval) = valsat wt eval
@@ -205,8 +205,8 @@ module complete-relationship where
     PotEntails CTTruth (same-type-truthify tct)
                λ wt fin _ → all-fin-satm wt fin
     where
-      all-fin-satm : ∀{Δ e} →
-                     ∅ , Δ ⊢ e :: τ →
+      all-fin-satm : ∀{Δ Δp e} →
+                     ∅ , Δ , Δp ⊢ e :: τ →
                      e final →
                      e ⊧̇†? ξ
       all-fin-satm =

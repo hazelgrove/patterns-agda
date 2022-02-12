@@ -2,86 +2,143 @@ open import Prelude
 
 module Nat where
   data Nat : Set where
-    Z : Nat
-    1+ : Nat → Nat
+    zero : Nat
+    suc : Nat → Nat
 
   {-# BUILTIN NATURAL Nat #-}
 
   -- the succ operation is injective
-  1+inj : (x y : Nat) → (1+ x == 1+ y) → x == y
-  1+inj Z .0 refl = refl
-  1+inj (1+ x) .(1+ x) refl = refl
+  suc-inj : (x y : Nat) →
+           (suc x == suc y) →
+           x == y
+  suc-inj zero .0 refl = refl
+  suc-inj (suc x) .(suc x) refl = refl
 
-  -- equality of naturals is decidable. we represent this as computing a
-  -- choice of units, with inl <> meaning that the naturals are indeed the
-  -- same and inr <> that they are not.
-  natEQ : (x y : Nat) → ((x == y) + ((x == y) → ⊥))
-  natEQ Z Z = Inl refl
-  natEQ Z (1+ y) = Inr (λ ())
-  natEQ (1+ x) Z = Inr (λ ())
-  natEQ (1+ x) (1+ y) with natEQ x y
-  natEQ (1+ x) (1+ .x) | Inl refl = Inl refl
-  ... | Inr b = Inr (λ x₁ → b (1+inj x y x₁))
+  -- equality of naturals is decidable
+  nat-dec : (x y : Nat) →
+            ((x == y) + ((x == y) → ⊥))
+  nat-dec zero zero = Inl refl
+  nat-dec zero (suc y) = Inr (λ ())
+  nat-dec (suc x) zero = Inr (λ ())
+  nat-dec (suc x) (suc y) with nat-dec x y
+  ... | Inl refl = Inl refl
+  ... | Inr x≠y = Inr (λ refl → x≠y (suc-inj x y refl))
 
-  -- nat equality as a predicate. this saves some very repetetive casing.
-  natEQp : (x y : Nat) → Set
-  natEQp x y with natEQ x y
-  natEQp x .x | Inl refl = ⊥
-  natEQp x y | Inr x₁ = ⊤
+  -- we already use + for sum types, so we use ✦ for the sum of nats
+  infixl 6 _✦_
+  _✦_ : Nat → Nat → Nat
+  zero ✦ y = y
+  (suc x) ✦ y = suc (x ✦ y)
+
+  ✦-identityʳ : (n : Nat) → n ✦ 0 == n
+  ✦-identityʳ zero = refl
+  ✦-identityʳ (suc n) =
+    ap1 (λ qq → suc qq) (✦-identityʳ n) 
+
+  ✦-suc : (m n : Nat) → m ✦ (suc n) == suc (m ✦ n)
+  ✦-suc zero n = refl
+  ✦-suc (suc m) n = ap1 (λ qq → suc qq) (✦-suc m n)
   
-  _nat+_ : Nat → Nat → Nat
-  Z nat+ y = y
-  1+ x nat+ y = 1+ (x nat+ y)
+  ✦-comm : (m n : Nat) → m ✦ n == n ✦ m
+  ✦-comm m zero = ✦-identityʳ m
+  ✦-comm m (suc n) =
+    ✦-suc m n · ap1 (λ qq → suc qq) (✦-comm m n) 
 
-  max : Nat → Nat → Nat
-  max Z n = n
-  max (1+ m) Z = 1+ m
-  max (1+ m) (1+ n) = 1+ (max m n)
+  ✦-assoc : (a b c : Nat) →
+            a ✦ (b ✦ c) == (a ✦ b) ✦ c
+  ✦-assoc zero b c = refl
+  ✦-assoc (suc a) b c = ap1 suc (✦-assoc a b c)
 
-  max-is-arg : (m n : Nat) →
-               (max m n == m) + (max m n == n)
-  max-is-arg Z n = Inr refl
-  max-is-arg (1+ m) Z = Inl refl
-  max-is-arg (1+ m) (1+ n)
-    with max-is-arg m n
-  ... | Inl max=m = Inl (ap1 (λ qq → 1+ qq) max=m)
-  ... | Inr max=n = Inr (ap1 (λ qq → 1+ qq) max=n)
-
-  max-comm : (m n : Nat) →
-             (max m n == max n m)
-  max-comm Z Z = refl
-  max-comm Z (1+ n) = refl
-  max-comm (1+ m) Z = refl
-  max-comm (1+ m) (1+ n)
-    with max-comm m n
-  ... | xmn=xnm = ap1 (λ qq → 1+ qq) xmn=xnm
-
+  infix 4 _<_
   data _<_ : Nat → Nat → Set where
-    z<1+ : ∀{n} → Z < (1+ n)
-    1+<1+ : ∀{m n} → m < n → (1+ m) < (1+ n)
+    z<suc : ∀{n} → zero < (suc n)
+    suc<suc : ∀{m n} → m < n → (suc m) < (suc n)
 
-  n<1+n : (n : Nat) →
-          n < (1+ n)
-  n<1+n Z = z<1+
-  n<1+n (1+ n) = 1+<1+ (n<1+n n)
+  n<sucn : (n : Nat) →
+           n < (suc n)
+  n<sucn zero = z<suc
+  n<sucn (suc n) = suc<suc (n<sucn n)
 
   <-≠ : ∀{n m} →
         n < m →
         n ≠ m
-  <-≠ (1+<1+ m<m) refl = <-≠ m<m refl
+  <-≠ (suc<suc m<m) refl = <-≠ m<m refl
 
-  max<-arg1< : ∀{m n x} →
-               max m n < x →
-               m < x
-  max<-arg1< {m = Z} {n = Z} z<1+ = z<1+
-  max<-arg1< {m = Z} {n = 1+ n} (1+<1+ max<x) = z<1+
-  max<-arg1< {m = 1+ m} {n = Z} (1+<1+ max<x) = 1+<1+ max<x
-  max<-arg1< {m = 1+ m} {n = 1+ n} (1+<1+ max<x) = 1+<1+ (max<-arg1< max<x)
+  <suc-≤ : ∀{n m} →
+           n < suc m →
+           (n < m) + (n == m)
+  <suc-≤ {n = .zero} {m = zero} z<suc = Inr refl
+  <suc-≤ {n = .zero} {m = suc m} z<suc = Inl z<suc
+  <suc-≤ {n = suc n} {m = suc m} (suc<suc n<sucm)
+    with <suc-≤ n<sucm
+  ... | Inl n<m = Inl (suc<suc n<m)
+  ... | Inr refl = Inr refl
+  
+  <-trans-suc : ∀{a b c} →
+                a < suc b →
+                b < c →
+                a < c
+  <-trans-suc z<suc z<suc = z<suc
+  <-trans-suc z<suc (suc<suc b<c) = z<suc
+  <-trans-suc (suc<suc a<sucb) (suc<suc b<c) =
+    suc<suc (<-trans-suc a<sucb b<c)
 
-  max<-arg2< : ∀{m n x} →
-               max m n < x →
-               n < x
-  max<-arg2< {m = Z} {n = Z} z<1+ = z<1+
-  max<-arg2< {m = Z} {n = 1+ n} (1+<1+ max<x) = 1+<1+ max<x
-  max<-arg2< {m = 1+ m} {n = Z} (1+<1+ max<x) = z<1+
-  max<-arg2< {m = 1+ m} {n = 1+ n} (1+<1+ max<x) = 1+<1+ (max<-arg2< max<x)
+  <-trans : {a b c : Nat} →
+            a < b →
+            b < c →
+            a < c
+  <-trans z<suc (suc<suc b<c) = z<suc
+  <-trans (suc<suc a<b) (suc<suc b<c) =
+    suc<suc (<-trans a<b b<c)
+  
+  ✦-monoʳ-< : (a b c : Nat) →
+              b < c →
+              (a ✦ b) < (a ✦ c)
+  ✦-monoʳ-< zero b c b<c = b<c
+  ✦-monoʳ-< (suc a) b c b<c = suc<suc (✦-monoʳ-< a b c b<c)
+  
+  ✦-monoˡ-< : (a b c : Nat) →
+              b < c →
+              (b ✦ a) < (c ✦ a)
+  ✦-monoˡ-< a b c b<c =
+    tr (λ qq → qq < (c ✦ a)) (✦-comm a b)
+      (tr (λ qq → (a ✦ b) < qq) (✦-comm a c)
+        (✦-monoʳ-< a b c b<c))
+       
+  ✦-mono-< : {a b c d : Nat} →
+             a < b →
+             c < d →
+             (a ✦ c) < (b ✦ d)
+  ✦-mono-< {a = a} {b = b} {c = c} {d = d}
+           a<b c<d =
+    <-trans (✦-monoˡ-< c a b a<b)
+            (✦-monoʳ-< b c d c<d)
+
+  ✦-mono-<-suc : {a b c d : Nat} →
+                 a < b →
+                 c < suc d →
+                 (a ✦ c) < (b ✦ d)
+  ✦-mono-<-suc {a = a} {b = b} {c = c} {d = d}
+               a<b c<sucd
+    with <suc-≤ c<sucd
+  ... | Inl c<d = ✦-mono-< a<b c<d
+  ... | Inr refl = ✦-monoˡ-< c a b a<b
+  
+  max : Nat → Nat → Nat
+  max zero n = n
+  max (suc m) zero = suc m
+  max (suc m) (suc n) = suc (max m n)
+
+  arg1<sucmax : (m n : Nat) →
+                m < suc (max m n)
+  arg1<sucmax zero n = z<suc
+  arg1<sucmax (suc m) zero = suc<suc (n<sucn m)
+  arg1<sucmax (suc m) (suc n) =
+    suc<suc (arg1<sucmax m n)
+
+  arg2<sucmax : (m n : Nat) →
+                n < suc (max m n)
+  arg2<sucmax zero n = n<sucn n
+  arg2<sucmax (suc m) zero = z<suc
+  arg2<sucmax (suc m) (suc n) =
+    suc<suc (arg2<sucmax m n)

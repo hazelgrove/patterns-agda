@@ -1,5 +1,6 @@
 module Prelude where
-  open import Agda.Primitive using (Level; lzero; lsuc) renaming (_⊔_ to lmax) public
+  open import Agda.Primitive using (Level; lzero; lsuc)
+    renaming (_⊔_ to lmax) public
   
   -- empty type
   data ⊥ : Set where
@@ -93,25 +94,21 @@ module Prelude where
   some-inj : {A : Set} {x y : A} → Some x == Some y → x == y
   some-inj refl = refl
 
-  -- some isn't none
+  -- some is not none
   some-not-none : {A : Set} {x : A} → Some x == None → ⊥
   some-not-none ()
 
-  -- function extensionality, used to reason about contexts as
-  -- finite functions
+  -- function extensionality.
+  -- used to reason about contexts as finite functions
   postulate
      funext : {A : Set} {B : A → Set} {f g : (x : A) → (B x)} →
               ((x : A) → f x == g x) → f == g
 
   -- non-equality is commutative
-  flip : {A : Set} {x y : A} → (x == y → ⊥) → (y == x → ⊥)
+  flip : {A : Set} {x y : A} → 
+         (x == y → ⊥) →
+         (y == x → ⊥)
   flip neq eq = neq (! eq)
-
-  -- two types are said to be equivalent, or isomorphic, if there is a pair
-  -- of functions between them where both round-trips are stable up to ==
-  _≃_ : Set → Set → Set
-  _≃_ A B = Σ[ f ∈ (A → B) ] Σ[ g ∈ (B → A) ]
-             (((a : A) → g (f a) == a) × (((b : B) → f (g b) == b)))
 
   contra : {A : Set} → A → (A → ⊥) → ⊥
   contra a ¬a = ¬a a

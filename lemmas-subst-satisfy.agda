@@ -31,7 +31,7 @@ module lemmas-subst-satisfy where
                     e1 ⊧̇ ξ
   final-sat-subst (FVal VNum) sat = sat
   final-sat-subst {x = x} (FVal (VLam {x = y})) sat
-    with natEQ y x
+    with nat-dec y x
   ... | Inl refl = sat
   ... | Inr y≠x = lam-sat-all-sat sat
   final-sat-subst (FVal (VInl eval)) CSTruth = CSTruth
@@ -140,7 +140,7 @@ module lemmas-subst-satisfy where
                        e1 ⊧̇? ξ
   final-maysat-subst (FVal VNum) msat = msat
   final-maysat-subst {x = x} (FVal (VLam {x = y})) msat
-    with natEQ y x
+    with nat-dec y x
   ... | Inl refl = all-lam-maysat msat
   ... | Inr y≠x = all-lam-maysat msat
   final-maysat-subst (FVal (VInl eval)) CMSUnknown = CMSUnknown

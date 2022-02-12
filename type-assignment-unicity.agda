@@ -10,9 +10,9 @@ open import statics-core
 
 module type-assignment-unicity where  
   mutual
-    expr-type-unicity : ∀{Γ Δ e τ τ'} →
-                        Γ , Δ ⊢ e :: τ →
-                        Γ , Δ ⊢ e :: τ' →
+    expr-type-unicity : ∀{Γ Δ Δp e τ τ'} →
+                        Γ , Δ , Δp ⊢ e :: τ →
+                        Γ , Δ , Δp ⊢ e :: τ' →
                         τ == τ'
     expr-type-unicity TANum TANum = refl
     expr-type-unicity {Γ = Γ} (TAVar wt) (TAVar wt') =
@@ -49,49 +49,21 @@ module type-assignment-unicity where
     expr-type-unicity (TASnd wt) (TASnd wt')
       with expr-type-unicity wt wt'
     ... | refl = refl
-    expr-type-unicity {Δ = Δ} (TAEHole x) (TAEHole x') =
-      ctx-unicity {Γ = Δ} x x'
-    expr-type-unicity {Δ = Δ} (TANEHole x wt) (TANEHole x' wt') =
-      ctx-unicity {Γ = Δ} x x'
-
+    expr-type-unicity {Δ = Δ} (TAEHole x∈Δ st) (TAEHole x∈Δ' st')
+      with ctx-unicity {Γ = Δ} x∈Δ x∈Δ'
+    ... | refl = refl
+    expr-type-unicity {Δ = Δ} (TANEHole x∈Δ st wt) (TANEHole x∈Δ' st' wt')
+      with ctx-unicity {Γ = Δ} x∈Δ x∈Δ'
+    ... | refl = refl
+    
     -- variable and hole patterns may be assigned any type,
-    -- so unicity does not actually hold for patterns. However,
-    -- if we assume a given type for the pattern, then unicity
-    -- holds for all other aspects
-    pattern-unicity : ∀{p τ ξ ξ' Γ Γ' Δ Δ'} →
-                      p :: τ [ ξ ]⊣ Γ , Δ →
-                      p :: τ [ ξ' ]⊣ Γ' , Δ' →
-                      (ξ == ξ') × (Γ == Γ') × (Δ == Δ')
-    pattern-unicity PTVar PTVar = refl , refl , refl
-    pattern-unicity PTNum PTNum = refl , refl , refl
-    pattern-unicity (PTInl pt) (PTInl pt')
-      with pattern-unicity pt pt'
-    ... | refl , refl , refl = refl , refl , refl
-    pattern-unicity (PTInr pt) (PTInr pt')
-      with pattern-unicity pt pt'
-    ... | refl , refl , refl  = refl , refl , refl
-    pattern-unicity (PTPair dis dish pt1 pt2) (PTPair dis' dish' pt1' pt2')
-      with pattern-unicity pt1 pt1' | pattern-unicity pt2 pt2'
-    ... | refl , refl , refl | refl , refl , refl = refl , refl , refl
-    pattern-unicity PTEHole PTEHole = refl , refl , refl
-    pattern-unicity (PTNEHole pt apt) (PTNEHole pt' apt')
-      with pattern-unicity pt pt'
-    ... | refl , refl , refl = refl , refl , refl
-    pattern-unicity PTWild PTWild = refl , refl , refl
-    
-    rule-unicity : ∀{Γ Δ r τ1 ξ ξ' τ2 τ2'} →
-                   Γ , Δ ⊢ r :: τ1 [ ξ ]=> τ2 →
-                   Γ , Δ ⊢ r :: τ1 [ ξ' ]=> τ2' →
-                   (ξ == ξ') × (τ2 == τ2')
-    rule-unicity (CTRule pt dis dish wt) (CTRule pt' dis' dish' wt')
-      with pattern-unicity pt pt'
-    ... | refl , refl , refl
-      with expr-type-unicity wt wt'
-    ... | refl = refl , refl
-    
-    rules-unicity : ∀{Γ Δ rs τ1 ξrs ξrs' τ2 τ2'} →
-                    Γ , Δ ⊢ rs ::s τ1 [ ξrs ]=> τ2 →
-                    Γ , Δ ⊢ rs ::s τ1 [ ξrs' ]=> τ2' →
+    -- so unicity does not actually hold for patterns, and thus
+    -- also does not hole for rules. However, if we assume a
+    -- given type for the pattern, then unicity holds for all
+    -- other arguments
+    rules-unicity : ∀{Γ Δ Δp rs τ1 ξrs ξrs' τ2 τ2'} →
+                    Γ , Δ , Δp ⊢ rs ::s τ1 [ ξrs ]=> τ2 →
+                    Γ , Δ , Δp ⊢ rs ::s τ1 [ ξrs' ]=> τ2' →
                     (ξrs == ξrs') × (τ2 == τ2')
     rules-unicity (CTOneRule wt) (CTOneRule wt')
       with rule-unicity wt wt'
@@ -101,3 +73,34 @@ module type-assignment-unicity where
     ... | refl , refl
       with rules-unicity wts wts'
     ... | refl , refl = refl , refl
+                       
+    rule-unicity : ∀{Γ Δ Δp r τ1 ξ ξ' τ2 τ2'} →
+                   Γ , Δ , Δp ⊢ r :: τ1 [ ξ ]=> τ2 →
+                   Γ , Δ , Δp ⊢ r :: τ1 [ ξ' ]=> τ2' →
+                   (ξ == ξ') × (τ2 == τ2')
+    rule-unicity (CTRule pt Γ##Γp wt1) (CTRule pt' Γ##Γp' wt1')
+      with pattern-unicity pt pt'
+    ... | refl , refl
+      with expr-type-unicity wt1 wt1'
+    ... | refl = refl , refl
+
+    pattern-unicity : ∀{Δp p τ ξ ξ' Γ Γ'} →
+                      Δp ⊢ p :: τ [ ξ ]⊣ Γ →
+                      Δp ⊢ p :: τ [ ξ' ]⊣ Γ' →
+                      (ξ == ξ') × (Γ == Γ')
+    pattern-unicity PTVar PTVar = refl , refl
+    pattern-unicity PTNum PTNum = refl , refl
+    pattern-unicity (PTInl pt) (PTInl pt')
+      with pattern-unicity pt pt'
+    ... | refl , refl = refl , refl
+    pattern-unicity (PTInr pt) (PTInr pt')
+      with pattern-unicity pt pt'
+    ... | refl , refl  = refl , refl
+    pattern-unicity (PTPair disj pt1 pt2) (PTPair disj' pt1' pt2')
+      with pattern-unicity pt1 pt1' | pattern-unicity pt2 pt2'
+    ... | refl , refl | refl , refl = refl , refl
+    pattern-unicity (PTEHole w∈Δ) (PTEHole w∈Δ') = refl , refl
+    pattern-unicity (PTNEHole w∈Δ pt) (PTNEHole w∈Δ' pt')
+      with pattern-unicity pt pt'
+    ... | refl , refl = refl , refl
+    pattern-unicity PTWild PTWild = refl , refl

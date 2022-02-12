@@ -1,3 +1,4 @@
+open import List
 open import Nat
 open import Prelude
 open import contexts
@@ -14,6 +15,18 @@ module core where
   infixr 25  _==>_
   infixr 25 _⊕_
   infixr 25 _⊠_
+
+  -- the type of type contexts, i.e., Γs in the judgements
+  tctx : Set
+  tctx = htyp ctx
+
+  -- the type of hole contexts, i.e. Δs in the judgements.
+  hctx : Set
+  hctx = (htyp ctx × htyp) ctx
+
+  -- the type of patten hole contexts, i.e. Δps in the judgements
+  phctx : Set
+  phctx = htyp ctx
   
   mutual
     -- patterns used for structural pattern matching
@@ -39,22 +52,24 @@ module core where
     -- zippered rules
     data zrules : Set where
       _/_/_ : rules → rule → rules → zrules
+
+    -- substitution environments
+    data env : Set where
+      Id    : (Γ : tctx) → env
+      Subst : (d : ihexp) → (y : Nat) → env → env
     
     -- internal expressions
     data ihexp : Set where
-      N        : Nat → ihexp
-      X        : Nat → ihexp
-      ·λ_·[_]_ : Nat → htyp → ihexp → ihexp
-      _∘_      : ihexp → ihexp → ihexp
-      inl      : htyp → ihexp → ihexp
-      inr      : htyp → ihexp → ihexp
-      match    : ihexp → zrules → ihexp
-      ⟨_,_⟩    : ihexp → ihexp → ihexp
-      fst      : ihexp → ihexp
-      snd      : ihexp → ihexp
-      ⦇-⦈[_]   : Nat → ihexp
-      ⦇⌜_⌟⦈[_] : ihexp → Nat → ihexp
-
-  -- the type of type contexts, i.e., Γs in the judgements
-  tctx : Set
-  tctx = htyp ctx
+      N           : Nat → ihexp
+      X           : Nat → ihexp
+      ·λ_·[_]_    : Nat → htyp → ihexp → ihexp
+      _∘_         : ihexp → ihexp → ihexp
+      inl         : htyp → ihexp → ihexp
+      inr         : htyp → ihexp → ihexp
+      match_·:_of : ihexp → htyp → zrules → ihexp
+      ⟨_,_⟩       : ihexp → ihexp → ihexp
+      fst         : ihexp → ihexp
+      snd         : ihexp → ihexp
+      ⦇-⦈⟨_⟩      : (Nat × env) → ihexp
+      ⦇⌜_⌟⦈⟨_⟩    : ihexp → (Nat × env) → ihexp
+ 

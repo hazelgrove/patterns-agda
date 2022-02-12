@@ -13,25 +13,31 @@ module satisfy-decidable where
   satisfy-bool : ihexp → constr → Bool
   satisfy-bool e ·⊤ = true
   satisfy-bool e ·⊥ = false
-  satisfy-bool (N n1) (N n2) with natEQ n1 n2
+  satisfy-bool (N n1) (N n2) with nat-dec n1 n2
   ... | Inl _ = true
   ... | Inr _ = false
   satisfy-bool (inl τ e) (inl ξ) = satisfy-bool e ξ
   satisfy-bool (inr τ e) (inr ξ) = satisfy-bool e ξ
   satisfy-bool (e1 ∘ e2) ⟨ ξ1 , ξ2 ⟩ =
-    satisfy-bool (fst (e1 ∘ e2)) ξ1 and satisfy-bool (snd (e1 ∘ e2)) ξ2
+    satisfy-bool (fst (e1 ∘ e2)) ξ1 and
+      satisfy-bool (snd (e1 ∘ e2)) ξ2
   satisfy-bool ⟨ e1 , e2 ⟩ ⟨ ξ1 , ξ2 ⟩ =
     satisfy-bool e1 ξ1 and satisfy-bool e2 ξ2
   satisfy-bool (fst e) ⟨ ξ1 , ξ2 ⟩ =
-    satisfy-bool (fst (fst e)) ξ1 and satisfy-bool (snd (fst e)) ξ2
+    satisfy-bool (fst (fst e)) ξ1 and
+      satisfy-bool (snd (fst e)) ξ2
   satisfy-bool (snd e) ⟨ ξ1 , ξ2 ⟩ =
-    satisfy-bool (fst (snd e)) ξ1 and satisfy-bool (snd (snd e)) ξ2
-  satisfy-bool (match e rs) ⟨ ξ1 , ξ2 ⟩ =
-    satisfy-bool (fst (match e rs)) ξ1 and satisfy-bool (snd (match e rs)) ξ2
-  satisfy-bool ⦇-⦈[ u ] ⟨ ξ1 , ξ2 ⟩ =
-    satisfy-bool (fst ⦇-⦈[ u ]) ξ1 and satisfy-bool (snd ⦇-⦈[ u ]) ξ2
-  satisfy-bool ⦇⌜ e ⌟⦈[ u ] ⟨ ξ1 , ξ2 ⟩ =
-    satisfy-bool (fst ⦇⌜ e ⌟⦈[ u ]) ξ1 and satisfy-bool (snd ⦇⌜ e ⌟⦈[ u ]) ξ2
+    satisfy-bool (fst (snd e)) ξ1 and
+      satisfy-bool (snd (snd e)) ξ2
+  satisfy-bool (match e ·: τ of rs) ⟨ ξ1 , ξ2 ⟩ =
+    satisfy-bool (fst (match e ·: τ of rs)) ξ1 and
+      satisfy-bool (snd (match e ·: τ of rs)) ξ2
+  satisfy-bool ⦇-⦈⟨ u , σ ⟩ ⟨ ξ1 , ξ2 ⟩ =
+    satisfy-bool (fst ⦇-⦈⟨ u , σ ⟩) ξ1 and
+      satisfy-bool (snd ⦇-⦈⟨ u , σ ⟩) ξ2
+  satisfy-bool ⦇⌜ e ⌟⦈⟨ u , σ ⟩ ⟨ ξ1 , ξ2 ⟩ =
+    satisfy-bool (fst ⦇⌜ e ⌟⦈⟨ u , σ ⟩) ξ1 and
+      satisfy-bool (snd ⦇⌜ e ⌟⦈⟨ u , σ ⟩) ξ2
   satisfy-bool e (ξ1 ∨ ξ2) =
     satisfy-bool e ξ1 or satisfy-bool e ξ2
   -- otherwise,
@@ -39,41 +45,41 @@ module satisfy-decidable where
   -- we expand things out so that all clauses hold definitionally
   satisfy-bool e ·? = false
   satisfy-bool (X x) (N n) = false
-  satisfy-bool (·λ x ·[ u ] e) (N n) = false
+  satisfy-bool (·λ x ·[ τ ] e) (N n) = false
   satisfy-bool (e1 ∘ e2) (N n) = false
   satisfy-bool (inl τ e) (N n) = false
   satisfy-bool (inr τ e) (N n) = false
   satisfy-bool ⟨ e1 , e2 ⟩ (N n) = false
   satisfy-bool (fst e) (N n) = false
   satisfy-bool (snd e) (N n) = false
-  satisfy-bool (match e rs) (N n) = false
-  satisfy-bool ⦇-⦈[ u ] (N n) = false
-  satisfy-bool ⦇⌜ e ⌟⦈[ u ] (N n) = false
+  satisfy-bool (match e ·: τ of rs) (N n) = false
+  satisfy-bool ⦇-⦈⟨ u , σ ⟩ (N n) = false
+  satisfy-bool ⦇⌜ e ⌟⦈⟨ u , σ ⟩ (N n) = false
   satisfy-bool (N n) (inl ξ) = false
   satisfy-bool (X x) (inl ξ) = false
-  satisfy-bool (·λ x ·[ u ] e) (inl ξ) = false
+  satisfy-bool (·λ x ·[ τ ] e) (inl ξ) = false
   satisfy-bool (e1 ∘ e2) (inl ξ) = false
   satisfy-bool (inr τ e) (inl ξ) = false
   satisfy-bool ⟨ e1 , e2 ⟩ (inl ξ) = false
   satisfy-bool (fst e) (inl ξ) = false
   satisfy-bool (snd e) (inl ξ) = false
-  satisfy-bool (match e x) (inl ξ) = false
-  satisfy-bool ⦇-⦈[ u ] (inl ξ) = false
-  satisfy-bool ⦇⌜ e ⌟⦈[ u ] (inl ξ) = false
+  satisfy-bool (match e ·: τ of x) (inl ξ) = false
+  satisfy-bool ⦇-⦈⟨ u , σ ⟩ (inl ξ) = false
+  satisfy-bool ⦇⌜ e ⌟⦈⟨ u , σ ⟩ (inl ξ) = false
   satisfy-bool (N n) (inr ξ) = false
   satisfy-bool (X x) (inr ξ) = false
-  satisfy-bool (·λ x ·[ u ] e) (inr ξ) = false
+  satisfy-bool (·λ x ·[ τ ] e) (inr ξ) = false
   satisfy-bool (e1 ∘ e2) (inr ξ) = false
   satisfy-bool (inl τ e) (inr ξ) = false
   satisfy-bool ⟨ e1 , e2 ⟩ (inr ξ) = false
   satisfy-bool (fst e) (inr ξ) = false
   satisfy-bool (snd e) (inr ξ) = false
-  satisfy-bool (match e rs) (inr ξ) = false
-  satisfy-bool ⦇-⦈[ u ] (inr ξ) = false
-  satisfy-bool ⦇⌜ e ⌟⦈[ u ] (inr ξ) = false
+  satisfy-bool (match e ·: τ of rs) (inr ξ) = false
+  satisfy-bool ⦇-⦈⟨ u , σ ⟩ (inr ξ) = false
+  satisfy-bool ⦇⌜ e ⌟⦈⟨ u , σ ⟩ (inr ξ) = false
   satisfy-bool (N n) ⟨ ξ1 , ξ2 ⟩ = false
   satisfy-bool (X x) ⟨ ξ1 , ξ2 ⟩ = false
-  satisfy-bool (·λ x ·[ u ] e) ⟨ ξ1 , ξ2 ⟩ = false
+  satisfy-bool (·λ x ·[ τ ] e) ⟨ ξ1 , ξ2 ⟩ = false
   satisfy-bool (inl τ e) ⟨ ξ1 , ξ2 ⟩ = false
   satisfy-bool (inr τ e) ⟨ ξ1 , ξ2 ⟩ = false
 
@@ -82,23 +88,24 @@ module satisfy-decidable where
                   e ⊧̇ ξ →
                   satisfy-bool e ξ == true
   satisfy-sound CSTruth = refl
-  satisfy-sound (CSNum {n = n}) with natEQ n n
+  satisfy-sound (CSNum {n = n}) with nat-dec n n
   ... | Inl refl = refl
   ... | Inr neq = abort (neq refl)
   satisfy-sound (CSInl sat) = satisfy-sound sat
   satisfy-sound (CSInr sat) = satisfy-sound sat
-  satisfy-sound (CSPair sat1 sat2) = and-true (satisfy-sound sat1) (satisfy-sound sat2)
+  satisfy-sound (CSPair sat1 sat2) =
+    and-true (satisfy-sound sat1) (satisfy-sound sat2)
   satisfy-sound {e = e1 ∘ e2} (CSNotIntroPair ni sat1 sat2) =
     and-true (satisfy-sound sat1) (satisfy-sound sat2)
-  satisfy-sound {e = match e rs} (CSNotIntroPair ni sat1 sat2) =
+  satisfy-sound {e = match e ·: τ of rs} (CSNotIntroPair ni sat1 sat2) =
     and-true (satisfy-sound sat1) (satisfy-sound sat2)
   satisfy-sound {e = fst e} (CSNotIntroPair ni sat1 sat2) =
     and-true (satisfy-sound sat1) (satisfy-sound sat2)
   satisfy-sound {e = snd e} (CSNotIntroPair ni sat1 sat2) =
     and-true (satisfy-sound sat1) (satisfy-sound sat2)
-  satisfy-sound {e = ⦇-⦈[ u ]} (CSNotIntroPair ni sat1 sat2) =
+  satisfy-sound {e = ⦇-⦈⟨ u , σ ⟩} (CSNotIntroPair ni sat1 sat2) =
     and-true (satisfy-sound sat1) (satisfy-sound sat2)
-  satisfy-sound {e = ⦇⌜ e ⌟⦈[ u ]} (CSNotIntroPair ni sat1 sat2) =
+  satisfy-sound {e = ⦇⌜ e ⌟⦈⟨ u , σ ⟩} (CSNotIntroPair ni sat1 sat2) =
     and-true (satisfy-sound sat1) (satisfy-sound sat2)
   satisfy-sound {e = e} {ξ = ξ1 ∨ ξ2} (CSOrL sat) =
     or-true-l {Q = satisfy-bool e ξ2} (satisfy-sound sat)
@@ -110,33 +117,47 @@ module satisfy-decidable where
                      satisfy-bool e ξ == true →
                      e ⊧̇ ξ
   satisfy-complete {ξ = ·⊤} sateq = CSTruth
-  satisfy-complete {e = N n1} {ξ = N n2} sateq with natEQ n1 n2
+  satisfy-complete {e = N n1} {ξ = N n2} sateq with nat-dec n1 n2
   ... | Inl refl = CSNum
   ... | Inr neq with sateq
   ... | ()
-  satisfy-complete {e = inl τ e} {ξ = inl ξ} sateq = CSInl (satisfy-complete sateq)
-  satisfy-complete {e = inr τ e} {ξ = inr ξ} sateq = CSInr (satisfy-complete sateq)
+  satisfy-complete {e = inl τ e} {ξ = inl ξ} sateq =
+    CSInl (satisfy-complete sateq)
+  satisfy-complete {e = inr τ e} {ξ = inr ξ} sateq =
+    CSInr (satisfy-complete sateq)
   satisfy-complete {e = e1 ∘ e2} {ξ = ⟨ ξ1 , ξ2 ⟩} sateq
     with true-and sateq
-  ... | sat1 , sat2 = CSNotIntroPair NVAp (satisfy-complete sat1) (satisfy-complete sat2)
-  satisfy-complete {e = match e x} {ξ = ⟨ ξ1 , ξ2 ⟩} sateq
+  ... | sat1 , sat2 =
+    CSNotIntroPair NVAp (satisfy-complete sat1)
+                   (satisfy-complete sat2)
+  satisfy-complete {e = match e ·: τ of rs} {ξ = ⟨ ξ1 , ξ2 ⟩} sateq
     with true-and sateq
-  ... | sat1 , sat2 = CSNotIntroPair NVMatch (satisfy-complete sat1) (satisfy-complete sat2)
+  ... | sat1 , sat2 =
+    CSNotIntroPair NVMatch (satisfy-complete sat1)
+                   (satisfy-complete sat2)
   satisfy-complete {e = ⟨ e1 , e2 ⟩} {ξ = ⟨ ξ1 , ξ2 ⟩} sateq
     with true-and sateq
-  ... | sat1 , sat2 = CSPair (satisfy-complete sat1) (satisfy-complete sat2)
+  ... | sat1 , sat2 =
+    CSPair (satisfy-complete sat1) (satisfy-complete sat2)
   satisfy-complete {e = fst e} {ξ = ⟨ ξ1 , ξ2 ⟩} sateq
     with true-and sateq
-  ... | sat1 , sat2 = CSNotIntroPair NVFst (satisfy-complete sat1) (satisfy-complete sat2)
+  ... | sat1 , sat2 =
+    CSNotIntroPair NVFst (satisfy-complete sat1)
+                   (satisfy-complete sat2)
   satisfy-complete {e = snd e} {ξ = ⟨ ξ1 , ξ2 ⟩} sateq
     with true-and sateq
-  ... | sat1 , sat2 = CSNotIntroPair NVSnd (satisfy-complete sat1) (satisfy-complete sat2)
-  satisfy-complete {e = ⦇-⦈[ u ]} {ξ = ⟨ ξ1 , ξ2 ⟩} sateq
+  ... | sat1 , sat2 =
+    CSNotIntroPair NVSnd (satisfy-complete sat1)
+                   (satisfy-complete sat2)
+  satisfy-complete {e = ⦇-⦈⟨ u , σ ⟩} {ξ = ⟨ ξ1 , ξ2 ⟩} sateq
     with true-and sateq
-  ... | sat1 , sat2 = CSNotIntroPair NVEHole (satisfy-complete sat1) (satisfy-complete sat2)
-  satisfy-complete {e = ⦇⌜ e ⌟⦈[ u ]} {ξ = ⟨ ξ1 , ξ2 ⟩} sateq
+  ... | sat1 , sat2 =
+    CSNotIntroPair NVEHole (satisfy-complete sat1) (satisfy-complete sat2)
+  satisfy-complete {e = ⦇⌜ e ⌟⦈⟨ u , σ ⟩} {ξ = ⟨ ξ1 , ξ2 ⟩} sateq
     with true-and sateq
-  ... | sat1 , sat2 = CSNotIntroPair NVNEHole (satisfy-complete sat1) (satisfy-complete sat2)
+  ... | sat1 , sat2 =
+    CSNotIntroPair NVNEHole (satisfy-complete sat1)
+                   (satisfy-complete sat2)
   satisfy-complete {ξ = ξ1 ∨ ξ2} sateq
     with true-or sateq
   ... | Inl sat1 = CSOrL (satisfy-complete sat1)
@@ -168,75 +189,110 @@ module satisfy-decidable where
   -- maysatisfy-bool e ξ = notintro-bool e and possible-bool ξ and xrefutable-bool ξ
   -- we expand things out so that all clasues hold definitionally
   maysatisfy-bool e ·⊤ =
-    notintro-bool e and possible-bool ·⊤ and xrefutable-bool ·⊤
+    notintro-bool e and
+      possible-bool ·⊤ and xrefutable-bool ·⊤
   maysatisfy-bool e (N n) =
-    notintro-bool e and possible-bool (N n) and xrefutable-bool (N n)
+    notintro-bool e and
+      possible-bool (N n) and xrefutable-bool (N n)
   maysatisfy-bool (N n) (inl ξ) =
-    notintro-bool (N n) and possible-bool (inl ξ) and xrefutable-bool (inl ξ)
+    notintro-bool (N n) and
+      possible-bool (inl ξ) and xrefutable-bool (inl ξ)
   maysatisfy-bool (X x) (inl ξ) =
-    notintro-bool (X x) and possible-bool (inl ξ) and xrefutable-bool (inl ξ)
-  maysatisfy-bool (·λ x ·[ u ] e) (inl ξ) =
-    notintro-bool ((·λ x ·[ u ] e)) and possible-bool (inl ξ) and xrefutable-bool (inl ξ)
+    notintro-bool (X x) and
+      possible-bool (inl ξ) and xrefutable-bool (inl ξ)
+  maysatisfy-bool (·λ x ·[ τ ] e) (inl ξ) =
+    notintro-bool ((·λ x ·[ τ ] e)) and
+      possible-bool (inl ξ) and xrefutable-bool (inl ξ)
   maysatisfy-bool (e1 ∘ e2) (inl ξ) =
-    notintro-bool (e1 ∘ e2) and possible-bool (inl ξ) and xrefutable-bool (inl ξ)
+    notintro-bool (e1 ∘ e2) and
+      possible-bool (inl ξ) and xrefutable-bool (inl ξ)
   maysatisfy-bool (inr τ e) (inl ξ) =
-    notintro-bool (inr τ e) and possible-bool (inl ξ) and xrefutable-bool (inl ξ)
+    notintro-bool (inr τ e) and
+      possible-bool (inl ξ) and xrefutable-bool (inl ξ)
   maysatisfy-bool ⟨ e1 , e2 ⟩ (inl ξ) =
-    notintro-bool ⟨ e1 , e2 ⟩ and possible-bool (inl ξ) and xrefutable-bool (inl ξ)
+    notintro-bool ⟨ e1 , e2 ⟩ and
+      possible-bool (inl ξ) and xrefutable-bool (inl ξ)
   maysatisfy-bool (fst e) (inl ξ) =
-    notintro-bool (fst e) and possible-bool (inl ξ) and xrefutable-bool (inl ξ)
+    notintro-bool (fst e) and
+      possible-bool (inl ξ) and xrefutable-bool (inl ξ)
   maysatisfy-bool (snd e) (inl ξ) =
-    notintro-bool (snd e) and possible-bool (inl ξ) and xrefutable-bool (inl ξ)
-  maysatisfy-bool (match e rs) (inl ξ) =
-    notintro-bool (match e rs) and possible-bool (inl ξ) and xrefutable-bool (inl ξ)
-  maysatisfy-bool ⦇-⦈[ u ] (inl ξ) =
-    notintro-bool ⦇-⦈[ u ] and possible-bool (inl ξ) and xrefutable-bool (inl ξ)
-  maysatisfy-bool ⦇⌜ e ⌟⦈[ u ] (inl ξ) =
-    notintro-bool ⦇⌜ e ⌟⦈[ u ] and possible-bool (inl ξ) and xrefutable-bool (inl ξ)
+    notintro-bool (snd e) and
+      possible-bool (inl ξ) and xrefutable-bool (inl ξ)
+  maysatisfy-bool (match e ·: τ of rs) (inl ξ) =
+    notintro-bool (match e ·: τ of rs) and
+      possible-bool (inl ξ) and xrefutable-bool (inl ξ)
+  maysatisfy-bool ⦇-⦈⟨ u , σ ⟩ (inl ξ) =
+    notintro-bool ⦇-⦈⟨ u , σ ⟩ and
+      possible-bool (inl ξ) and xrefutable-bool (inl ξ)
+  maysatisfy-bool ⦇⌜ e ⌟⦈⟨ u , σ ⟩ (inl ξ) =
+    notintro-bool ⦇⌜ e ⌟⦈⟨ u , σ ⟩ and
+      possible-bool (inl ξ) and xrefutable-bool (inl ξ)
   maysatisfy-bool (N n) (inr ξ) =
-    notintro-bool (N n) and possible-bool (inr ξ) and xrefutable-bool (inr ξ)
+    notintro-bool (N n) and
+      possible-bool (inr ξ) and xrefutable-bool (inr ξ)
   maysatisfy-bool (X x) (inr ξ) =
-    notintro-bool (X x) and possible-bool (inr ξ) and xrefutable-bool (inr ξ)
-  maysatisfy-bool (·λ x ·[ u ] e) (inr ξ) =
-    notintro-bool (·λ x ·[ u ] e) and possible-bool (inr ξ) and xrefutable-bool (inr ξ)
+    notintro-bool (X x) and
+      possible-bool (inr ξ) and xrefutable-bool (inr ξ)
+  maysatisfy-bool (·λ x ·[ τ ] e) (inr ξ) =
+    notintro-bool (·λ x ·[ τ ] e) and
+      possible-bool (inr ξ) and xrefutable-bool (inr ξ)
   maysatisfy-bool (e1 ∘ e2) (inr ξ) =
-    notintro-bool (e1 ∘ e2) and possible-bool (inr ξ) and xrefutable-bool (inr ξ)
+    notintro-bool (e1 ∘ e2) and
+      possible-bool (inr ξ) and xrefutable-bool (inr ξ)
   maysatisfy-bool (inl τ e) (inr ξ) =
-    notintro-bool (inl τ e) and possible-bool (inr ξ) and xrefutable-bool (inr ξ)
+    notintro-bool (inl τ e) and
+      possible-bool (inr ξ) and xrefutable-bool (inr ξ)
   maysatisfy-bool ⟨ e1 , e2 ⟩ (inr ξ) =
-    notintro-bool ⟨ e1 , e2 ⟩ and possible-bool (inr ξ) and xrefutable-bool (inr ξ)
+    notintro-bool ⟨ e1 , e2 ⟩ and
+      possible-bool (inr ξ) and xrefutable-bool (inr ξ)
   maysatisfy-bool (fst e) (inr ξ) =
-    notintro-bool (fst e) and possible-bool (inr ξ) and xrefutable-bool (inr ξ)
+    notintro-bool (fst e) and
+      possible-bool (inr ξ) and xrefutable-bool (inr ξ)
   maysatisfy-bool (snd e) (inr ξ) =
-    notintro-bool (snd e) and possible-bool (inr ξ) and xrefutable-bool (inr ξ)
-  maysatisfy-bool (match e rs) (inr ξ) =
-    notintro-bool (match e rs) and possible-bool (inr ξ) and xrefutable-bool (inr ξ)
-  maysatisfy-bool ⦇-⦈[ u ] (inr ξ) =
-    notintro-bool ⦇-⦈[ u ] and possible-bool (inr ξ) and xrefutable-bool (inr ξ)
-  maysatisfy-bool ⦇⌜ e ⌟⦈[ u ] (inr ξ) =
-    notintro-bool ⦇⌜ e ⌟⦈[ u ] and possible-bool (inr ξ) and xrefutable-bool (inr ξ)
+    notintro-bool (snd e) and
+      possible-bool (inr ξ) and xrefutable-bool (inr ξ)
+  maysatisfy-bool (match e ·: τ of rs) (inr ξ) =
+    notintro-bool (match e ·: τ of rs) and
+      possible-bool (inr ξ) and xrefutable-bool (inr ξ)
+  maysatisfy-bool ⦇-⦈⟨ u , σ ⟩ (inr ξ) =
+    notintro-bool ⦇-⦈⟨ u , σ ⟩ and
+      possible-bool (inr ξ) and xrefutable-bool (inr ξ)
+  maysatisfy-bool ⦇⌜ e ⌟⦈⟨ u , σ ⟩ (inr ξ) =
+    notintro-bool ⦇⌜ e ⌟⦈⟨ u , σ ⟩ and
+      possible-bool (inr ξ) and xrefutable-bool (inr ξ)
   maysatisfy-bool (N n) ⟨ ξ1 , ξ2 ⟩ =
-    notintro-bool (N n) and possible-bool ⟨ ξ1 , ξ2 ⟩ and xrefutable-bool ⟨ ξ1 , ξ2 ⟩
+    notintro-bool (N n) and
+      possible-bool ⟨ ξ1 , ξ2 ⟩ and xrefutable-bool ⟨ ξ1 , ξ2 ⟩
   maysatisfy-bool (X x) ⟨ ξ1 , ξ2 ⟩ =
-    notintro-bool (X x) and possible-bool ⟨ ξ1 , ξ2 ⟩ and xrefutable-bool ⟨ ξ1 , ξ2 ⟩
-  maysatisfy-bool (·λ x ·[ u ] e) ⟨ ξ1 , ξ2 ⟩ =
-    notintro-bool (·λ x ·[ u ] e) and possible-bool ⟨ ξ1 , ξ2 ⟩ and xrefutable-bool ⟨ ξ1 , ξ2 ⟩
+    notintro-bool (X x) and
+      possible-bool ⟨ ξ1 , ξ2 ⟩ and xrefutable-bool ⟨ ξ1 , ξ2 ⟩
+  maysatisfy-bool (·λ x ·[ τ ] e) ⟨ ξ1 , ξ2 ⟩ =
+    notintro-bool (·λ x ·[ τ ] e) and
+      possible-bool ⟨ ξ1 , ξ2 ⟩ and xrefutable-bool ⟨ ξ1 , ξ2 ⟩
   maysatisfy-bool (e1 ∘ e2) ⟨ ξ1 , ξ2 ⟩ =
-    notintro-bool (e1 ∘ e2) and possible-bool ⟨ ξ1 , ξ2 ⟩ and xrefutable-bool ⟨ ξ1 , ξ2 ⟩
+    notintro-bool (e1 ∘ e2) and
+      possible-bool ⟨ ξ1 , ξ2 ⟩ and xrefutable-bool ⟨ ξ1 , ξ2 ⟩
   maysatisfy-bool (inl τ e) ⟨ ξ1 , ξ2 ⟩ =
-    notintro-bool (inl τ e) and possible-bool ⟨ ξ1 , ξ2 ⟩ and xrefutable-bool ⟨ ξ1 , ξ2 ⟩
+    notintro-bool (inl τ e) and
+      possible-bool ⟨ ξ1 , ξ2 ⟩ and xrefutable-bool ⟨ ξ1 , ξ2 ⟩
   maysatisfy-bool (inr τ e) ⟨ ξ1 , ξ2 ⟩ =
-    notintro-bool (inr τ e) and possible-bool ⟨ ξ1 , ξ2 ⟩ and xrefutable-bool ⟨ ξ1 , ξ2 ⟩
+    notintro-bool (inr τ e) and
+      possible-bool ⟨ ξ1 , ξ2 ⟩ and xrefutable-bool ⟨ ξ1 , ξ2 ⟩
   maysatisfy-bool (fst e) ⟨ ξ1 , ξ2 ⟩ =
-    notintro-bool (fst e) and possible-bool ⟨ ξ1 , ξ2 ⟩ and xrefutable-bool ⟨ ξ1 , ξ2 ⟩
+    notintro-bool (fst e) and
+      possible-bool ⟨ ξ1 , ξ2 ⟩ and xrefutable-bool ⟨ ξ1 , ξ2 ⟩
   maysatisfy-bool (snd e) ⟨ ξ1 , ξ2 ⟩ =
-    notintro-bool (snd e) and possible-bool ⟨ ξ1 , ξ2 ⟩ and xrefutable-bool ⟨ ξ1 , ξ2 ⟩
-  maysatisfy-bool (match e rs) ⟨ ξ1 , ξ2 ⟩ =
-    notintro-bool (match e rs) and possible-bool ⟨ ξ1 , ξ2 ⟩ and xrefutable-bool ⟨ ξ1 , ξ2 ⟩
-  maysatisfy-bool ⦇-⦈[ u ] ⟨ ξ1 , ξ2 ⟩ =
-    notintro-bool ⦇-⦈[ u ] and possible-bool ⟨ ξ1 , ξ2 ⟩ and xrefutable-bool ⟨ ξ1 , ξ2 ⟩
-  maysatisfy-bool ⦇⌜ e ⌟⦈[ u ] ⟨ ξ1 , ξ2 ⟩ =
-    notintro-bool ⦇⌜ e ⌟⦈[ u ] and possible-bool ⟨ ξ1 , ξ2 ⟩ and xrefutable-bool ⟨ ξ1 , ξ2 ⟩
+    notintro-bool (snd e) and
+      possible-bool ⟨ ξ1 , ξ2 ⟩ and xrefutable-bool ⟨ ξ1 , ξ2 ⟩
+  maysatisfy-bool (match e ·: τ of rs) ⟨ ξ1 , ξ2 ⟩ =
+    notintro-bool (match e ·: τ of rs) and
+      possible-bool ⟨ ξ1 , ξ2 ⟩ and xrefutable-bool ⟨ ξ1 , ξ2 ⟩
+  maysatisfy-bool ⦇-⦈⟨ u , σ ⟩ ⟨ ξ1 , ξ2 ⟩ =
+    notintro-bool ⦇-⦈⟨ u , σ ⟩ and
+      possible-bool ⟨ ξ1 , ξ2 ⟩ and xrefutable-bool ⟨ ξ1 , ξ2 ⟩
+  maysatisfy-bool ⦇⌜ e ⌟⦈⟨ u , σ ⟩ ⟨ ξ1 , ξ2 ⟩ =
+    notintro-bool ⦇⌜ e ⌟⦈⟨ u , σ ⟩ and
+      possible-bool ⟨ ξ1 , ξ2 ⟩ and xrefutable-bool ⟨ ξ1 , ξ2 ⟩
 
   -- lemma needed for a few cases
   not-ref-lem : ∀{e ξ} →
@@ -270,47 +326,65 @@ module satisfy-decidable where
   maysatisfy-sound {e = ⟨ e1 , e2 ⟩} {ξ = ⟨ ξ1 , ξ2 ⟩} (CMSPair msat1 msat2) =
     or-true-r {P = maysatisfy-bool e1 ξ1 and satisfy-bool e2 ξ2}
               (or-true-r {P = satisfy-bool e1 ξ1 and maysatisfy-bool e2 ξ2}
-                         (and-true (maysatisfy-sound msat1) (maysatisfy-sound msat2)))
+                         (and-true (maysatisfy-sound msat1)
+                                   (maysatisfy-sound msat2)))
   maysatisfy-sound (CMSOrL msat1 ¬sat2) =
     or-true-l (and-true
                 (maysatisfy-sound msat1)
-                (false-not-true (neq-true-false (λ sat2 → ¬sat2 (satisfy-complete sat2)))))
+                (false-not-true
+                  (neq-true-false
+                    (λ sat2 → ¬sat2 (satisfy-complete sat2)))))
   maysatisfy-sound (CMSOrR ¬sat1 msat2) =
     or-true-r (and-true
-                (false-not-true (neq-true-false (λ sat1 → ¬sat1 (satisfy-complete sat1))))
+                (false-not-true
+                  (neq-true-false
+                    (λ sat1 → ¬sat1 (satisfy-complete sat1))))
                 (maysatisfy-sound msat2))
   maysatisfy-sound {ξ = ·?} (CMSNotIntro ni ref pos) = refl
-  maysatisfy-sound {e = e} {ξ = N n} (CMSNotIntro ni ref pos) =
+  maysatisfy-sound {e = e} {ξ = N n}
+                   (CMSNotIntro ni ref pos) =
     and-true (notintro-sound ni) refl
-  maysatisfy-sound {e = e1 ∘ e2} {ξ = inl ξ} (CMSNotIntro ni ref (PInl pos)) =
+  maysatisfy-sound {e = e1 ∘ e2} {ξ = inl ξ}
+                   (CMSNotIntro ni ref (PInl pos)) =
     and-true (possible-sound pos) refl
-  maysatisfy-sound {e = match e rs} {ξ = inl ξ} (CMSNotIntro ni ref (PInl pos)) =
+  maysatisfy-sound {e = match e ·: τ of rs} {ξ = inl ξ}
+                   (CMSNotIntro ni ref (PInl pos)) =
     and-true (possible-sound pos) refl
-  maysatisfy-sound {e = fst e} {ξ = inl ξ} (CMSNotIntro ni ref (PInl pos)) =
+  maysatisfy-sound {e = fst e} {ξ = inl ξ}
+                   (CMSNotIntro ni ref (PInl pos)) =
     and-true (possible-sound pos) refl
-  maysatisfy-sound {e = snd e} {ξ = inl ξ} (CMSNotIntro ni ref (PInl pos)) =
+  maysatisfy-sound {e = snd e} {ξ = inl ξ}
+                   (CMSNotIntro ni ref (PInl pos)) =
     and-true (possible-sound pos) refl
-  maysatisfy-sound {e = ⦇-⦈[ u ]} {ξ = inl ξ} (CMSNotIntro ni ref (PInl pos)) =
+  maysatisfy-sound {e = ⦇-⦈⟨ u , σ ⟩} {ξ = inl ξ}
+                   (CMSNotIntro ni ref (PInl pos)) =
     and-true (possible-sound pos) refl
-  maysatisfy-sound {e = ⦇⌜ e ⌟⦈[ u ]} {ξ = inl ξ} (CMSNotIntro ni ref (PInl pos)) =
+  maysatisfy-sound {e = ⦇⌜ e ⌟⦈⟨ u , σ ⟩} {ξ = inl ξ}
+                   (CMSNotIntro ni ref (PInl pos)) =
     and-true (possible-sound pos) refl
-  maysatisfy-sound {e = e1 ∘ e2} {ξ = inr ξ} (CMSNotIntro ni ref (PInr pos)) =
+  maysatisfy-sound {e = e1 ∘ e2} {ξ = inr ξ}
+                   (CMSNotIntro ni ref (PInr pos)) =
     and-true (possible-sound pos) refl
-  maysatisfy-sound {e = match e rs} {ξ = inr ξ} (CMSNotIntro ni ref (PInr pos)) =
+  maysatisfy-sound {e = match e ·: τ of rs} {ξ = inr ξ}
+                   (CMSNotIntro ni ref (PInr pos)) =
     and-true (possible-sound pos) refl
-  maysatisfy-sound {e = fst e} {ξ = inr ξ} (CMSNotIntro ni ref (PInr pos)) =
+  maysatisfy-sound {e = fst e} {ξ = inr ξ}
+                   (CMSNotIntro ni ref (PInr pos)) =
     and-true (possible-sound pos) refl
-  maysatisfy-sound {e = snd e} {ξ = inr ξ} (CMSNotIntro ni ref (PInr pos)) =
+  maysatisfy-sound {e = snd e} {ξ = inr ξ}
+                   (CMSNotIntro ni ref (PInr pos)) =
     and-true (possible-sound pos) refl
-  maysatisfy-sound {e = ⦇-⦈[ u ]} {ξ = inr ξ} (CMSNotIntro ni ref (PInr pos)) =
+  maysatisfy-sound {e = ⦇-⦈⟨ u , σ ⟩} {ξ = inr ξ}
+                   (CMSNotIntro ni ref (PInr pos)) =
     and-true (possible-sound pos) refl
-  maysatisfy-sound {e = ⦇⌜ e ⌟⦈[ u ]} {ξ = inr ξ} (CMSNotIntro ni ref (PInr pos)) =
+  maysatisfy-sound {e = ⦇⌜ e ⌟⦈⟨ u , σ ⟩} {ξ = inr ξ}
+                   (CMSNotIntro ni ref (PInr pos)) =
     and-true (possible-sound pos) refl
   maysatisfy-sound {e = e1 ∘ e2} {ξ = ⟨ ξ1 , ξ2 ⟩}
                    (CMSNotIntro ni (RXPairL ref1) (PPair pos1 pos2)) =
     and-true (and-true (possible-sound pos1) (possible-sound pos2))
              (or-true-l (xrefutable-sound ref1))
-  maysatisfy-sound {e = match e rs} {ξ = ⟨ ξ1 , ξ2 ⟩}
+  maysatisfy-sound {e = match e ·: τ of rs} {ξ = ⟨ ξ1 , ξ2 ⟩}
                    (CMSNotIntro ni (RXPairL ref1) (PPair pos1 pos2)) =
     and-true (and-true (possible-sound pos1) (possible-sound pos2))
              (or-true-l (xrefutable-sound ref1))
@@ -322,11 +396,11 @@ module satisfy-decidable where
                    (CMSNotIntro ni (RXPairL ref1) (PPair pos1 pos2)) =
     and-true (and-true (possible-sound pos1) (possible-sound pos2))
              (or-true-l (xrefutable-sound ref1))
-  maysatisfy-sound {e = ⦇-⦈[ u ]} {ξ = ⟨ ξ1 , ξ2 ⟩}
+  maysatisfy-sound {e = ⦇-⦈⟨ u , σ ⟩} {ξ = ⟨ ξ1 , ξ2 ⟩}
                    (CMSNotIntro ni (RXPairL ref1) (PPair pos1 pos2)) =
     and-true (and-true (possible-sound pos1) (possible-sound pos2))
              (or-true-l (xrefutable-sound ref1))
-  maysatisfy-sound {e = ⦇⌜ e ⌟⦈[ u ]} {ξ = ⟨ ξ1 , ξ2 ⟩}
+  maysatisfy-sound {e = ⦇⌜ e ⌟⦈⟨ u , σ ⟩} {ξ = ⟨ ξ1 , ξ2 ⟩}
                    (CMSNotIntro ni (RXPairL ref1) (PPair pos1 pos2)) =
     and-true (and-true (possible-sound pos1) (possible-sound pos2))
              (or-true-l (xrefutable-sound ref1))
@@ -334,7 +408,7 @@ module satisfy-decidable where
                    (CMSNotIntro ni (RXPairR ref2) (PPair pos1 pos2)) =
     and-true (and-true (possible-sound pos1) (possible-sound pos2))
              (or-true-r (xrefutable-sound ref2))
-  maysatisfy-sound {e = match e x} {ξ = ⟨ ξ1 , ξ2 ⟩}
+  maysatisfy-sound {e = match e ·: τ of rs} {ξ = ⟨ ξ1 , ξ2 ⟩}
                    (CMSNotIntro ni (RXPairR ref2) (PPair pos1 pos2)) =
     and-true (and-true (possible-sound pos1) (possible-sound pos2))
              (or-true-r (xrefutable-sound ref2))
@@ -346,26 +420,32 @@ module satisfy-decidable where
                    (CMSNotIntro ni (RXPairR ref2) (PPair pos1 pos2)) =
     and-true (and-true (possible-sound pos1) (possible-sound pos2))
              (or-true-r (xrefutable-sound ref2))
-  maysatisfy-sound {e = ⦇-⦈[ u ]} {ξ = ⟨ ξ1 , ξ2 ⟩}
+  maysatisfy-sound {e = ⦇-⦈⟨ u , σ ⟩} {ξ = ⟨ ξ1 , ξ2 ⟩}
                    (CMSNotIntro ni (RXPairR ref2) (PPair pos1 pos2)) =
     and-true (and-true (possible-sound pos1) (possible-sound pos2))
              (or-true-r (xrefutable-sound ref2))
-  maysatisfy-sound {e = ⦇⌜ e ⌟⦈[ u ]} {ξ = ⟨ ξ1 , ξ2 ⟩}
+  maysatisfy-sound {e = ⦇⌜ e ⌟⦈⟨ u , σ ⟩} {ξ = ⟨ ξ1 , ξ2 ⟩}
                    (CMSNotIntro ni (RXPairR ref2) (PPair pos1 pos2)) =
     and-true (and-true (possible-sound pos1) (possible-sound pos2))
              (or-true-r (xrefutable-sound ref2))
-  maysatisfy-sound {e = e} {ξ = ξ1 ∨ ξ2} (CMSNotIntro ni (RXOr ref1 ref2) (POrL pos1)) =
+  maysatisfy-sound {e = e} {ξ = ξ1 ∨ ξ2}
+                   (CMSNotIntro ni (RXOr ref1 ref2) (POrL pos1)) =
     or-true-l
       (and-true (maysatisfy-sound msat1)
-                (false-not-true (neq-true-false λ sat2 → ¬sat2 (satisfy-complete sat2))))
+                (false-not-true
+                  (neq-true-false
+                    λ sat2 → ¬sat2 (satisfy-complete sat2))))
     where
       msat1 : e ⊧̇? ξ1
       msat1 = CMSNotIntro ni ref1 pos1
       ¬sat2 : e ⊧̇ ξ2 → ⊥
       ¬sat2 sat2 = not-ref-lem ni sat2 ref2
-  maysatisfy-sound {e = e} {ξ = ξ1 ∨ ξ2} (CMSNotIntro ni (RXOr ref1 ref2) (POrR pos2)) =
+  maysatisfy-sound {e = e} {ξ = ξ1 ∨ ξ2}
+    (CMSNotIntro ni (RXOr ref1 ref2) (POrR pos2)) =
     or-true-r
-      (and-true (false-not-true (neq-true-false λ sat1 → ¬sat1 (satisfy-complete sat1)))
+      (and-true (false-not-true
+                  (neq-true-false
+                    λ sat1 → ¬sat1 (satisfy-complete sat1)))
                 (maysatisfy-sound msat2))
      where
       ¬sat1 : e ⊧̇ ξ1 → ⊥
@@ -389,7 +469,7 @@ module satisfy-decidable where
   ... | pos , refl = CMSNotIntro NVAp RXInl (PInl (possible-complete pos))
   maysatisfy-complete {e = inl τ e} {ξ = inl ξ} msateq =
     CMSInl (maysatisfy-complete msateq)
-  maysatisfy-complete {e = match e rs} {ξ = inl ξ} msateq
+  maysatisfy-complete {e = match e ·: τ of rs} {ξ = inl ξ} msateq
     with true-and {P = possible-bool ξ} msateq
   ... | pos , refl = CMSNotIntro NVMatch RXInl (PInl (possible-complete pos))
   maysatisfy-complete {e = fst e} {ξ = inl ξ} msateq
@@ -398,17 +478,18 @@ module satisfy-decidable where
   maysatisfy-complete {e = snd e} {ξ = inl ξ} msateq
     with true-and {P = possible-bool ξ} msateq
   ... | pos , refl = CMSNotIntro NVSnd RXInl (PInl (possible-complete pos))
-  maysatisfy-complete {e = ⦇-⦈[ u ]} {ξ = inl ξ} msateq
+  maysatisfy-complete {e = ⦇-⦈⟨ u , σ ⟩} {ξ = inl ξ} msateq
     with true-and {P = possible-bool ξ} msateq
   ... | pos , refl = CMSNotIntro NVEHole RXInl (PInl (possible-complete pos))
-  maysatisfy-complete {e = ⦇⌜ e ⌟⦈[ u ]} {ξ = inl ξ} msateq
+  maysatisfy-complete {e = ⦇⌜ e ⌟⦈⟨ u , σ ⟩} {ξ = inl ξ} msateq
     with true-and {P = possible-bool ξ} msateq
   ... | pos , refl = CMSNotIntro NVNEHole RXInl (PInl (possible-complete pos))
   maysatisfy-complete {e = e1 ∘ e2} {ξ = inr ξ} msateq
     with true-and {P = possible-bool ξ} msateq
   ... | pos , refl = CMSNotIntro NVAp RXInr (PInr (possible-complete pos))
-  maysatisfy-complete {e = inr τ e} {ξ = inr ξ} msateq = CMSInr (maysatisfy-complete msateq)
-  maysatisfy-complete {e = match e rs} {ξ = inr ξ} msateq
+  maysatisfy-complete {e = inr τ e} {ξ = inr ξ} msateq =
+    CMSInr (maysatisfy-complete msateq)
+  maysatisfy-complete {e = match e ·: τ of rs} {ξ = inr ξ} msateq
     with true-and {P = possible-bool ξ} msateq
   ... | pos , refl = CMSNotIntro NVMatch RXInr (PInr (possible-complete pos))
   maysatisfy-complete {e = fst e} {ξ = inr ξ} msateq
@@ -417,10 +498,10 @@ module satisfy-decidable where
   maysatisfy-complete {e = snd e} {ξ = inr ξ} msateq
     with true-and {P = possible-bool ξ} msateq
   ... | pos , refl = CMSNotIntro NVSnd RXInr (PInr (possible-complete pos))
-  maysatisfy-complete {e = ⦇-⦈[ u ]} {ξ = inr ξ} msateq
+  maysatisfy-complete {e = ⦇-⦈⟨ u , σ ⟩} {ξ = inr ξ} msateq
     with true-and {P = possible-bool ξ} msateq
   ... | pos , refl = CMSNotIntro NVEHole RXInr (PInr (possible-complete pos))
-  maysatisfy-complete {e = ⦇⌜ e ⌟⦈[ u ]} {ξ = inr ξ} msateq
+  maysatisfy-complete {e = ⦇⌜ e ⌟⦈⟨ u , σ ⟩} {ξ = inr ξ} msateq
     with true-and {P = possible-bool ξ} msateq
   ... | pos , refl = CMSNotIntro NVNEHole RXInr (PInr (possible-complete pos))
   maysatisfy-complete {e = e1 ∘ e2} {ξ = ⟨ ξ1 , ξ2 ⟩} msateq
@@ -428,71 +509,90 @@ module satisfy-decidable where
                   {Q = xrefutable-bool ξ1 or xrefutable-bool ξ2} msateq
   ... | pos , ref with true-and {P = possible-bool ξ1} {Q = possible-bool ξ2} pos
   ... | pos1 , pos2 with true-or ref 
-  ... | Inl ref1 = CMSNotIntro NVAp (RXPairL (xrefutable-complete ref1))
-                               (PPair (possible-complete pos1) (possible-complete pos2))
-  ... | Inr ref2 = CMSNotIntro NVAp (RXPairR (xrefutable-complete ref2))
-                               (PPair (possible-complete pos1) (possible-complete pos2))
-  maysatisfy-complete {e = match e rs} {ξ = ⟨ ξ1 , ξ2 ⟩} msateq
+  ... | Inl ref1 =
+    CMSNotIntro NVAp (RXPairL (xrefutable-complete ref1))
+                (PPair (possible-complete pos1) (possible-complete pos2))
+  ... | Inr ref2 =
+    CMSNotIntro NVAp (RXPairR (xrefutable-complete ref2))
+                (PPair (possible-complete pos1) (possible-complete pos2))
+  maysatisfy-complete {e = match e ·: τ of rs} {ξ = ⟨ ξ1 , ξ2 ⟩} msateq
     with true-and {P = possible-bool ξ1 and possible-bool ξ2}
                   {Q = xrefutable-bool ξ1 or xrefutable-bool ξ2} msateq
   ... | pos , ref with true-and {P = possible-bool ξ1} {Q = possible-bool ξ2} pos
   ... | pos1 , pos2 with true-or ref 
-  ... | Inl ref1 = CMSNotIntro NVMatch (RXPairL (xrefutable-complete ref1))
-                               (PPair (possible-complete pos1) (possible-complete pos2))
-  ... | Inr ref2 = CMSNotIntro NVMatch (RXPairR (xrefutable-complete ref2))
-                               (PPair (possible-complete pos1) (possible-complete pos2))
+  ... | Inl ref1 =
+    CMSNotIntro NVMatch (RXPairL (xrefutable-complete ref1))
+                (PPair (possible-complete pos1) (possible-complete pos2))
+  ... | Inr ref2 =
+    CMSNotIntro NVMatch (RXPairR (xrefutable-complete ref2))
+                (PPair (possible-complete pos1) (possible-complete pos2))
   maysatisfy-complete {e = ⟨ e1 , e2 ⟩} {ξ = ⟨ ξ1 , ξ2 ⟩} msateq
     with true-or {P = maysatisfy-bool e1 ξ1 and satisfy-bool e2 ξ2}
                  {Q = satisfy-bool e1 ξ1 and maysatisfy-bool e2 ξ2 or
                       maysatisfy-bool e1 ξ1 and maysatisfy-bool e2 ξ2}
                  msateq
-  ... | Inl tand with true-and {P = maysatisfy-bool e1 ξ1} {Q = satisfy-bool e2 ξ2} tand
+  ... | Inl tand
+    with true-and {P = maysatisfy-bool e1 ξ1} {Q = satisfy-bool e2 ξ2} tand
   ... | msat1 , sat2 = CMSPairL (maysatisfy-complete msat1) (satisfy-complete sat2)
   maysatisfy-complete {e = ⟨ e1 , e2 ⟩} {ξ = ⟨ ξ1 , ξ2 ⟩} msateq |
-    Inr tor with true-or {P = satisfy-bool e1 ξ1 and maysatisfy-bool e2 ξ2}
-                         {Q = maysatisfy-bool e1 ξ1 and maysatisfy-bool e2 ξ2}
-                         tor
-  ... | Inl tand with true-and {P = satisfy-bool e1 ξ1} {Q = maysatisfy-bool e2 ξ2} tand
-  ... | sat1 , msat2 = CMSPairR (satisfy-complete sat1) (maysatisfy-complete msat2)
+    Inr tor
+    with true-or {P = satisfy-bool e1 ξ1 and maysatisfy-bool e2 ξ2}
+                 {Q = maysatisfy-bool e1 ξ1 and maysatisfy-bool e2 ξ2}
+                 tor
+  ... | Inl tand
+    with true-and {P = satisfy-bool e1 ξ1} {Q = maysatisfy-bool e2 ξ2} tand
+  ... | sat1 , msat2 =
+    CMSPairR (satisfy-complete sat1) (maysatisfy-complete msat2)
   maysatisfy-complete {e = ⟨ e1 , e2 ⟩} {ξ = ⟨ ξ1 , ξ2 ⟩} msateq | Inr tor | Inr tand
     with true-and {P = maysatisfy-bool e1 ξ1} {Q = maysatisfy-bool e2 ξ2} tand
-  ... | msat1 , msat2 = CMSPair (maysatisfy-complete msat1) (maysatisfy-complete msat2) 
+  ... | msat1 , msat2 =
+    CMSPair (maysatisfy-complete msat1) (maysatisfy-complete msat2) 
   maysatisfy-complete {e = fst e} {ξ = ⟨ ξ1 , ξ2 ⟩} msateq
     with true-and {P = possible-bool ξ1 and possible-bool ξ2}
                   {Q = xrefutable-bool ξ1 or xrefutable-bool ξ2} msateq
   ... | pos , ref with true-and {P = possible-bool ξ1} {Q = possible-bool ξ2} pos
   ... | pos1 , pos2 with true-or ref 
-  ... | Inl ref1 = CMSNotIntro NVFst (RXPairL (xrefutable-complete ref1))
-                               (PPair (possible-complete pos1) (possible-complete pos2))
-  ... | Inr ref2 = CMSNotIntro NVFst (RXPairR (xrefutable-complete ref2))
-                               (PPair (possible-complete pos1) (possible-complete pos2))
+  ... | Inl ref1 =
+    CMSNotIntro NVFst (RXPairL (xrefutable-complete ref1))
+                (PPair (possible-complete pos1) (possible-complete pos2))
+  ... | Inr ref2 =
+    CMSNotIntro NVFst (RXPairR (xrefutable-complete ref2))
+                (PPair (possible-complete pos1) (possible-complete pos2))
   maysatisfy-complete {e = snd e} {ξ = ⟨ ξ1 , ξ2 ⟩} msateq
     with true-and {P = possible-bool ξ1 and possible-bool ξ2}
                   {Q = xrefutable-bool ξ1 or xrefutable-bool ξ2} msateq
-  ... | pos , ref with true-and {P = possible-bool ξ1} {Q = possible-bool ξ2} pos
-  ... | pos1 , pos2 with true-or ref 
-  ... | Inl ref1 = CMSNotIntro NVSnd (RXPairL (xrefutable-complete ref1))
-                               (PPair (possible-complete pos1) (possible-complete pos2))
-  ... | Inr ref2 = CMSNotIntro NVSnd (RXPairR (xrefutable-complete ref2))
-                               (PPair (possible-complete pos1) (possible-complete pos2))
-  maysatisfy-complete {e = ⦇-⦈[ u ]} {ξ = ⟨ ξ1 , ξ2 ⟩} msateq
+  ... | pos , ref
+    with true-and {P = possible-bool ξ1} {Q = possible-bool ξ2} pos
+  ... | pos1 , pos2
+    with true-or ref 
+  ... | Inl ref1 =
+    CMSNotIntro NVSnd (RXPairL (xrefutable-complete ref1))
+                (PPair (possible-complete pos1) (possible-complete pos2))
+  ... | Inr ref2 =
+    CMSNotIntro NVSnd (RXPairR (xrefutable-complete ref2))
+                (PPair (possible-complete pos1) (possible-complete pos2))
+  maysatisfy-complete {e = ⦇-⦈⟨ u , σ ⟩} {ξ = ⟨ ξ1 , ξ2 ⟩} msateq
     with true-and {P = possible-bool ξ1 and possible-bool ξ2}
                   {Q = xrefutable-bool ξ1 or xrefutable-bool ξ2} msateq
   ... | pos , ref with true-and {P = possible-bool ξ1} {Q = possible-bool ξ2} pos
   ... | pos1 , pos2 with true-or ref 
-  ... | Inl ref1 = CMSNotIntro NVEHole (RXPairL (xrefutable-complete ref1))
-                               (PPair (possible-complete pos1) (possible-complete pos2))
-  ... | Inr ref2 = CMSNotIntro NVEHole (RXPairR (xrefutable-complete ref2))
-                               (PPair (possible-complete pos1) (possible-complete pos2))
-  maysatisfy-complete {e = ⦇⌜ e ⌟⦈[ u ]} {ξ = ⟨ ξ1 , ξ2 ⟩} msateq
+  ... | Inl ref1 =
+    CMSNotIntro NVEHole (RXPairL (xrefutable-complete ref1))
+                (PPair (possible-complete pos1) (possible-complete pos2))
+  ... | Inr ref2 =
+    CMSNotIntro NVEHole (RXPairR (xrefutable-complete ref2))
+                (PPair (possible-complete pos1) (possible-complete pos2))
+  maysatisfy-complete {e = ⦇⌜ e ⌟⦈⟨ u , σ ⟩} {ξ = ⟨ ξ1 , ξ2 ⟩} msateq
     with true-and {P = possible-bool ξ1 and possible-bool ξ2}
                   {Q = xrefutable-bool ξ1 or xrefutable-bool ξ2} msateq
   ... | pos , ref with true-and {P = possible-bool ξ1} {Q = possible-bool ξ2} pos
   ... | pos1 , pos2 with true-or ref 
-  ... | Inl ref1 = CMSNotIntro NVNEHole (RXPairL (xrefutable-complete ref1))
-                               (PPair (possible-complete pos1) (possible-complete pos2))
-  ... | Inr ref2 = CMSNotIntro NVNEHole (RXPairR (xrefutable-complete ref2))
-                               (PPair (possible-complete pos1) (possible-complete pos2))
+  ... | Inl ref1 =
+    CMSNotIntro NVNEHole (RXPairL (xrefutable-complete ref1))
+                (PPair (possible-complete pos1) (possible-complete pos2))
+  ... | Inr ref2 =
+    CMSNotIntro NVNEHole (RXPairR (xrefutable-complete ref2))
+                (PPair (possible-complete pos1) (possible-complete pos2))
   maysatisfy-complete {e = e} {ξ = ξ1 ∨ ξ2} msateq
     with true-or {P = maysatisfy-bool e ξ1 and not (satisfy-bool e ξ2)}
                  {Q = not (satisfy-bool e ξ1) and maysatisfy-bool e ξ2}
@@ -501,11 +601,13 @@ module satisfy-decidable where
                                {Q = not (satisfy-bool e ξ2)} tand
   ... | msat1 , ¬sat2 =
     CMSOrL (maysatisfy-complete msat1)
-           (λ sat2 → false-neq-true (not-true-false ¬sat2) (satisfy-sound sat2))
+           (λ sat2 → false-neq-true (not-true-false ¬sat2)
+                                    (satisfy-sound sat2))
   maysatisfy-complete {e = e} {ξ = ξ1 ∨ ξ2} msateq | Inr tand
     with true-and {P = not (satisfy-bool e ξ1)} {Q = maysatisfy-bool e ξ2} tand
   ... | ¬sat1 , msat2 =
-    CMSOrR (λ sat1 → false-neq-true (not-true-false ¬sat1) (satisfy-sound sat1))
+    CMSOrR (λ sat1 → false-neq-true (not-true-false ¬sat1)
+                                    (satisfy-sound sat1))
            (maysatisfy-complete msat2)
   
   -- combination of the above to explicitly show

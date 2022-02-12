@@ -27,16 +27,16 @@ module value-judgements where
   data _notintro : (e : ihexp) → Set where
     NVAp     : ∀{e1 e2} →
                (e1 ∘ e2) notintro
-    NVMatch  : ∀{e rs} →
-               (match e rs) notintro
+    NVMatch  : ∀{e τ rs} →
+               (match e ·: τ of rs) notintro
     NVFst    : ∀{e} →
                (fst e) notintro
     NVSnd    : ∀{e} →
                (snd e) notintro
-    NVEHole  : ∀{u} →
-               ⦇-⦈[ u ] notintro
-    NVNEHole : ∀{e u} →
-               ⦇⌜ e ⌟⦈[ u ] notintro
+    NVEHole  : ∀{u σ} →
+               ⦇-⦈⟨ u , σ ⟩ notintro
+    NVNEHole : ∀{e u σ} →
+               ⦇⌜ e ⌟⦈⟨ u , σ ⟩ notintro
 
   
   val-notintro-not : ∀{e} →
@@ -49,3 +49,9 @@ module value-judgements where
   val-notintro-not (VInr eval) ()
   val-notintro-not (VPair eval1 eval2) ()
 
+  notintro-pair-not : ∀{e} →
+                      e notintro →
+                      (e1 e2 : ihexp) →
+                      e == ⟨ e1 , e2 ⟩ →
+                      ⊥
+  notintro-pair-not () e1 e2 refl
