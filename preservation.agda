@@ -14,8 +14,9 @@ open import lemmas-satisfy
 open import lemmas-subst-type
 open import matching-coherence
 open import patterns-core
-open import statics-core
 open import result-judgements
+open import statics-core
+open import type-assignment-unicity
 
 module preservation where
   preservation : ∀{Δ Δp e1 τ e2} →
@@ -48,7 +49,7 @@ module preservation where
                         (BDZRules _ (BDRules (BDRule pbde _) _)))
                (HBUMatch hbu hburs hbdrs)
                (TAMatchZPre wt
-                            (CTOneRule (CTRule {e = e} {Γp = Γp}
+                            (RTOneRule (RTRule {e = e} {Γp = Γp}
                                                pt Γ##Γp wt')))
                (ITSuccMatch fin mat) =
     substs-type (mat-substs-simultaneous bu bup pbde mat)
@@ -62,7 +63,7 @@ module preservation where
                         (BDZRules _ (BDRules (BDRule pbde _) _)))
                (HBUMatch hbu hburs hbdrs)
                (TAMatchZPre wt
-                            (CTRules (CTRule {e = e} {Γp = Γp}
+                            (RTRules (RTRule {e = e} {Γp = Γp}
                                              pt Γ##Γp wt')
                                      rst))
                (ITSuccMatch fin mat) =
@@ -74,11 +75,11 @@ module preservation where
   preservation (BUMatch bu burs bdrs)
                (HBUMatch hbu hburs hbdrs)
                (TAMatchZPre wt
-                            (CTRules (CTRule pt Γ##Γp wt')
+                            (RTRules (RTRule pt Γ##Γp wt')
                                      rst))
                (ITFailMatch fin nmat ERZPre) =
     TAMatchNZPre wt fin
-                 (CTOneRule (CTRule pt Γ##Γp wt')) rst
+                 (RTOneRule (RTRule pt Γ##Γp wt')) rst
                  (notmat-not-satormay fin wt pt nmat)
   preservation (BUMatch bu burs bdrs)
                (HBUMatch hbu hburs hbdrs)
@@ -91,7 +92,7 @@ module preservation where
                         (BDZRules _ (BDRules (BDRule pbde _) _)))
                (HBUMatch hbu hburs hbdrs)
                (TAMatchNZPre wt fin pre
-                             (CTOneRule (CTRule {e = e} {Γp = Γp}
+                             (RTOneRule (RTRule {e = e} {Γp = Γp}
                                                 pt Γ##Γp wt'))
                              ¬red)
                (ITSuccMatch fin₁ mat) =
@@ -106,7 +107,7 @@ module preservation where
                         (BDZRules _ (BDRules (BDRule pbde _) _)))
                (HBUMatch hbu hburs hbdrs)
                (TAMatchNZPre wt fin pre
-                             (CTRules (CTRule {e = e} {Γp = Γp}
+                             (RTRules (RTRule {e = e} {Γp = Γp}
                                               pt Γ##Γp wt')
                                       rst)
                              ¬red)
@@ -118,15 +119,17 @@ module preservation where
                     wt')
   preservation (BUMatch bu burs bdrs)
                (HBUMatch hbu hburs hbdrs)
-               (TAMatchNZPre {e = e} {ξpre = ξpre} wt fin pret
-                             (CTRules {ξr = ξr} {ξrs = ξrs}
-                                      (CTRule pt Γ##Γp wt')
+               (TAMatchNZPre {e = e} {ξpre = ξpre} wt fin
+                             pret
+                             (RTRules {ξr = ξr} {ξrs = ξrs}
+                                      (RTRule pt Γ##Γp wt')
                                       postt)
                              ¬red)
                (ITFailMatch fin₁ nmat (ERNZPre er)) =
     TAMatchNZPre wt fin
-                 (rs-constr-append (ERNZPre er) pret
-                                   (CTRule pt Γ##Γp wt'))
+                 (rules-erase-constr (ERNZPre er)
+                                     pret
+                                     (RTOneRule (RTRule pt Γ##Γp wt')))
                  postt ¬red'
     where
       -- need to add ξr to the end of the chain of ∨s in ξpre

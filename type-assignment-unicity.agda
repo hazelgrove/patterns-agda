@@ -65,10 +65,10 @@ module type-assignment-unicity where
                     Γ , Δ , Δp ⊢ rs ::s τ1 [ ξrs ]=> τ2 →
                     Γ , Δ , Δp ⊢ rs ::s τ1 [ ξrs' ]=> τ2' →
                     (ξrs == ξrs') × (τ2 == τ2')
-    rules-unicity (CTOneRule wt) (CTOneRule wt')
+    rules-unicity (RTOneRule wt) (RTOneRule wt')
       with rule-unicity wt wt'
     ... | refl , refl = refl , refl
-    rules-unicity (CTRules wt wts) (CTRules wt' wts')
+    rules-unicity (RTRules wt wts) (RTRules wt' wts')
       with rule-unicity wt wt'
     ... | refl , refl
       with rules-unicity wts wts'
@@ -78,7 +78,7 @@ module type-assignment-unicity where
                    Γ , Δ , Δp ⊢ r :: τ1 [ ξ ]=> τ2 →
                    Γ , Δ , Δp ⊢ r :: τ1 [ ξ' ]=> τ2' →
                    (ξ == ξ') × (τ2 == τ2')
-    rule-unicity (CTRule pt Γ##Γp wt1) (CTRule pt' Γ##Γp' wt1')
+    rule-unicity (RTRule pt Γ##Γp wt1) (RTRule pt' Γ##Γp' wt1')
       with pattern-unicity pt pt'
     ... | refl , refl
       with expr-type-unicity wt1 wt1'
@@ -104,3 +104,33 @@ module type-assignment-unicity where
       with pattern-unicity pt pt'
     ... | refl , refl = refl , refl
     pattern-unicity PTWild PTWild = refl , refl
+
+  -- unicity for the rules typing without target judgements
+  rules-no-target-unicity : ∀{Δp rs τ1 ξrs ξrs'} →
+                            Δp ⊢ rs ::s τ1 [ ξrs ] →
+                            Δp ⊢ rs ::s τ1 [ ξrs' ] →
+                            ξrs == ξrs'
+  rules-no-target-unicity (RTOneRule pt) (RTOneRule pt')
+    with pattern-unicity pt pt'
+  ... | refl , refl = refl
+  rules-no-target-unicity (RTRules pt rst) (RTRules pt' rst')
+    with pattern-unicity pt pt'
+  ... | refl , refl
+    with rules-no-target-unicity rst rst'
+  ... | refl = refl
+  
+  -- the two rule typing judgements produce the same types
+  rules-target-no-target-unicity : ∀{Γ Δ Δp rs τ1 ξrs ξrs' τ2} →
+                                   Γ , Δ , Δp ⊢ rs ::s τ1 [ ξrs ]=> τ2 →
+                                   Δp ⊢ rs ::s τ1 [ ξrs' ] →
+                                   ξrs == ξrs'
+  rules-target-no-target-unicity (RTOneRule (RTRule pt Γ##Γp wt))
+                                 (RTOneRule pt')
+    with pattern-unicity pt pt'
+  ... | refl , refl = refl
+  rules-target-no-target-unicity (RTRules (RTRule pt Γ##Γp wt) rst)
+                                 (RTRules pt' rst')
+    with pattern-unicity pt pt'
+  ... | refl , refl 
+    with rules-target-no-target-unicity rst rst'
+  ... | refl = refl

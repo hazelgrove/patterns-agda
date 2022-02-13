@@ -35,7 +35,7 @@ module hole-binders-disjoint-symmetric where
     lem-hbd-lam (HBDNEHole bdσ bd) =
       HBDNEHole (lem-hbd-σ-lam bdσ) (lem-hbd-lam bd)
 
-    lem-hbd-σ-lam : {σ : env} {x : Nat} {τ1 : htyp} {e1 : ihexp} →
+    lem-hbd-σ-lam : {σ : subst-env} {x : Nat} {τ1 : htyp} {e1 : ihexp} →
                     hole-binders-disjoint-σ σ (·λ x ·[ τ1 ] e1) →
                     hole-binders-disjoint-σ σ e1
     lem-hbd-σ-lam HBDσId = HBDσId
@@ -116,7 +116,7 @@ module hole-binders-disjoint-symmetric where
     ... | bdσ1 , bdσ2 | bd1 , bd2 =
       HBDNEHole bdσ1 bd1 , HBDNEHole bdσ2 bd2
 
-    lem-hbd-σ-ap : {σ : env} {e1 e2 : ihexp} →
+    lem-hbd-σ-ap : {σ : subst-env} {e1 e2 : ihexp} →
                   hole-binders-disjoint-σ σ (e1 ∘ e2) →
                   hole-binders-disjoint-σ σ e1 ×
                     hole-binders-disjoint-σ σ e2
@@ -193,7 +193,7 @@ module hole-binders-disjoint-symmetric where
     lem-hbd-inl (HBDNEHole bdσ bd) =
       HBDNEHole (lem-hbd-σ-inl bdσ) (lem-hbd-inl bd)
 
-    lem-hbd-σ-inl : {σ : env} {τ : htyp} {e1 : ihexp} →
+    lem-hbd-σ-inl : {σ : subst-env} {τ : htyp} {e1 : ihexp} →
                    hole-binders-disjoint-σ σ (inl τ e1) →
                    hole-binders-disjoint-σ σ e1
     lem-hbd-σ-inl HBDσId = HBDσId
@@ -251,7 +251,7 @@ module hole-binders-disjoint-symmetric where
     lem-hbd-inr (HBDNEHole bdσ bd) =
       HBDNEHole (lem-hbd-σ-inr bdσ) (lem-hbd-inr bd)
 
-    lem-hbd-σ-inr : {σ : env} {τ : htyp} {e1 : ihexp} →
+    lem-hbd-σ-inr : {σ : subst-env} {τ : htyp} {e1 : ihexp} →
                     hole-binders-disjoint-σ σ (inr τ e1) →
                     hole-binders-disjoint-σ σ e1
     lem-hbd-σ-inr HBDσId = HBDσId
@@ -359,7 +359,7 @@ module hole-binders-disjoint-symmetric where
       HBDNEHole bdσr bdr ,
       HBDNEHole bdσpost bdpost
 
-    lem-hbd-σ-match : {σ : env} {e1 : ihexp} {τ : htyp}
+    lem-hbd-σ-match : {σ : subst-env} {e1 : ihexp} {τ : htyp}
                       {rs-pre : rules} {r : rule} {rs-post : rules} →
                       hole-binders-disjoint-σ σ
                         (match e1 ·: τ of (rs-pre / r / rs-post)) →
@@ -502,7 +502,7 @@ module hole-binders-disjoint-symmetric where
     ... | bdσ1 , bdσ2 | bd1 , bd2 =
       HBDNEHole bdσ1 bd1 , HBDNEHole bdσ2 bd2
 
-    lem-hbd-σ-pair : {σ : env} {e1 e2 : ihexp} →
+    lem-hbd-σ-pair : {σ : subst-env} {e1 e2 : ihexp} →
                      hole-binders-disjoint-σ σ ⟨ e1 , e2 ⟩ →
                      hole-binders-disjoint-σ σ e1 ×
                        hole-binders-disjoint-σ σ e2
@@ -578,7 +578,7 @@ module hole-binders-disjoint-symmetric where
     lem-hbd-fst (HBDNEHole bdσ bd) =
       HBDNEHole (lem-hbd-σ-fst bdσ) (lem-hbd-fst bd)
 
-    lem-hbd-σ-fst : {σ : env} {e1 : ihexp} →
+    lem-hbd-σ-fst : {σ : subst-env} {e1 : ihexp} →
                    hole-binders-disjoint-σ σ (fst e1) →
                    hole-binders-disjoint-σ σ e1
     lem-hbd-σ-fst HBDσId = HBDσId
@@ -635,7 +635,7 @@ module hole-binders-disjoint-symmetric where
     lem-hbd-snd (HBDNEHole bdσ bd) =
       HBDNEHole (lem-hbd-σ-snd bdσ) (lem-hbd-snd bd)
 
-    lem-hbd-σ-snd : {σ : env} {e1 : ihexp} →
+    lem-hbd-σ-snd : {σ : subst-env} {e1 : ihexp} →
                     hole-binders-disjoint-σ σ (snd e1) →
                     hole-binders-disjoint-σ σ e1
     lem-hbd-σ-snd HBDσId = HBDσId
@@ -670,7 +670,7 @@ module hole-binders-disjoint-symmetric where
       HBDPNEHole ub (lem-hbd-p-snd bd)
 
   mutual
-    lem-hbd-ehole : {e : ihexp} {u : Nat} {σ : env} →
+    lem-hbd-ehole : {e : ihexp} {u : Nat} {σ : subst-env} →
                     hole-binders-disjoint e ⦇-⦈⟨ u , σ ⟩ →
                     hole-binders-disjoint e σ
     lem-hbd-ehole HBDNum = HBDNum
@@ -695,27 +695,27 @@ module hole-binders-disjoint-symmetric where
       HBDNEHole (lem-hbd-σ-ehole bdσ)
                (lem-hbd-ehole bd)
 
-    lem-hbd-σ-ehole : {σ : env} {u : Nat} {σ1 : env} →
+    lem-hbd-σ-ehole : {σ : subst-env} {u : Nat} {σ1 : subst-env} →
                       hole-binders-disjoint-σ σ ⦇-⦈⟨ u , σ1 ⟩ →
                       hole-binders-disjoint-σ σ σ1
     lem-hbd-σ-ehole HBDσId = HBDσId
     lem-hbd-σ-ehole (HBDσSubst bd bdσ) =
       HBDσSubst (lem-hbd-ehole bd) (lem-hbd-σ-ehole bdσ)
 
-    lem-hbd-rs-ehole : {rs : rules} {u : Nat} {σ : env} →
+    lem-hbd-rs-ehole : {rs : rules} {u : Nat} {σ : subst-env} →
                        hole-binders-disjoint-rs rs ⦇-⦈⟨ u , σ ⟩ →
                        hole-binders-disjoint-rs rs σ
     lem-hbd-rs-ehole HBDNoRules = HBDNoRules
     lem-hbd-rs-ehole (HBDRules bdr bdrs) =
       HBDRules (lem-hbd-r-ehole bdr) (lem-hbd-rs-ehole bdrs)
 
-    lem-hbd-r-ehole : {r : rule} {u : Nat} {σ : env} →
+    lem-hbd-r-ehole : {r : rule} {u : Nat} {σ : subst-env} →
                       hole-binders-disjoint-r r ⦇-⦈⟨ u , σ ⟩ →
                       hole-binders-disjoint-r r σ
     lem-hbd-r-ehole (HBDRule bdp bde) =
       HBDRule (lem-hbd-p-ehole bdp) (lem-hbd-ehole bde)
     
-    lem-hbd-p-ehole : {p : pattrn} {u : Nat} {σ : env} →
+    lem-hbd-p-ehole : {p : pattrn} {u : Nat} {σ : subst-env} →
                       hole-binders-disjoint-p p ⦇-⦈⟨ u , σ ⟩ →
                       hole-binders-disjoint-p p σ
     lem-hbd-p-ehole HBDPNum = HBDPNum
@@ -731,7 +731,7 @@ module hole-binders-disjoint-symmetric where
       HBDPNEHole ubσ (lem-hbd-p-ehole bd)
       
   mutual
-    lem-hbd-nehole : {e : ihexp} {e1 : ihexp} {u : Nat} {σ : env} →
+    lem-hbd-nehole : {e : ihexp} {e1 : ihexp} {u : Nat} {σ : subst-env} →
                      hole-binders-disjoint e ⦇⌜ e1 ⌟⦈⟨ u , σ ⟩ →
                      hole-binders-disjoint e σ ×
                        hole-binders-disjoint e e1
@@ -781,7 +781,7 @@ module hole-binders-disjoint-symmetric where
     ... | bdσσ , bdσ' | bdeσ , bde' =
       HBDNEHole bdσσ bdeσ , HBDNEHole bdσ' bde'
 
-    lem-hbd-σ-nehole : {σ : env} {e1 : ihexp} {u : Nat} {σ1 : env} →
+    lem-hbd-σ-nehole : {σ : subst-env} {e1 : ihexp} {u : Nat} {σ1 : subst-env} →
                        hole-binders-disjoint-σ σ ⦇⌜ e1 ⌟⦈⟨ u , σ1 ⟩ →
                        hole-binders-disjoint-σ σ σ1 ×
                          hole-binders-disjoint-σ σ e1 
@@ -791,7 +791,7 @@ module hole-binders-disjoint-symmetric where
     ... | bddσ , bdd' | bdσσ , bdσ' =
       HBDσSubst bddσ bdσσ , HBDσSubst bdd' bdσ'
 
-    lem-hbd-rs-nehole : {rs : rules} {e1 : ihexp} {u : Nat} {σ : env} →
+    lem-hbd-rs-nehole : {rs : rules} {e1 : ihexp} {u : Nat} {σ : subst-env} →
                         hole-binders-disjoint-rs rs ⦇⌜ e1 ⌟⦈⟨ u , σ ⟩ →
                         hole-binders-disjoint-rs rs σ ×
                           hole-binders-disjoint-rs rs e1
@@ -801,7 +801,7 @@ module hole-binders-disjoint-symmetric where
     ... | bdrσ , bdr' | bdrsσ , bdrs' =
       HBDRules bdrσ bdrsσ , HBDRules bdr' bdrs'
 
-    lem-hbd-r-nehole : {r : rule} {e1 : ihexp} {u : Nat} {σ : env} →
+    lem-hbd-r-nehole : {r : rule} {e1 : ihexp} {u : Nat} {σ : subst-env} →
                        hole-binders-disjoint-r r ⦇⌜ e1 ⌟⦈⟨ u , σ ⟩ →
                        hole-binders-disjoint-r r σ ×
                          hole-binders-disjoint-r r e1
@@ -810,7 +810,7 @@ module hole-binders-disjoint-symmetric where
     ... | bdpσ , bdp' | bdeσ , bde' =
       HBDRule bdpσ bdeσ , HBDRule bdp' bde'
     
-    lem-hbd-p-nehole : {p : pattrn} {e1 : ihexp} {u : Nat} {σ : env} →
+    lem-hbd-p-nehole : {p : pattrn} {e1 : ihexp} {u : Nat} {σ : subst-env} →
                        hole-binders-disjoint-p p ⦇⌜ e1 ⌟⦈⟨ u , σ ⟩ →
                        hole-binders-disjoint-p p σ ×
                          hole-binders-disjoint-p p e1
@@ -838,7 +838,7 @@ module hole-binders-disjoint-symmetric where
       HBDPNEHole ubσ bdσ , HBDPNEHole ub bd'
 
   mutual
-    lem-σ-hbd-subst : {e : ihexp} {d : ihexp} {y : Nat} {σ : env} →
+    lem-σ-hbd-subst : {e : ihexp} {d : ihexp} {y : Nat} {σ : subst-env} →
                       hole-binders-disjoint e (Subst d y σ) →
                       hole-binders-disjoint e d ×
                         hole-binders-disjoint e σ
@@ -890,7 +890,7 @@ module hole-binders-disjoint-symmetric where
     ... | bdσ' , bdσσ | bde' , bdeσ =
       HBDNEHole bdσ' bde' , HBDNEHole bdσσ bdeσ
 
-    lem-σ-hbd-σ-subst : {σ : env} {d : ihexp} {y : Nat} {σ1 : env} →
+    lem-σ-hbd-σ-subst : {σ : subst-env} {d : ihexp} {y : Nat} {σ1 : subst-env} →
                         hole-binders-disjoint-σ σ (Subst d y σ1) →
                         hole-binders-disjoint-σ σ d ×
                           hole-binders-disjoint-σ σ σ1
@@ -900,7 +900,7 @@ module hole-binders-disjoint-symmetric where
     ... | bdd' , bddσ | bdσ' , bdσσ =
       HBDσSubst bdd' bdσ' , HBDσSubst bddσ bdσσ
 
-    lem-σ-hbd-rs-subst : {rs : rules} {d : ihexp} {y : Nat} {σ : env} →
+    lem-σ-hbd-rs-subst : {rs : rules} {d : ihexp} {y : Nat} {σ : subst-env} →
                          hole-binders-disjoint-rs rs (Subst d y σ) →
                          hole-binders-disjoint-rs rs d ×
                            hole-binders-disjoint-rs rs σ
@@ -910,7 +910,7 @@ module hole-binders-disjoint-symmetric where
     ... | bdr' , bdrσ | bdrs' , bdrsσ =
       HBDRules bdr' bdrs' , HBDRules bdrσ bdrsσ
 
-    lem-σ-hbd-r-subst : {r : rule} {d : ihexp} {y : Nat} {σ : env} →
+    lem-σ-hbd-r-subst : {r : rule} {d : ihexp} {y : Nat} {σ : subst-env} →
                         hole-binders-disjoint-r r (Subst d y σ) →
                         hole-binders-disjoint-r r d ×
                           hole-binders-disjoint-r r σ
@@ -919,7 +919,7 @@ module hole-binders-disjoint-symmetric where
     ... | bdp' , bdpσ | bd' , bdσ =
       HBDRule bdp' bd' , HBDRule bdpσ bdσ
 
-    lem-σ-hbd-p-subst : {p : pattrn} {d : ihexp} {y : Nat} {σ : env} →
+    lem-σ-hbd-p-subst : {p : pattrn} {d : ihexp} {y : Nat} {σ : subst-env} →
                         hole-binders-disjoint-p p (Subst d y σ) →
                         hole-binders-disjoint-p p d ×
                           hole-binders-disjoint-p p σ
@@ -992,7 +992,7 @@ module hole-binders-disjoint-symmetric where
     ... | bdσr , bdσrs | bdr , bdrs =
       HBDNEHole bdσr bdr , HBDNEHole bdσrs bdrs
 
-    lem-rs-hbd-σ : {σ : env} {r : rule} {rs : rules} →
+    lem-rs-hbd-σ : {σ : subst-env} {r : rule} {rs : rules} →
                    hole-binders-disjoint-σ σ (r / rs) →
                    hole-binders-disjoint-σ σ r ×
                      hole-binders-disjoint-σ σ rs
@@ -1091,7 +1091,7 @@ module hole-binders-disjoint-symmetric where
     ... | bdσp , bdσe | bdp , bde =
       HBDNEHole bdσp bdp , HBDNEHole bdσe bde
 
-    lem-r-hbd-σ : {σ : env} {pr : pattrn} {er : ihexp} →
+    lem-r-hbd-σ : {σ : subst-env} {pr : pattrn} {er : ihexp} →
                   hole-binders-disjoint-σ σ (pr => er) →
                   hole-binders-disjoint-σ σ pr ×
                     hole-binders-disjoint-σ σ er
@@ -1168,7 +1168,7 @@ module hole-binders-disjoint-symmetric where
     lem-p-hbd-inl (HBDNEHole bdσ bd) =
       HBDNEHole (lem-p-hbd-σ-inl bdσ) (lem-p-hbd-inl bd)
 
-    lem-p-hbd-σ-inl : {σ : env} {p1 : pattrn} →
+    lem-p-hbd-σ-inl : {σ : subst-env} {p1 : pattrn} →
                       hole-binders-disjoint-σ σ (inl p1) →
                       hole-binders-disjoint-σ σ p1
     lem-p-hbd-σ-inl HBDσId = HBDσId
@@ -1231,7 +1231,7 @@ module hole-binders-disjoint-symmetric where
     lem-p-hbd-inr (HBDNEHole bdσ bd) =
       HBDNEHole (lem-p-hbd-σ-inr bdσ) (lem-p-hbd-inr bd)
 
-    lem-p-hbd-σ-inr : {σ : env} {p1 : pattrn} →
+    lem-p-hbd-σ-inr : {σ : subst-env} {p1 : pattrn} →
                       hole-binders-disjoint-σ σ (inr p1) →
                       hole-binders-disjoint-σ σ p1
     lem-p-hbd-σ-inr HBDσId = HBDσId
@@ -1316,7 +1316,7 @@ module hole-binders-disjoint-symmetric where
     ... | bdσ1 , bdσ2 | bd1 , bd2 =
       HBDNEHole bdσ1 bd1 , HBDNEHole bdσ2 bd2
 
-    lem-p-hbd-σ-pair : {σ : env} {p1 p2 : pattrn} →
+    lem-p-hbd-σ-pair : {σ : subst-env} {p1 p2 : pattrn} →
                        hole-binders-disjoint-σ σ ⟨ p1 , p2 ⟩ →
                        hole-binders-disjoint-σ σ p1 ×
                          hole-binders-disjoint-σ σ p2
@@ -1399,7 +1399,7 @@ module hole-binders-disjoint-symmetric where
     lem-p-hbd-ehole (HBDNEHole bdσ bd) =
       HUBNEHole (lem-p-hbd-σ-ehole bdσ) (lem-p-hbd-ehole bd)
   
-    lem-p-hbd-σ-ehole : {σ : env} {w : Nat} →
+    lem-p-hbd-σ-ehole : {σ : subst-env} {w : Nat} →
                         hole-binders-disjoint-σ {T = pattrn} σ ⦇-⦈[ w ] →
                         hole-unbound-in-σ w σ
     lem-p-hbd-σ-ehole HBDσId = HUBσId
@@ -1484,7 +1484,7 @@ module hole-binders-disjoint-symmetric where
     ... | ubσ , bdσ' | ub , bd' =
       HUBNEHole ubσ ub , HBDNEHole bdσ' bd'
 
-    lem-p-hbd-σ-nehole : {σ : env} {p1 : pattrn} {w : Nat} {τ : htyp} →
+    lem-p-hbd-σ-nehole : {σ : subst-env} {p1 : pattrn} {w : Nat} {τ : htyp} →
                          hole-binders-disjoint-σ σ ⦇⌜ p1 ⌟⦈[ w , τ ] →
                          hole-unbound-in-σ w σ ×
                            hole-binders-disjoint-σ σ p1
@@ -1599,7 +1599,7 @@ module hole-binders-disjoint-symmetric where
       HBDRule (p-hole-binders-disjoint-sym bdp)
               (hole-binders-disjoint-sym bde)
 
-    σ-hole-binders-disjoint-sym : {e : ihexp} {σ : env} →
+    σ-hole-binders-disjoint-sym : {e : ihexp} {σ : subst-env} →
                                   hole-binders-disjoint e σ →
                                   hole-binders-disjoint-σ σ e
     σ-hole-binders-disjoint-sym {σ = Id Γ} bdσ = HBDσId
@@ -1632,7 +1632,7 @@ module hole-binders-disjoint-symmetric where
       HBDPNEHole ub (p-hole-binders-disjoint-sym bd')
 
   mutual
-    hole-binders-disjoint-σ-sym : {σ : env} {e : ihexp} →
+    hole-binders-disjoint-σ-sym : {σ : subst-env} {e : ihexp} →
                                   hole-binders-disjoint-σ σ e →
                                   hole-binders-disjoint e σ
     hole-binders-disjoint-σ-sym {e = N n} hbd = HBDNum
@@ -1673,7 +1673,7 @@ module hole-binders-disjoint-symmetric where
       HBDNEHole (σ-hole-binders-disjoint-σ-sym hbdσ)
                 (hole-binders-disjoint-σ-sym hbde)
 
-    σ-hole-binders-disjoint-σ-sym : {σ1 : env} {σ2 : env} →
+    σ-hole-binders-disjoint-σ-sym : {σ1 : subst-env} {σ2 : subst-env} →
                                     hole-binders-disjoint-σ σ1 σ2 →
                                     hole-binders-disjoint-σ σ2 σ1
     σ-hole-binders-disjoint-σ-sym {σ2 = Id Γ} hbd = HBDσId
@@ -1683,7 +1683,7 @@ module hole-binders-disjoint-symmetric where
       HBDσSubst (hole-binders-disjoint-σ-sym hbdd)
                 (σ-hole-binders-disjoint-σ-sym hbdσ')
 
-    rs-hole-binders-disjoint-σ-sym : {σ : env} {rs : rules} →
+    rs-hole-binders-disjoint-σ-sym : {σ : subst-env} {rs : rules} →
                                      hole-binders-disjoint-σ σ rs →
                                      hole-binders-disjoint-rs rs σ
     rs-hole-binders-disjoint-σ-sym {rs = nil} hbd = HBDNoRules
@@ -1693,7 +1693,7 @@ module hole-binders-disjoint-symmetric where
       HBDRules (r-hole-binders-disjoint-σ-sym hbdr)
                (rs-hole-binders-disjoint-σ-sym hbdrs)
 
-    r-hole-binders-disjoint-σ-sym : {σ : env} {r : rule} →
+    r-hole-binders-disjoint-σ-sym : {σ : subst-env} {r : rule} →
                                     hole-binders-disjoint-σ σ r →
                                     hole-binders-disjoint-r r σ
     r-hole-binders-disjoint-σ-sym {r = p => e} hbd
@@ -1702,7 +1702,7 @@ module hole-binders-disjoint-symmetric where
       HBDRule (p-hole-binders-disjoint-σ-sym hbdp)
               (hole-binders-disjoint-σ-sym hbde)
 
-    p-hole-binders-disjoint-σ-sym : {σ : env} {p : pattrn} →
+    p-hole-binders-disjoint-σ-sym : {σ : subst-env} {p : pattrn} →
                                     hole-binders-disjoint-σ σ p →
                                     hole-binders-disjoint-p p σ
     p-hole-binders-disjoint-σ-sym {p = N n} hbd = HBDPNum
@@ -1766,7 +1766,7 @@ module hole-binders-disjoint-symmetric where
       HBDNEHole (σ-hole-binders-disjoint-rs-sym hbdσ)
                (hole-binders-disjoint-rs-sym hbd')
 
-    σ-hole-binders-disjoint-rs-sym : {rs : rules} {σ : env} →
+    σ-hole-binders-disjoint-rs-sym : {rs : rules} {σ : subst-env} →
                                      hole-binders-disjoint-rs rs σ →
                                      hole-binders-disjoint-σ σ rs
     σ-hole-binders-disjoint-rs-sym {σ = Id Γ} hbd = HBDσId
@@ -1859,7 +1859,7 @@ module hole-binders-disjoint-symmetric where
       HBDNEHole (σ-hole-binders-disjoint-r-sym hbdσ)
                 (hole-binders-disjoint-r-sym hbd')
 
-    σ-hole-binders-disjoint-r-sym : {r : rule} {σ : env} →
+    σ-hole-binders-disjoint-r-sym : {r : rule} {σ : subst-env} →
                                     hole-binders-disjoint-r r σ →
                                     hole-binders-disjoint-σ σ r
     σ-hole-binders-disjoint-r-sym {σ = Id Γ} hbd = HBDσId
@@ -1952,7 +1952,7 @@ module hole-binders-disjoint-symmetric where
       HBDNEHole (σ-hole-binders-disjoint-p-sym hbdσ)
                (hole-binders-disjoint-p-sym hbd')
 
-    σ-hole-binders-disjoint-p-sym : {p : pattrn} {σ : env} →
+    σ-hole-binders-disjoint-p-sym : {p : pattrn} {σ : subst-env} →
                                     hole-binders-disjoint-p p σ →
                                     hole-binders-disjoint-σ σ p
     σ-hole-binders-disjoint-p-sym {σ = Id Γ} hbd = HBDσId

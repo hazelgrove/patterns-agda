@@ -179,8 +179,8 @@ module weakening where
                   (∀{x} →
                    dom Γ' x →
                    fresh-θ x θ) →
-                  Γ , Δ , Δp ⊢ θ :ls: Γθ →
-                  (Γ' ∪ Γ) , Δ , Δp ⊢ θ :ls: Γθ
+                  Γ , Δ , Δp ⊢ θ :sl: Γθ →
+                  (Γ' ∪ Γ) , Δ , Δp ⊢ θ :sl: Γθ
     weaken-θ-∪Γ frshθ STAEmpty = STAEmpty
     weaken-θ-∪Γ {Γ' = Γ'} {Γ = Γ} frshθ
                 (STAExtend {θ = θ} {d = d} {y = y} y#Γ wst wt) =
@@ -210,8 +210,8 @@ module weakening where
                   (∀{x} →
                    dom Γ' x →
                    fresh-σ x σ) →
-                  Γ , Δ , Δp ⊢ σ :s: Γσ →
-                  (Γ' ∪ Γ) , Δ , Δp ⊢ σ :s: Γσ
+                  Γ , Δ , Δp ⊢ σ :se: Γσ →
+                  (Γ' ∪ Γ) , Δ , Δp ⊢ σ :se: Γσ
     weaken-σ-∪Γ {Γ' = Γ'} {Γ = Γ} {Γσ = Γσ}
                 frsh (STAId Γσ⊆Γ) =
       STAId Γσ⊆Γ'∪Γ
@@ -228,7 +228,7 @@ module weakening where
     weaken-σ-∪Γ {Γ' = Γ'} {Γ = Γ} {Δ = Δ} {Δp = Δp}
                 {σ = Subst d y σ} {Γσ = Γσ}
                 frsh (STASubst {τ = τ} st wt) =
-      STASubst (tr (λ qq → qq , Δ , Δp ⊢ σ :s: Γσ)
+      STASubst (tr (λ qq → qq , Δ , Δp ⊢ σ :se: Γσ)
                    ((! (∪-assoc Γ' (■ (y , τ)) Γ) ·
                      ap1 (λ qq → qq ∪ Γ)
                          (∪-comm Γ'
@@ -261,16 +261,16 @@ module weakening where
                        fresh-rs x rs) →
                       Γ , Δ , Δp ⊢ rs ::s τ1 [ ξ ]=> τ2 →
                       (Γ' ∪ Γ) , Δ , Δp ⊢ rs ::s τ1 [ ξ ]=> τ2
-    weaken-rules-∪Γ {Γ' = Γ'} frsh (CTOneRule {r = p => e} rt) =
-      CTOneRule (weaken-rule-∪Γ frsh' rt)
+    weaken-rules-∪Γ {Γ' = Γ'} frsh (RTOneRule {r = p => e} rt) =
+      RTOneRule (weaken-rule-∪Γ frsh' rt)
       where
         frsh' : ∀{z} →
                 dom Γ' z →
                 fresh-r z (p => e)
         frsh' z∈Γ' with frsh z∈Γ'
         ... | FRules fr frs = fr
-    weaken-rules-∪Γ {Γ' = Γ'} frsh (CTRules {r = r} {rs = rs} rt rst) =
-      CTRules (weaken-rule-∪Γ frshr rt)
+    weaken-rules-∪Γ {Γ' = Γ'} frsh (RTRules {r = r} {rs = rs} rt rst) =
+      RTRules (weaken-rule-∪Γ frshr rt)
               (weaken-rules-∪Γ frshrs rst)
       where
         frshr : ∀{z} →
@@ -292,9 +292,9 @@ module weakening where
                      (Γ' ∪ Γ) , Δ , Δp ⊢ r :: τ1 [ ξ ]=> τ2
     weaken-rule-∪Γ {Γ' = Γ'} {Γ = Γ} {Δ = Δ} {Δp = Δp}
                    {τ2 = τ2} frsh
-                   (CTRule {e = e} {Γp = Γp} 
+                   (RTRule {e = e} {Γp = Γp} 
                            pt Γ##Γp wt) =
-      CTRule pt
+      RTRule pt
              (disjoint-parts Γ'##Γp Γ##Γp)
              (tr (λ qq → qq , Δ , Δp ⊢ e :: τ2)
                  (! (∪-assoc Γ' Γ Γp))
@@ -522,8 +522,8 @@ module weakening where
                   (∀{x} →
                    dom Δ' x →
                    hole-fresh-σ x σ) →
-                  Γ , Δ , Δp ⊢ σ :s: Γσ →
-                  Γ , (Δ' ∪ Δ) , Δp ⊢ σ :s: Γσ
+                  Γ , Δ , Δp ⊢ σ :se: Γσ →
+                  Γ , (Δ' ∪ Δ) , Δp ⊢ σ :se: Γσ
     weaken-σ-∪Δ frsh (STAId Γσ⊆Γ) = STAId Γσ⊆Γ
     weaken-σ-∪Δ {Δ' = Δ'} {σ = Subst d y σ}
                 frsh (STASubst st wt) =
@@ -546,16 +546,16 @@ module weakening where
                        hole-fresh-rs u rs) →
                       Γ , Δ , Δp ⊢ rs ::s τ1 [ ξ ]=> τ2 →
                       Γ , (Δ' ∪ Δ) , Δp ⊢ rs ::s τ1 [ ξ ]=> τ2
-    weaken-rules-∪Δ {Δ' = Δ'} frsh (CTOneRule {r = p => e} rt) =
-      CTOneRule (weaken-rule-∪Δ frsh' rt)
+    weaken-rules-∪Δ {Δ' = Δ'} frsh (RTOneRule {r = p => e} rt) =
+      RTOneRule (weaken-rule-∪Δ frsh' rt)
       where
         frsh' : ∀{z} →
                 dom Δ' z →
                 hole-fresh-r z (p => e)
         frsh' z∈Δ' with frsh z∈Δ'
         ... | HFRules hfr hfrs = hfr
-    weaken-rules-∪Δ {Δ' = Δ'} frsh (CTRules {r = r} {rs = rs} rt rst) =
-      CTRules (weaken-rule-∪Δ frshr rt)
+    weaken-rules-∪Δ {Δ' = Δ'} frsh (RTRules {r = r} {rs = rs} rt rst) =
+      RTRules (weaken-rule-∪Δ frshr rt)
               (weaken-rules-∪Δ frshrs rst)
       where
         frshr : ∀{z} →
@@ -577,13 +577,13 @@ module weakening where
                      Γ , (Δ' ∪ Δ) , Δp ⊢ r :: τ1 [ ξ ]=> τ2
     weaken-rule-∪Δ {Γ = Γ} {Δ' = Δ'} {Δ = Δ} {Δp = Δp}
                    {τ1 = τ1} {ξ = ξ} {τ2 = τ2} frsh
-                   (CTRule {p = p} {e = e}
+                   (RTRule {p = p} {e = e}
                            {Γp = Γp} 
                            pt Γ##Γp wt) =
-      CTRule pt Γ##Γp (weaken-ta-∪Δ frsh' wt)
+      RTRule pt Γ##Γp (weaken-ta-∪Δ frsh' wt)
       -- tr (λ qq → Γ , qq , Δp ⊢ p => e :: τ1 [ ξ ]=> τ2)
       --    (∪-assoc Δ' Δe Δp)
-      --    (CTRule pt Γ##Γp
+      --    (RTRule pt Γ##Γp
       --            (disjoint-parts Δ'##Δp Δe##Δp)
       --            (weaken-ta-∪Δ frsh' wt))
       where

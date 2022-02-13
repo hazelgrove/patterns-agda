@@ -53,10 +53,10 @@ module core where
     data zrules : Set where
       _/_/_ : rules → rule → rules → zrules
 
-    -- substitution environments
-    data env : Set where
-      Id    : (Γ : tctx) → env
-      Subst : (d : ihexp) → (y : Nat) → env → env
+    -- substitution environments as used for hole closures
+    data subst-env : Set where
+      Id    : (Γ : tctx) → subst-env
+      Subst : (d : ihexp) → (y : Nat) → subst-env → subst-env
     
     -- internal expressions
     data ihexp : Set where
@@ -70,6 +70,6 @@ module core where
       ⟨_,_⟩       : ihexp → ihexp → ihexp
       fst         : ihexp → ihexp
       snd         : ihexp → ihexp
-      ⦇-⦈⟨_⟩      : (Nat × env) → ihexp
-      ⦇⌜_⌟⦈⟨_⟩    : ihexp → (Nat × env) → ihexp
+      ⦇-⦈⟨_⟩      : (Nat × subst-env) → ihexp
+      ⦇⌜_⌟⦈⟨_⟩    : ihexp → (Nat × subst-env) → ihexp
  

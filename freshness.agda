@@ -61,7 +61,7 @@ module freshness where
                  unbound-in-rs x (r / rs-post) →
                  unbound-in-zrs x (rs-pre / r / rs-post)
 
-    data unbound-in-σ : Nat → env → Set where
+    data unbound-in-σ : Nat → subst-env → Set where
       UBσId    : ∀{x Γ} →
                  unbound-in-σ x (Id Γ)
       UBσSubst : ∀{x d y σ} →
@@ -137,7 +137,7 @@ module freshness where
     ZRulesUB = record { unbound-in = unbound-in-zrs }
 
   instance
-    EnvUB : UnboundIn env
+    EnvUB : UnboundIn subst-env
     EnvUB = record { unbound-in = unbound-in-σ }
 
   instance
@@ -170,7 +170,7 @@ module freshness where
                 fresh-rs x (r / rs-post) →
                 fresh-zrs x (rs-pre / r / rs-post)
 
-    data fresh-σ : Nat → env → Set where
+    data fresh-σ : Nat → subst-env → Set where
       FσId    : ∀{x Γ} →
                 x # Γ →
                 fresh-σ x (Id Γ)
@@ -288,7 +288,7 @@ module freshness where
                   hole-unbound-in-rs u (r / rs-post) →
                   hole-unbound-in-zrs u (rs-pre / r / rs-post)
 
-    data hole-unbound-in-σ : Nat → env → Set where
+    data hole-unbound-in-σ : Nat → subst-env → Set where
       HUBσId    : ∀{u Γ} →
                   hole-unbound-in-σ u (Id Γ)
       HUBσSubst : ∀{u d y σ} →
@@ -361,7 +361,7 @@ module freshness where
     ZRulesHUB = record { hole-unbound-in = hole-unbound-in-zrs }
 
   instance
-    EnvHUB : HoleUnboundIn env
+    EnvHUB : HoleUnboundIn subst-env
     EnvHUB = record { hole-unbound-in = hole-unbound-in-σ }
 
   instance
@@ -394,7 +394,7 @@ module freshness where
                  hole-fresh-rs u (r / rs-post) →
                  hole-fresh-zrs u (rs-pre / r / rs-post)
 
-    data hole-fresh-σ : Nat → env → Set where
+    data hole-fresh-σ : Nat → subst-env → Set where
       HFσId    : ∀{x Γ} →
                  hole-fresh-σ x (Id Γ)
       HFσSubst : ∀{x d y σ} →

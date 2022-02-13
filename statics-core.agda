@@ -11,19 +11,14 @@ open import result-judgements
 
 module statics-core where
   mutual
-    -- substitution typing
-    data _,_,_⊢_:s:_ : tctx → hctx → phctx →
-                       env → tctx → Set where
-      STAId    : ∀{Γ Δ Δp Γ'} →
-                 ((x : Nat) (τ : htyp) →
-                  (x , τ) ∈ Γ' →
-                  (x , τ) ∈ Γ) →
-                 Γ , Δ , Δp ⊢ Id Γ' :s: Γ'
-      STASubst : ∀{Γ Δ Δp d y τ σ Γ'} →
-                 (Γ ,, (y , τ)) , Δ , Δp ⊢ σ :s: Γ' →
-                 Γ , Δ , Δp ⊢ d :: τ →
-                 Γ , Δ , Δp ⊢ Subst d y σ :s: Γ'
-                 
+    -- type assignment
+    -- 
+    -- note that the on-paper version of this judgement includes 
+    -- only a single Δ context for both expression and pattern holes,
+    -- and it is clear from the context which is being considered.
+    -- however, since expression holes require hole closures whil
+    -- pattern holes only require the type of the hole, we must
+    -- explicitly separate this into two contexts Δ and Δp here.
     data _,_,_⊢_::_ : (Γ : tctx) → (Δ : hctx) → (Δp : phctx) →
                       (e : ihexp) → (τ : htyp) → Set where
       TANum        : ∀{Γ Δ Δp n} →
@@ -68,34 +63,53 @@ module statics-core where
                      Γ , Δ , Δp ⊢ (snd e) :: τ2
       TAEHole      : ∀{Γ Δ Δp u σ Γ' τ} →
                      (u , (Γ' , τ)) ∈ Δ →
-                     Γ , Δ , Δp ⊢ σ :s: Γ' →
+                     Γ , Δ , Δp ⊢ σ :se: Γ' →
                      Γ , Δ , Δp ⊢ ⦇-⦈⟨ u , σ ⟩ :: τ
       TANEHole     : ∀{Γ Δ Δp u σ Γ' τ e τ'} →
                      (u , (Γ' , τ)) ∈ Δ →
-                     Γ , Δ , Δp ⊢ σ :s: Γ' →
+                     Γ , Δ , Δp ⊢ σ :se: Γ' →
                      Γ , Δ , Δp ⊢ e :: τ' → 
                      Γ , Δ , Δp ⊢ ⦇⌜ e ⌟⦈⟨ u , σ ⟩ :: τ
 
-    -- r transforms a final expression of type τ to a final expression
-    -- of type τ', emitting constraint ξ
+    -- substitution environment typing
+    -- 
+    -- typing for hole closures a la Hazelnut
+    data _,_,_⊢_:se:_ : (Γ : tctx) → (Δ : hctx) → (Δp : phctx) →
+                       (σ : subst-env) → (Γ' : tctx) → Set where
+      STAId    : ∀{Γ Δ Δp Γ'} →
+                 ((x : Nat) (τ : htyp) →
+                  (x , τ) ∈ Γ' →
+                  (x , τ) ∈ Γ) →
+                 Γ , Δ , Δp ⊢ Id Γ' :se: Γ'
+      STASubst : ∀{Γ Δ Δp d y τ σ Γ'} →
+                 (Γ ,, (y , τ)) , Δ , Δp ⊢ σ :se: Γ' →
+                 Γ , Δ , Δp ⊢ d :: τ →
+                 Γ , Δ , Δp ⊢ Subst d y σ :se: Γ'
+
+    -- rule typing
+    --
+    -- the rule r transforms a final expression of type τ to a
+    -- final expression of type τ', emitting the constraint ξ
     data _,_,_⊢_::_[_]=>_ : (Γ : tctx) → (Δ : hctx) → (Δp : phctx) →
                             (r : rule) → (τ : htyp) → (ξ : constr) →
                             (τ' : htyp) → Set where
-      CTRule : ∀{Γ Δ Δp p e τ τ' ξ Γp} →
+      RTRule : ∀{Γ Δ Δp p e τ τ' ξ Γp} →
                Δp ⊢ p :: τ [ ξ ]⊣ Γp →
                Γ ## Γp →
                (Γ ∪ Γp) , Δ , Δp ⊢ e :: τ' →
                Γ , Δ , Δp ⊢ (p => e) :: τ [ ξ ]=> τ'
 
-    -- rs transforms a final expression of type τ to a final
+    -- rules typing
+    --
+    -- the rules rs transform a final expression of type τ to a final
     -- expression of type τ', emitting constraint ξrs
     data _,_,_⊢_::s_[_]=>_ : (Γ : tctx) → (Δ : hctx) → (Δp : phctx) →
-                             (rs : rules) → (τ : htyp) → (ξrs : constr) →
-                             (τ' : htyp) → Set where
-      CTOneRule : ∀{Γ Δ Δp r τ ξr τ'} →
+                             (rs : rules) → (τ : htyp) →
+                             (ξrs : constr) → (τ' : htyp) → Set where
+      RTOneRule : ∀{Γ Δ Δp r τ ξr τ'} →
                   Γ , Δ , Δp ⊢ r :: τ [ ξr ]=> τ' →
                   Γ , Δ , Δp ⊢ (r / nil) ::s τ [ ξr ]=> τ' 
-      CTRules   : ∀{Γ Δ Δp r rs τ ξr ξrs τ'} →
+      RTRules   : ∀{Γ Δ Δp r rs τ ξr ξrs τ'} →
                   Γ , Δ , Δp ⊢ r :: τ [ ξr ]=> τ' →
                   Γ , Δ , Δp ⊢ rs ::s τ [ ξrs ]=> τ' →
                   Γ , Δ , Δp ⊢ (r / rs) ::s τ [ ξr ∨ ξrs ]=> τ'
@@ -110,7 +124,7 @@ module statics-core where
   -- the purpose of this typing is also somewhat different to that
   -- of substitution environments. an environment σ records a
   -- series of substitutions which are applied one after another,
-  -- and the typing judgement Γ , Δ , Δp ⊢ σ :s: Γσ tells us that
+  -- and the typing judgement Γ , Δ , Δp ⊢ σ :se: Γσ tells us that
   -- any term which is well-typed in Γσ will be well-typed in Γ after
   -- applying σ. contrastingly, a list of substitutions θ is supposed
   -- to indicate a set of substitutions applied "simultaneously"
@@ -119,18 +133,23 @@ module statics-core where
   -- STExtend. as well, we require that the type Γθ records all typing
   -- assumptions about substituted variables in θ, while substitution
   -- environment only requires that the Id Γ case records a subset thereof
-  data _,_,_⊢_:ls:_ : tctx → hctx → phctx →
+  data _,_,_⊢_:sl:_ : tctx → hctx → phctx →
                       subst-list → tctx → Set where
       STAEmpty  : ∀{Γ Δ Δp} →
-                  Γ , Δ , Δp ⊢ [] :ls: ∅
+                  Γ , Δ , Δp ⊢ [] :sl: ∅
       STAExtend : ∀{Γ Δ Δp θ Γθ d τ y} →
                   y # Γ →
-                  Γ , Δ , Δp ⊢ θ :ls: Γθ →
+                  Γ , Δ , Δp ⊢ θ :sl: Γθ →
                   Γ , Δ , Δp ⊢ d :: τ →
-                  Γ , Δ , Δp ⊢ ((d , τ , y) :: θ) :ls: (Γθ ,, (y , τ))
+                  Γ , Δ , Δp ⊢ ((d , τ , y) :: θ) :sl: (Γθ ,, (y , τ))
                  
   -- ξ1 entails ξ2
-  data _c⊧̇_ : (ξ1 : constr) → (ξ2 : constr) → Set where
+  --
+  -- note that, while suppressed on paper, the definition of
+  -- entailment assumes a fixed type assignent for ξ1 and ξ2.
+  -- this is needed since we lack type unicity for contraints
+  data _·:_c⊧̇_ : (ξ1 : constr) → (τ : htyp) →
+                 (ξ2 : constr) → Set where
     Entails : ∀{ξ1 ξ2 τ} →
               ξ1 :c: τ →
               ξ2 :c: τ →
@@ -139,10 +158,11 @@ module statics-core where
                e val →
                e ⊧̇†? ξ1 →
                e ⊧̇ ξ2) →
-              ξ1 c⊧̇ ξ2
+              ξ1 ·: τ c⊧̇ ξ2
 
   -- ξ1 potentially entails ξ2
-  data _c⊧̇†?_ : (ξ1 : constr) → (ξ2 : constr) → Set where
+  data _·:_c⊧̇†?_ : (ξ1 : constr) → (τ : htyp) →
+                   (ξ2 : constr) → Set where
     PotEntails : ∀{ξ1 ξ2 τ} →
                  ξ1 :c: τ →
                  ξ2 :c: τ →
@@ -151,10 +171,11 @@ module statics-core where
                   e final →
                   e ⊧̇†? ξ1 →
                   e ⊧̇†? ξ2) →
-                 ξ1 c⊧̇†? ξ2
+                 ξ1 ·: τ c⊧̇†? ξ2
 
-  -- ξ1 entails ξ2
-  data _cc⊧_ : (ξ1 : comp-constr) → (ξ2 : comp-constr) → Set where
+  -- ξ1 entails ξ2, where ξ1 and ξ2 are complete constraints
+  data _·:_cc⊧_ : (ξ1 : comp-constr) → (τ : htyp) →
+                  (ξ2 : comp-constr) → Set where
     Entails : ∀{ξ1 ξ2 τ} →
               ξ1 :cc: τ →
               ξ2 :cc: τ →
@@ -163,15 +184,18 @@ module statics-core where
                e val →
                e ⊧ ξ1 →
                e ⊧ ξ2) →
-              ξ1 cc⊧ ξ2
+              ξ1 ·: τ cc⊧ ξ2
 
   -- rs is matched by expressions of type τ, emitting constraint ξrs.
+  --
+  -- this is similar to rules typing, but does not check the type
+  -- of branches and does not require a typing context.
   data _⊢_::s_[_] : (Δp : phctx) → (rs : rules) →
                     (τ : htyp) → (ξrs : constr) → Set where
-     CTOneRule : ∀{Δp p e τ ξr Γp} →
+     RTOneRule : ∀{Δp p e τ ξr Γp} →
                  Δp ⊢ p :: τ [ ξr ]⊣ Γp →
                  Δp ⊢ ((p => e) / nil) ::s τ [ ξr ]
-     CTRules   : ∀{Δp p e rs τ ξr ξrs Γp} →
+     RTRules   : ∀{Δp p e rs τ ξr ξrs Γp} →
                  Δp ⊢ p :: τ [ ξr ]⊣ Γp →
                  Δp ⊢ rs ::s τ [ ξrs ] →
                  Δp ⊢ ((p => e) / rs) ::s τ [ ξr ∨ ξrs ]
@@ -182,129 +206,141 @@ module statics-core where
   -- considered patterns
   data _⊢_::s_[_nr/_] : (Δp : phctx) → (rs : rules) → (τ : htyp) →
                         (ξpre : constr) → (ξrs : constr) → Set where
-     CTOneRule : ∀{Δp p e τ ξpre ξr Γp} →
+     RTOneRule : ∀{Δp p e τ ξpre ξr Γp} →
                  Δp ⊢ p :: τ [ ξr ]⊣ Γp →
-                 (ξr c⊧̇ ξpre → ⊥) →
+                 (ξr ·: τ c⊧̇ ξpre → ⊥) →
                  Δp ⊢ ((p => e) / nil) ::s τ [ ξpre nr/ ξr ]
-     CTRules   : ∀{Δp p e rs τ ξpre ξr ξrs Γp} →
+     RTRules   : ∀{Δp p e rs τ ξpre ξr ξrs Γp} →
                  Δp ⊢ p :: τ [ ξr ]⊣ Γp →
-                 (ξr c⊧̇ ξpre → ⊥) →
+                 (ξr ·: τ c⊧̇ ξpre → ⊥) →
                  Δp ⊢ rs ::s τ [ ξpre ∨ ξr nr/ ξrs ] →
                  Δp ⊢ ((p => e) / rs) ::s τ [ ξpre nr/ ξr ∨ ξrs ]
 
-  -- every expression of the same type as rs matches or may
-  -- match at least one rule in rs
-  data _exhaustive : (rs : rules) → Set where
-    EXRules : ∀{Δp rs τ ξ} →
-              Δp ⊢ rs ::s τ [ ξ ] →
-              ·⊤ c⊧̇†? ξ →
-              rs exhaustive
-
-  -- no rule occurring in rs is redundant 
-  data _nonredundant : (rs : rules) → Set where
-    NRRules   : ∀{Δp rs τ ξ} →
-                Δp ⊢ rs ::s τ [ ·⊥ nr/ ξ ] →
-                rs nonredundant
-
-  -- TODO: Should these be in a Δp ctx?
   mutual
     -- all match expressions occuring in e are exhaustive
-    data _all-exhaustive : (e : ihexp) → Set where
-      AEXNum    : ∀{n} →
-                  (N n) all-exhaustive
-      AEXVar    : ∀{x} →
-                  (X x) all-exhaustive
-      AEXLam    : ∀{x τ1 e} →
-                  e all-exhaustive →
-                  (·λ x ·[ τ1 ] e) all-exhaustive
-      AEXAp     : ∀{e1 e2} →
-                  e1 all-exhaustive →
-                  e2 all-exhaustive →
-                  (e1 ∘ e2) all-exhaustive
-      AEXInl    : ∀{e τ2} →
-                  e all-exhaustive →
-                  (inl τ2 e) all-exhaustive
-      AEXInr    : ∀{e τ1} →
-                  e all-exhaustive →
-                  (inr τ1 e) all-exhaustive        
-      AEXMatch  : ∀{e τ rsz rs} →
-                  e all-exhaustive →
-                  erase-r rsz rs →
-                  rs exhaustive →
-                  rs branches-all-exhaustive →
-                  (match e ·: τ of rsz) all-exhaustive
-      AEXPair   : ∀{e1 e2} →
-                  e1 all-exhaustive →
-                  e2 all-exhaustive →
-                  ⟨ e1 , e2 ⟩ all-exhaustive
-      AEXFst    : ∀{e} →
-                  e all-exhaustive →
-                  (fst e) all-exhaustive
-      AEXSnd    : ∀{e} →
-                  e all-exhaustive →
-                  (snd e) all-exhaustive
-      AEXEHole  : ∀{u σ} →
-                  ⦇-⦈⟨ u , σ ⟩ all-exhaustive
-      AEXNEHole : ∀{e u σ} →
-                  e all-exhaustive →
-                  ⦇⌜ e ⌟⦈⟨ u , σ ⟩ all-exhaustive
+    data _⊢_exhaustive : (Δp : phctx) → (e : ihexp) → Set where
+      EXNum    : ∀{Δp n} →
+                 Δp ⊢ (N n) exhaustive
+      EXVar    : ∀{Δp x} →
+                 Δp ⊢ (X x) exhaustive
+      EXLam    : ∀{Δp x τ1 e} →
+                 Δp ⊢ e exhaustive →
+                 Δp ⊢ (·λ x ·[ τ1 ] e) exhaustive
+      EXAp     : ∀{Δp e1 e2} →
+                 Δp ⊢ e1 exhaustive →
+                 Δp ⊢ e2 exhaustive →
+                 Δp ⊢ (e1 ∘ e2) exhaustive
+      EXInl    : ∀{Δp e τ2} →
+                 Δp ⊢ e exhaustive →
+                 Δp ⊢ (inl τ2 e) exhaustive
+      EXInr    : ∀{Δp e τ1} →
+                 Δp ⊢ e exhaustive →
+                 Δp ⊢ (inr τ1 e) exhaustive        
+      EXMatch  : ∀{Δp e τ rsz rs ξ} →
+                 Δp ⊢ e exhaustive →
+                 erase-r rsz rs →
+                 Δp ⊢ rs ::s τ [ ξ ] →
+                 ·⊤ ·: τ c⊧̇†? ξ →
+                 Δp ⊢ rs targets-exhaustive →
+                 Δp ⊢ (match e ·: τ of rsz) exhaustive
+      EXPair   : ∀{Δp e1 e2} →
+                 Δp ⊢ e1 exhaustive →
+                 Δp ⊢ e2 exhaustive →
+                 Δp ⊢ ⟨ e1 , e2 ⟩ exhaustive
+      EXFst    : ∀{Δp e} →
+                 Δp ⊢ e exhaustive →
+                 Δp ⊢ (fst e) exhaustive
+      EXSnd    : ∀{Δp e} →
+                 Δp ⊢ e exhaustive →
+                 Δp ⊢ (snd e) exhaustive
+      EXEHole  : ∀{Δp u σ} →
+                 Δp ⊢ σ substs-exhaustive →
+                 Δp ⊢ ⦇-⦈⟨ u , σ ⟩ exhaustive
+      EXNEHole : ∀{Δp e u σ} →
+                 Δp ⊢ σ substs-exhaustive →
+                 Δp ⊢ e exhaustive →
+                 Δp ⊢ ⦇⌜ e ⌟⦈⟨ u , σ ⟩ exhaustive
 
+    -- for each substituted expression d in σ, all match expressions
+    -- occurring in d are exhaustive
+    data _⊢_substs-exhaustive : (Δp : phctx) → (σ : subst-env) → Set where
+      EXσId    : ∀{Δp Γ} →
+                 Δp ⊢ (Id Γ) substs-exhaustive
+      EXσSubst : ∀{Δp d y σ} →
+                 Δp ⊢ σ substs-exhaustive →
+                 Δp ⊢ d exhaustive →
+                 Δp ⊢ (Subst d y σ) substs-exhaustive
+                 
     -- for each rule p => e in rs, all match expressions
     -- occurring in e are exhaustive
-    data _branches-all-exhaustive : (rs : rules) → Set where
-      AEXNoRules : nil branches-all-exhaustive
-      AEXRules   : ∀{p e rs} →
-                   e all-exhaustive →
-                   rs branches-all-exhaustive →
-                   ((p => e) / rs) branches-all-exhaustive
-                
+    data _⊢_targets-exhaustive : (Δp : phctx) → (rs : rules) → Set where
+      EXNoRules : ∀{Δp} →
+                   Δp ⊢ nil targets-exhaustive
+      EXRules   : ∀{Δp p e rs} →
+                   Δp ⊢ e exhaustive →
+                   Δp ⊢ rs targets-exhaustive →
+                   Δp ⊢ ((p => e) / rs) targets-exhaustive
+
   mutual
     -- no match expression occurring in e contains redundant rules
-    data _all-nonredundant : (e : ihexp) → Set where
-      ANRNum       : ∀{n} →
-                     (N n) all-nonredundant
-      ANRVar       : ∀{x} →
-                     (X x) all-nonredundant
-      ANRLam       : ∀{x τ1 e} →
-                     e all-nonredundant →
-                     (·λ x ·[ τ1 ] e) all-nonredundant
-      ANRAp        : ∀{e1 e2} →
-                     e1 all-nonredundant →
-                     e2 all-nonredundant →
-                     (e1 ∘ e2) all-nonredundant
-      ANRInl       : ∀{e τ2} →
-                     e all-nonredundant →
-                     (inl τ2 e) all-nonredundant
-      ANRInr       : ∀{e τ1} →
-                     e all-nonredundant →
-                     (inr τ1 e) all-nonredundant        
-      ANRMatchZPre : ∀{e τ rsz rs} →
-                     e all-nonredundant →
-                     erase-r rsz rs →
-                     rs nonredundant →
-                     rs branches-all-nonredundant →
-                     (match e ·: τ of rsz) all-nonredundant
-      ANRPair      : ∀{e1 e2} →
-                     e1 all-nonredundant →
-                     e2 all-nonredundant →
-                     ⟨ e1 , e2 ⟩ all-nonredundant
-      ANRFst       : ∀{e} →
-                     e all-nonredundant →
-                     (fst e) all-nonredundant
-      ANRSnd       : ∀{e} →
-                     e all-nonredundant →
-                     (snd e) all-nonredundant
-      ANREHole     : ∀{u σ} →
-                     ⦇-⦈⟨ u , σ ⟩ all-nonredundant
-      ANRNEHole    : ∀{e u σ} →
-                     e all-nonredundant →
-                     ⦇⌜ e ⌟⦈⟨ u , σ ⟩ all-nonredundant
+    data _⊢_nonredundant : (Δp : phctx) → (e : ihexp) → Set where
+      NRNum       : ∀{Δp n} →
+                    Δp ⊢ (N n) nonredundant
+      NRVar       : ∀{Δp x} →
+                    Δp ⊢ (X x) nonredundant
+      NRLam       : ∀{Δp x τ1 e} →
+                    Δp ⊢ e nonredundant →
+                    Δp ⊢ (·λ x ·[ τ1 ] e) nonredundant
+      NRAp        : ∀{Δp e1 e2} →
+                    Δp ⊢ e1 nonredundant →
+                    Δp ⊢ e2 nonredundant →
+                    Δp ⊢ (e1 ∘ e2) nonredundant
+      NRInl       : ∀{Δp e τ2} →
+                    Δp ⊢ e nonredundant →
+                    Δp ⊢ (inl τ2 e) nonredundant
+      NRInr       : ∀{Δp e τ1} →
+                    Δp ⊢ e nonredundant →
+                    Δp ⊢ (inr τ1 e) nonredundant        
+      NRMatchZPre : ∀{Δp e τ rsz rs ξ} →
+                    Δp ⊢ e nonredundant →
+                    erase-r rsz rs →
+                    Δp ⊢ rs ::s τ [ ·⊥ nr/ ξ ] →
+                    Δp ⊢ rs targets-nonredundant →
+                    Δp ⊢ (match e ·: τ of rsz) nonredundant
+      NRPair      : ∀{Δp e1 e2} →
+                    Δp ⊢ e1 nonredundant →
+                    Δp ⊢ e2 nonredundant →
+                    Δp ⊢ ⟨ e1 , e2 ⟩ nonredundant
+      NRFst       : ∀{Δp e} →
+                    Δp ⊢ e nonredundant →
+                    Δp ⊢ (fst e) nonredundant
+      NRSnd       : ∀{Δp e} →
+                    Δp ⊢ e nonredundant →
+                    Δp ⊢ (snd e) nonredundant
+      NREHole     : ∀{Δp u σ} →
+                    Δp ⊢ ⦇-⦈⟨ u , σ ⟩ nonredundant
+      NRNEHole    : ∀{Δp e u σ} →
+                    Δp ⊢ e nonredundant →
+                    Δp ⊢ ⦇⌜ e ⌟⦈⟨ u , σ ⟩ nonredundant
+
+    -- for each substituted expression d in σ, no match expression
+    -- occurring in d contains redundant rules
+    data _⊢_substs-nonredundant : (Δp : phctx) →
+                                  (σ : subst-env) → Set where
+      NRσId    : ∀{Δp Γ} →
+                 Δp ⊢ (Id Γ) substs-nonredundant
+      NRσSubst : ∀{Δp d y σ} →
+                 Δp ⊢ σ substs-nonredundant →
+                 Δp ⊢ d nonredundant →
+                 Δp ⊢ (Subst d y σ) substs-nonredundant
 
     -- for each rule p => e in rs, no match expression
     -- occurring in e contains redundant rules
-    data _branches-all-nonredundant : (rs : rules) → Set where
-      ANRNoRules : nil branches-all-nonredundant
-      ANRRules   : ∀{p e rs} →
-                   e all-nonredundant →
-                   rs branches-all-nonredundant →
-                   ((p => e) / rs) branches-all-nonredundant
+    data _⊢_targets-nonredundant : (Δp : phctx) →
+                                   (rs : rules) → Set where
+      NRNoRules : ∀{Δp} →
+                  Δp ⊢ nil targets-nonredundant
+      NRRules   : ∀{Δp p e rs} →
+                  Δp ⊢ e nonredundant →
+                  Δp ⊢ rs targets-nonredundant →
+                  Δp ⊢ ((p => e) / rs) targets-nonredundant

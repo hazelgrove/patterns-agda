@@ -190,17 +190,17 @@ module complete-relationship where
       ¬msat' satm' =
         indet-values-not-satormay ind vals' wt ct ¬satm satm'
 
-  truth-potent-ent-truthify : ∀{ξ} →
-                             ·⊤ c⊧̇†? ξ →
-                             ·⊤ cc⊧ (ξ ◆⊤)
+  truth-potent-ent-truthify : ∀{ξ τ} →
+                             ·⊤ ·: τ c⊧̇†? ξ →
+                             ·⊤ ·: τ cc⊧ (ξ ◆⊤)
   truth-potent-ent-truthify (PotEntails trct ct pent) =
     Entails CTTruth (truthify-same-type ct)
             λ wt eval _ →
               val-satormay-sat-truthify eval (pent wt (FVal eval) (CSMSSat CSTruth))
  
-  truth-ent-truthify-potent : ∀{ξ} →
-                             ·⊤ cc⊧ (ξ ◆⊤) →
-                             ·⊤ c⊧̇†? ξ
+  truth-ent-truthify-potent : ∀{ξ τ} →
+                             ·⊤ ·: τ cc⊧ (ξ ◆⊤) →
+                             ·⊤ ·: τ c⊧̇†? ξ
   truth-ent-truthify-potent {ξ = ξ} (Entails {τ = τ} trct tct ent) =
     PotEntails CTTruth (same-type-truthify tct)
                λ wt fin _ → all-fin-satm wt fin
@@ -214,18 +214,18 @@ module complete-relationship where
                            (λ wt' eval' →
                               sat-truthify-satormay (ent wt' eval' CSTruth))
 
-  ent-truthify-ent-falsify : ∀{ξ1 ξ2} →
-                             ξ1 c⊧̇ ξ2 →
-                             (ξ1 ◆⊤) cc⊧ (ξ2 ◆⊥)
+  ent-truthify-ent-falsify : ∀{ξ1 ξ2 τ} →
+                             ξ1 ·: τ c⊧̇ ξ2 →
+                             (ξ1 ◆⊤) ·: τ cc⊧ (ξ2 ◆⊥)
   ent-truthify-ent-falsify (Entails ct1 ct2 ent) =
     Entails (truthify-same-type ct1) (falsify-same-type ct2)
             λ wt eval satt →
               val-sat-sat-falsify eval
                                   (ent wt eval (sat-truthify-satormay satt))
   
-  truthify-ent-falsify-ent : ∀{ξ1 ξ2} →
-                             (ξ1 ◆⊤) cc⊧ (ξ2 ◆⊥) →
-                             ξ1 c⊧̇ ξ2
+  truthify-ent-falsify-ent : ∀{ξ1 ξ2 τ} →
+                             (ξ1 ◆⊤) ·: τ cc⊧ (ξ2 ◆⊥) →
+                             ξ1 ·: τ c⊧̇ ξ2
   truthify-ent-falsify-ent (Entails tct1 fct2 ent) =
     Entails (same-type-truthify tct1) (same-type-falsify fct2)
             λ wt eval satm →

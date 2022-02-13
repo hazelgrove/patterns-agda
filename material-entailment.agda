@@ -7,9 +7,9 @@ open import statics-core
 open import value-judgements
 
 module material-entailment where
-  entailment-material : ∀{ξ1 ξ2} →
-                        ξ1 cc⊧ ξ2 →
-                        ·⊤ cc⊧ ((ξ1 ◆d) ∨ ξ2)
+  entailment-material : ∀{ξ1 ξ2 τ} →
+                        ξ1 ·: τ cc⊧ ξ2 →
+                        ·⊤ ·: τ cc⊧ ((ξ1 ◆d) ∨ ξ2)
   entailment-material {ξ1 = ξ1} {ξ2 = ξ2} (Entails {τ = τ} ct1 ct2 ent) =
     Entails CTTruth (CTOr (dual-same-type ct1) ct2) material
     where
@@ -23,9 +23,9 @@ module material-entailment where
       ... | Satisfy sat1 _ = CSOrR (ent wt eval sat1)
       ... | SatisfyDual _ satd1 = CSOrL satd1
 
-  material-entailment : ∀{ξ1 ξ2} →
-                        ·⊤ cc⊧ ((ξ1 ◆d) ∧ ξ2) →
-                        ξ1 cc⊧ ξ2
+  material-entailment : ∀{ξ1 ξ2 τ} →
+                        ·⊤ ·: τ cc⊧ ((ξ1 ◆d) ∧ ξ2) →
+                        ξ1 ·: τ cc⊧ ξ2
   material-entailment {ξ1 = ξ1} {ξ2 = ξ2}
                       (Entails tct (CTAnd {τ = τ} ctd1 ct2) ment) =
     Entails (same-type-dual ctd1) ct2 ent

@@ -53,3 +53,4 @@ open import lemmas-subst-type
 open import finality
 open import lemmas-or-append
 open import preservation
+open import progress

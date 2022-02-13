@@ -53,7 +53,7 @@ module binders-uniqueness where
                  binders-disjoint-rs rs-pre (r / rs-post) →
                  binders-unique-zrs (rs-pre / r / rs-post)
 
-    data binders-unique-σ : env → Set where
+    data binders-unique-σ : subst-env → Set where
       BUσId    : ∀{Γ} →
                  binders-unique-σ (Id Γ)
       BUσSubst : ∀{d y σ} →
@@ -154,7 +154,7 @@ module binders-uniqueness where
                   hole-binders-disjoint-rs rs-pre (r / rs-post) →
                   hole-binders-unique-zrs (rs-pre / r / rs-post)
 
-    data hole-binders-unique-σ : env → Set where
+    data hole-binders-unique-σ : subst-env → Set where
       HBUσId    : ∀{Γ} →
                   hole-binders-unique-σ (Id Γ)
       HBUσSubst : ∀{d y σ} →

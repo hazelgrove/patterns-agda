@@ -112,7 +112,7 @@ module freshness-decidable where
     ... | Inl frsh = Inl (FNEHole frshσ frsh)
     
     fresh-σ-dec : (x : Nat) →
-                  (σ : env) →
+                  (σ : subst-env) →
                   (fresh-σ x σ) + (fresh-σ x σ → ⊥)
     fresh-σ-dec x (Id Γ)
       with Γ x in Γx

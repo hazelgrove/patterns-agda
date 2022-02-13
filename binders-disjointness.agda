@@ -57,7 +57,7 @@ module binders-disjointness where
                  binders-disjoint-zrs (rs-pre / r / rs-post) t
 
     data binders-disjoint-σ {T : Set} {{_ : UnboundIn T}} :
-                            env → T → Set where
+                            subst-env → T → Set where
       BDσId    : ∀{Γ t} →
                  binders-disjoint-σ (Id Γ) t
       BDσSubst : ∀{d y σ t} →
@@ -159,7 +159,7 @@ module binders-disjointness where
                   hole-binders-disjoint-zrs (rs-pre / r / rs-post) t
 
     data hole-binders-disjoint-σ {T : Set} {{_ : HoleUnboundIn T}} :
-                                 env → T → Set where
+                                 subst-env → T → Set where
       HBDσId    : ∀{Γ t} →
                   hole-binders-disjoint-σ (Id Γ) t
       HBDσSubst : ∀{d y σ t} →
