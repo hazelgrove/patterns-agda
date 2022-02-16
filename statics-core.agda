@@ -16,11 +16,13 @@ module statics-core where
     -- note that the on-paper version of this judgement includes 
     -- only a single Δ context for both expression and pattern holes,
     -- and it is clear from the context which is being considered.
-    -- however, since expression holes require hole closures whil
+    -- however, since expression holes require hole closures while
     -- pattern holes only require the type of the hole, we must
     -- explicitly separate this into two contexts Δ and Δp here.
     data _,_,_⊢_::_ : (Γ : tctx) → (Δ : hctx) → (Δp : phctx) →
                       (e : ihexp) → (τ : htyp) → Set where
+      TAUnit       : ∀{Γ Δ Δp} →
+                     Γ , Δ , Δp ⊢ unit :: unit
       TANum        : ∀{Γ Δ Δp n} →
                      Γ , Δ , Δp ⊢ (N n) :: num
       TAVar        : ∀{Γ x τ Δ Δp} →
@@ -43,14 +45,16 @@ module statics-core where
       TAMatchZPre  : ∀{Γ Δ Δp e τ τ' r rs ξ} →
                      Γ , Δ , Δp ⊢ e :: τ →
                      Γ , Δ , Δp ⊢ (r / rs) ::s τ [ ξ ]=> τ' →
-                     Γ , Δ , Δp ⊢ match e ·: τ of (nil / r / rs) :: τ'
+                     Γ , Δ , Δp ⊢
+                       match e ·: τ of (nil / r / rs) :: τ'
       TAMatchNZPre : ∀{Γ Δ Δp e τ τ' rs-pre r rs-post ξpre ξrest} →
                      Γ , Δ , Δp ⊢ e :: τ →
                      e final →
                      Γ , Δ , Δp ⊢ rs-pre ::s τ [ ξpre ]=> τ' →
                      Γ , Δ , Δp ⊢ (r / rs-post) ::s τ [ ξrest ]=> τ' →
                      (e ⊧̇†? ξpre → ⊥) →
-                     Γ , Δ , Δp ⊢ match e ·: τ of (rs-pre / r / rs-post) :: τ'
+                     Γ , Δ , Δp ⊢
+                       match e ·: τ of (rs-pre / r / rs-post) :: τ'
       TAPair       : ∀{Γ Δ Δp e1 e2 τ1 τ2} →
                      Γ , Δ , Δp ⊢ e1 :: τ1 →
                      Γ , Δ , Δp ⊢ e2 :: τ2 →
@@ -219,6 +223,8 @@ module statics-core where
   mutual
     -- all match expressions occuring in e are exhaustive
     data _⊢_exhaustive : (Δp : phctx) → (e : ihexp) → Set where
+      EXUnit   : ∀{Δp} →
+                 Δp ⊢ unit exhaustive
       EXNum    : ∀{Δp n} →
                  Δp ⊢ (N n) exhaustive
       EXVar    : ∀{Δp x} →
@@ -284,6 +290,8 @@ module statics-core where
   mutual
     -- no match expression occurring in e contains redundant rules
     data _⊢_nonredundant : (Δp : phctx) → (e : ihexp) → Set where
+      NRUnit      : ∀{Δp} →
+                    Δp ⊢ unit nonredundant
       NRNum       : ∀{Δp n} →
                     Δp ⊢ (N n) nonredundant
       NRVar       : ∀{Δp x} →

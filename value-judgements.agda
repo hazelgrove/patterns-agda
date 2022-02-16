@@ -8,6 +8,7 @@ module value-judgements where
 
   -- e is a value
   data _val : (e : ihexp) → Set where
+    VUnit : unit val
     VNum  : ∀{n} →
             (N n) val
     VLam  : ∀{x τ e} →

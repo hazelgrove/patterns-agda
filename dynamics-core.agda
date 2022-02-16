@@ -58,6 +58,7 @@ module dynamics-core where
       ([ d / y ]rs rs-pre) / ([ d / y ]r r) / ([ d / y ]rs rs-post)
       
     [_/_]_ : ihexp → Nat → ihexp → ihexp
+    [ d / y ] unit = unit
     [ d / y ] (N n) = N n
     [ d / y ] X x
       with nat-dec x y

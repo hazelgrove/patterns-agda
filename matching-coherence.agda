@@ -18,9 +18,10 @@ module matching-coherence where
             Δp ⊢ p :: τ [ ξ ]⊣ Γ →
             e ⊧̇ ξ →
             Σ[ θ ∈ subst-list ] e ·: τ ▹ p ⊣ θ
+  sat-mat fin wt PTUnit CSTruth = [] , MUnit
+  sat-mat fin wt PTNum CSNum = [] , MNum
   sat-mat {e = e} {τ = τ} fin wt (PTVar {x = x}) sat =
     (e , τ , x) :: [] , MVar
-  sat-mat fin wt PTNum CSNum = [] , MNum
   sat-mat fin (TAInl wt) (PTInl pt) (CSInl sat)
     with sat-mat (inl-final fin) wt pt sat
   ... | θ , mat = θ , MInl mat
@@ -60,8 +61,9 @@ module matching-coherence where
             Δp ⊢ p :: τ [ ξ ]⊣ Γ →
             e ·: τ ▹ p ⊣ θ →
             e ⊧̇ ξ
-  mat-sat fin wt PTVar MVar = CSTruth
+  mat-sat fin wt PTUnit MUnit = CSTruth
   mat-sat fin wt PTNum MNum = CSNum
+  mat-sat fin wt PTVar MVar = CSTruth
   mat-sat fin (TAInl wt) (PTInl pt) (MInl mat)
     with mat-sat (inl-final fin) wt pt mat
   ... | sat = CSInl sat

@@ -16,6 +16,7 @@ module lemmas-subst-matching where
   subst-mat : ∀{x e1 e2 τ p θ1} →
               e1 ·: τ ▹ p ⊣ θ1 →
               Σ[ θ2 ∈ subst-list ] (([ e2 / x ] e1) ·: τ ▹ p ⊣ θ2)
+  subst-mat MUnit = [] , MUnit
   subst-mat MNum = [] , MNum
   subst-mat {x = x} {e1 = e1} {e2 = e2} {τ = τ}
             (MVar {x = y}) =

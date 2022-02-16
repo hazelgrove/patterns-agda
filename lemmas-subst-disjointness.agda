@@ -18,7 +18,8 @@ module lemmas-subst-disjointness where
                              binders-disjoint e2 e →
                              unbound-in x e →
                              binders-disjoint ([ e2 / x ] e1) e
-    subst-binders-disjoint {e1 = N x} BDNum bd2 ube = BDNum
+    subst-binders-disjoint {e1 = unit} BDUnit bd2 ube = BDUnit
+    subst-binders-disjoint {e1 = N n} BDNum bd2 ube = BDNum
     subst-binders-disjoint {x = x} {e1 = X y} (BDVar) bd2 ube
       with nat-dec y x
     ... | Inl refl = bd2
@@ -91,35 +92,14 @@ module lemmas-subst-disjointness where
       with unbound-in-p-dec x p
     ... | Inr ¬ub = BDRule bdp bd
     ... | Inl ub = BDRule bdp (subst-binders-disjoint bd bd2 ube)
-
-  -- apply-substs-binders-disjoint : ∀{d τ y θ e} →
-  --                                 binders-unique-θ ((d , τ , y) :: θ) →
-  --                                 binders-disjoint-θ ((d , τ , y) :: θ) e →
-  --                                 binders-disjoint (apply-substs θ e) d
-  -- apply-substs-binders-disjoint
-  --   {θ = []}
-  --   (BUθExtend bud buθ θbdd yubd yubθ)
-  --   (BDθExtend dbde bdθ yube) =
-  --   binders-disjoint-sym dbde
-  -- apply-substs-binders-disjoint
-  --   {d = d} {y = y} {θ = (d' , τ' , y') :: θ} {e = e}
-  --   (BUθExtend bud (BUθExtend bud' buθ θbdd' y'ubd' y'ubθ)
-  --              (BDθExtend d'bdd y'ubd θbdd) yubd yubθ)
-  --   (BDθExtend dbde yube (BDθExtend d'bde y'ube θbde)) =
-  --   subst-binders-disjoint
-  --     {x = y'}
-  --     (apply-substs-binders-disjoint
-  --       {y = y'}
-  --       (BUθExtend bud buθ θbdd y'ubd y'ubθ)
-  --       (BDθExtend dbde y'ube θbde))
-  --     d'bdd y'ubd
   
   mutual
     subst-hole-binders-disjoint : ∀{x e1 e2} {e : ihexp} →
                                   hole-binders-disjoint e1 e →
                                   hole-binders-disjoint e2 e →
                                   hole-binders-disjoint ([ e2 / x ] e1) e
-    subst-hole-binders-disjoint {e1 = N x} HBDNum bd2 = HBDNum
+    subst-hole-binders-disjoint {e1 = unit} HBDUnit bd2 = HBDUnit
+    subst-hole-binders-disjoint {e1 = N n} HBDNum bd2 = HBDNum
     subst-hole-binders-disjoint {x = x} {e1 = X y} HBDVar bd2
       with nat-dec y x
     ... | Inl refl = bd2
@@ -179,25 +159,3 @@ module lemmas-subst-disjointness where
     ... | Inr ¬ub = HBDRule bdp bd
     ... | Inl ub = HBDRule bdp (subst-hole-binders-disjoint bd bd2)
 
-
-  -- apply-substs-hole-binders-disjoint : ∀{d y θ e} →
-  --                                      hole-binders-unique-θ ((d , y) :: θ) →
-  --                                      hole-binders-disjoint-θ ((d , y) :: θ) e →
-  --                                      hole-binders-disjoint (apply-substs θ e) d
-  -- apply-substs-hole-binders-disjoint
-  --   {θ = []}
-  --   (HBUθExtend bud buθ θbdd)
-  --   (HBDθExtend dbde bdθ) =
-  --   hole-binders-disjoint-sym dbde
-  -- apply-substs-hole-binders-disjoint
-  --   {d = d} {y = y} {θ = (d' , y') :: θ} {e = e}
-  --   (HBUθExtend bud (HBUθExtend bud' buθ θbdd')
-  --              (HBDθExtend d'bdd θbdd))
-  --   (HBDθExtend dbde (HBDθExtend d'bde θbde)) =
-  --   subst-hole-binders-disjoint
-  --     {x = y'}
-  --     (apply-substs-hole-binders-disjoint
-  --       {y = y'}
-  --       (HBUθExtend bud buθ θbdd)
-  --       (HBDθExtend dbde θbde))
-  --     d'bdd

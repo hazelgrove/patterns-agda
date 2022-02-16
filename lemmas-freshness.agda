@@ -15,9 +15,10 @@ module lemmas-freshness where
                           Δp ⊢ p :: τ [ ξ ]⊣ Γp →
                           unbound-in-p x p →
                           x # Γp
+  unbound-in-p-apart-Γp PTUnit UBPUnit = refl
+  unbound-in-p-apart-Γp PTNum UBPNum = refl
   unbound-in-p-apart-Γp PTVar (UBPVar x≠y) =
     neq-apart-singleton x≠y
-  unbound-in-p-apart-Γp PTNum UBPNum = refl
   unbound-in-p-apart-Γp (PTInl pt) (UBPInl ub) =
     unbound-in-p-apart-Γp pt ub
   unbound-in-p-apart-Γp (PTInr pt) (UBPInr ub) =
@@ -63,9 +64,10 @@ module lemmas-freshness where
                           Δp ⊢ p :: τ [ ξ ]⊣ Γp →
                           x # Γp →
                           unbound-in-p x p
+  apart-Γp-unbound-in-p PTUnit x#Γp = UBPUnit
+  apart-Γp-unbound-in-p PTNum x#Γp = UBPNum
   apart-Γp-unbound-in-p {τ = τ} {x = x} (PTVar {x = y}) x#Γp =
     UBPVar (apart-singleton-neq x#Γp)
-  apart-Γp-unbound-in-p PTNum x#Γp = UBPNum
   apart-Γp-unbound-in-p (PTInl pt) x#Γp =
     UBPInl (apart-Γp-unbound-in-p pt x#Γp)
   apart-Γp-unbound-in-p (PTInr pt) x#Γp =
@@ -87,8 +89,9 @@ module lemmas-freshness where
                                Δp ⊢ p :: τ [ ξ ]⊣ Γp →
                                u # Δp →
                                hole-unbound-in-p u p
-  apart-Δp-hole-unbound-in-p PTVar u#Δp = HUBPVar
+  apart-Δp-hole-unbound-in-p PTUnit u#Δp = HUBPUnit
   apart-Δp-hole-unbound-in-p PTNum u#Δp = HUBPNum
+  apart-Δp-hole-unbound-in-p PTVar u#Δp = HUBPVar
   apart-Δp-hole-unbound-in-p (PTInl pt) u#Δp =
     HUBPInl (apart-Δp-hole-unbound-in-p pt u#Δp)
   apart-Δp-hole-unbound-in-p (PTInr pt) u#Δp =
@@ -171,6 +174,7 @@ module lemmas-freshness where
                     unbound-in x e →
                     x # Γ →
                     fresh x e
+    binders-fresh TAUnit UBUnit x#Γ = FUnit
     binders-fresh TANum UBNum x#Γ = FNum
     binders-fresh (TAVar {x = y} y∈Γ) UBVar x#Γ =
       FVar (λ{ refl → some-not-none ((! y∈Γ) · x#Γ) })
@@ -264,6 +268,7 @@ module lemmas-freshness where
                          hole-unbound-in u e →
                          u # Δ →
                          hole-fresh u e
+    hole-binders-fresh TAUnit HUBUnit u#Δ = HFUnit
     hole-binders-fresh TANum HUBNum u#Δ = HFNum
     hole-binders-fresh (TAVar x∈Γ) HUBVar u#Δ = HFVar
     hole-binders-fresh (TALam x#Γ wt) (HUBLam ub) u#Δ =

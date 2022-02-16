@@ -23,6 +23,7 @@ module complete-satisfy-decidable where
   -- otherwise,
   -- comp-satisfy-bool e ξ = false.
   -- we expand things out so that all clauses hold definitionally
+  comp-satisfy-bool unit (N n) = false
   comp-satisfy-bool (X x) (N n) = false
   comp-satisfy-bool (·λ x ·[ τ ] e) (N n) = false
   comp-satisfy-bool (e1 ∘ e2) (N n) = false
@@ -34,6 +35,7 @@ module complete-satisfy-decidable where
   comp-satisfy-bool (snd e) (N n) = false
   comp-satisfy-bool ⦇-⦈⟨ u , σ ⟩ (N n) = false
   comp-satisfy-bool ⦇⌜ e ⌟⦈⟨ u , σ ⟩ (N n) = false
+  comp-satisfy-bool unit (N̸ n) = false
   comp-satisfy-bool (X x) (N̸ n) = false
   comp-satisfy-bool (·λ x ·[ τ ] e) (N̸ n) = false
   comp-satisfy-bool (e1 ∘ e2) (N̸ n) = false
@@ -45,6 +47,7 @@ module complete-satisfy-decidable where
   comp-satisfy-bool (snd e) (N̸ n) = false
   comp-satisfy-bool ⦇-⦈⟨ u , σ ⟩ (N̸ n) = false
   comp-satisfy-bool ⦇⌜ e ⌟⦈⟨ u , σ ⟩ (N̸ n) = false
+  comp-satisfy-bool unit (inl ξ) = false
   comp-satisfy-bool (N n) (inl ξ) = false
   comp-satisfy-bool (X x) (inl ξ) = false
   comp-satisfy-bool (·λ x ·[ τ ] e) (inl ξ) = false
@@ -56,6 +59,7 @@ module complete-satisfy-decidable where
   comp-satisfy-bool (snd e) (inl ξ) = false
   comp-satisfy-bool ⦇-⦈⟨ u , σ ⟩ (inl ξ) = false
   comp-satisfy-bool ⦇⌜ e ⌟⦈⟨ u , σ ⟩ (inl ξ) = false
+  comp-satisfy-bool unit (inr ξ) = false
   comp-satisfy-bool (N n) (inr ξ) = false
   comp-satisfy-bool (X x) (inr ξ) = false
   comp-satisfy-bool (·λ x ·[ τ ] e) (inr ξ) = false
@@ -67,6 +71,7 @@ module complete-satisfy-decidable where
   comp-satisfy-bool (snd e) (inr ξ) = false
   comp-satisfy-bool ⦇-⦈⟨ u , σ ⟩ (inr ξ) = false
   comp-satisfy-bool ⦇⌜ e ⌟⦈⟨ u , σ ⟩ (inr ξ) = false
+  comp-satisfy-bool unit ⟨ ξ1 , ξ2 ⟩ = false
   comp-satisfy-bool (N n) ⟨ ξ1 , ξ2 ⟩ = false
   comp-satisfy-bool (X x) ⟨ ξ1 , ξ2 ⟩ = false
   comp-satisfy-bool (·λ x ·[ τ ] e) ⟨ ξ1 , ξ2 ⟩ = false

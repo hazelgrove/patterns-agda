@@ -17,6 +17,8 @@ open import type-assignment-unicity
 
 module progress where
   -- a quick lemma needed for some of the match cases of progress
+  -- effectively, this just shows that we can break up the constraint
+  -- emitted by an erased list
   exhaust-erase : ∀{rs-pre r rs-post rss Δp τ ξpre ξrest ξ} →
                   erase-r (rs-pre / r / rs-post) rss →
                   Δp ⊢ rs-pre ::s τ [ ξpre ] →
@@ -49,7 +51,9 @@ module progress where
              Δp ⊢ e exhaustive →
              (e final) +
                Σ[ e' ∈ ihexp ](e ↦ e')
+  progress TAUnit ex = Inl (FVal VUnit)
   progress TANum ex = Inl (FVal VNum)
+  progress (TAVar ()) ex
   progress (TALam x#Γ wt) ex = Inl (FVal VLam)
   progress (TAAp wt1 wt2) (EXAp ex1 ex2)
    with progress wt1 ex1 | progress wt2 ex2

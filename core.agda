@@ -6,6 +6,7 @@ open import contexts
 module core where
   -- types
   data htyp : Set where
+    unit  : htyp
     num   : htyp
     _==>_ : htyp → htyp → htyp
     _⊕_   : htyp → htyp → htyp
@@ -31,6 +32,7 @@ module core where
   mutual
     -- patterns used for structural pattern matching
     data pattrn : Set where
+      unit     : pattrn
       N        : Nat → pattrn
       X        : Nat → pattrn
       inl      : pattrn → pattrn
@@ -60,6 +62,7 @@ module core where
     
     -- internal expressions
     data ihexp : Set where
+      unit        : ihexp
       N           : Nat → ihexp
       X           : Nat → ihexp
       ·λ_·[_]_    : Nat → htyp → ihexp → ihexp

@@ -44,6 +44,7 @@ module satisfy-decidable where
   -- satisfy-bool e ξ = false.
   -- we expand things out so that all clauses hold definitionally
   satisfy-bool e ·? = false
+  satisfy-bool unit (N n) = false
   satisfy-bool (X x) (N n) = false
   satisfy-bool (·λ x ·[ τ ] e) (N n) = false
   satisfy-bool (e1 ∘ e2) (N n) = false
@@ -55,6 +56,7 @@ module satisfy-decidable where
   satisfy-bool (match e ·: τ of rs) (N n) = false
   satisfy-bool ⦇-⦈⟨ u , σ ⟩ (N n) = false
   satisfy-bool ⦇⌜ e ⌟⦈⟨ u , σ ⟩ (N n) = false
+  satisfy-bool unit (inl ξ) = false
   satisfy-bool (N n) (inl ξ) = false
   satisfy-bool (X x) (inl ξ) = false
   satisfy-bool (·λ x ·[ τ ] e) (inl ξ) = false
@@ -66,6 +68,7 @@ module satisfy-decidable where
   satisfy-bool (match e ·: τ of x) (inl ξ) = false
   satisfy-bool ⦇-⦈⟨ u , σ ⟩ (inl ξ) = false
   satisfy-bool ⦇⌜ e ⌟⦈⟨ u , σ ⟩ (inl ξ) = false
+  satisfy-bool unit (inr ξ) = false
   satisfy-bool (N n) (inr ξ) = false
   satisfy-bool (X x) (inr ξ) = false
   satisfy-bool (·λ x ·[ τ ] e) (inr ξ) = false
@@ -77,6 +80,7 @@ module satisfy-decidable where
   satisfy-bool (match e ·: τ of rs) (inr ξ) = false
   satisfy-bool ⦇-⦈⟨ u , σ ⟩ (inr ξ) = false
   satisfy-bool ⦇⌜ e ⌟⦈⟨ u , σ ⟩ (inr ξ) = false
+  satisfy-bool unit ⟨ ξ1 , ξ2 ⟩ = false
   satisfy-bool (N n) ⟨ ξ1 , ξ2 ⟩ = false
   satisfy-bool (X x) ⟨ ξ1 , ξ2 ⟩ = false
   satisfy-bool (·λ x ·[ τ ] e) ⟨ ξ1 , ξ2 ⟩ = false
@@ -117,7 +121,8 @@ module satisfy-decidable where
                      satisfy-bool e ξ == true →
                      e ⊧̇ ξ
   satisfy-complete {ξ = ·⊤} sateq = CSTruth
-  satisfy-complete {e = N n1} {ξ = N n2} sateq with nat-dec n1 n2
+  satisfy-complete {e = N n1} {ξ = N n2} sateq
+    with nat-dec n1 n2
   ... | Inl refl = CSNum
   ... | Inr neq with sateq
   ... | ()
@@ -194,6 +199,9 @@ module satisfy-decidable where
   maysatisfy-bool e (N n) =
     notintro-bool e and
       possible-bool (N n) and xrefutable-bool (N n)
+  maysatisfy-bool unit (inl ξ) =
+    notintro-bool unit and
+      possible-bool (inl ξ) and xrefutable-bool (inl ξ)
   maysatisfy-bool (N n) (inl ξ) =
     notintro-bool (N n) and
       possible-bool (inl ξ) and xrefutable-bool (inl ξ)
@@ -227,6 +235,9 @@ module satisfy-decidable where
   maysatisfy-bool ⦇⌜ e ⌟⦈⟨ u , σ ⟩ (inl ξ) =
     notintro-bool ⦇⌜ e ⌟⦈⟨ u , σ ⟩ and
       possible-bool (inl ξ) and xrefutable-bool (inl ξ)
+  maysatisfy-bool unit (inr ξ) =
+    notintro-bool unit and
+      possible-bool (inr ξ) and xrefutable-bool (inr ξ)
   maysatisfy-bool (N n) (inr ξ) =
     notintro-bool (N n) and
       possible-bool (inr ξ) and xrefutable-bool (inr ξ)
@@ -260,6 +271,9 @@ module satisfy-decidable where
   maysatisfy-bool ⦇⌜ e ⌟⦈⟨ u , σ ⟩ (inr ξ) =
     notintro-bool ⦇⌜ e ⌟⦈⟨ u , σ ⟩ and
       possible-bool (inr ξ) and xrefutable-bool (inr ξ)
+  maysatisfy-bool unit ⟨ ξ1 , ξ2 ⟩ =
+    notintro-bool unit and
+      possible-bool ⟨ ξ1 , ξ2 ⟩ and xrefutable-bool ⟨ ξ1 , ξ2 ⟩
   maysatisfy-bool (N n) ⟨ ξ1 , ξ2 ⟩ =
     notintro-bool (N n) and
       possible-bool ⟨ ξ1 , ξ2 ⟩ and xrefutable-bool ⟨ ξ1 , ξ2 ⟩
@@ -293,12 +307,13 @@ module satisfy-decidable where
   maysatisfy-bool ⦇⌜ e ⌟⦈⟨ u , σ ⟩ ⟨ ξ1 , ξ2 ⟩ =
     notintro-bool ⦇⌜ e ⌟⦈⟨ u , σ ⟩ and
       possible-bool ⟨ ξ1 , ξ2 ⟩ and xrefutable-bool ⟨ ξ1 , ξ2 ⟩
-
+  
   -- lemma needed for a few cases
   not-ref-lem : ∀{e ξ} →
-                         e notintro →
-                         e ⊧̇ ξ →
-                         ξ xrefutable → ⊥
+                e notintro →
+                e ⊧̇ ξ →
+                ξ xrefutable →
+                ⊥
   not-ref-lem ni (CSNotIntroPair ni' sat1 sat2) (RXPairL ref1) =
     not-ref-lem NVFst sat1 ref1
   not-ref-lem ni (CSNotIntroPair ni' sat1 sat2) (RXPairR ref2) =

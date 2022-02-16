@@ -18,6 +18,8 @@ module freshness where
   -- the variable name x is not bound in e
   mutual
     data unbound-in-p : Nat → pattrn → Set where
+      UBPUnit   : ∀{x} →
+                  unbound-in-p x unit
       UBPNum    : ∀{x n} →
                   unbound-in-p x (N n)
       UBPVar    : ∀{x y} →
@@ -80,6 +82,8 @@ module freshness where
                   unbound-in-θ x ((d , τ , y) :: θ)
                   
     data unbound-in-e : Nat → ihexp → Set where
+      UBUnit   : ∀{x} →
+                 unbound-in-e x unit
       UBNum    : ∀{x n} →
                  unbound-in-e x (N n)
       UBVar    : ∀{x y} →
@@ -190,6 +194,8 @@ module freshness where
                  fresh-θ x ((d , τ , y) :: θ)
                  
     data fresh : Nat → ihexp → Set where
+      FUnit   : ∀{x} →
+                fresh x unit
       FNum    : ∀{x n} →
                 fresh x (N n)
       FVar    : ∀{x y} →
@@ -244,6 +250,8 @@ module freshness where
   mutual
     -- the hole name u is not bound in e
     data hole-unbound-in-p : Nat → pattrn → Set where
+      HUBPUnit   : ∀{u} →
+                   hole-unbound-in-p u unit
       HUBPNum    : ∀{u n} →
                    hole-unbound-in-p u (N n)
       HUBPVar    : ∀{u x} →
@@ -305,6 +313,8 @@ module freshness where
                    hole-unbound-in-θ u ((d , τ , y) :: θ)
                   
     data hole-unbound-in-e : Nat → ihexp → Set where
+      HUBUnit   : ∀{u} →
+                  hole-unbound-in-e u unit
       HUBNum    : ∀{u n} →
                   hole-unbound-in-e u (N n)
       HUBVar    : ∀{u x} →
@@ -411,6 +421,8 @@ module freshness where
                   hole-fresh-θ x ((d , τ , y) :: θ)
                  
     data hole-fresh : Nat → ihexp → Set where
+      HFUnit   : ∀{u} →
+                 hole-fresh u unit
       HFNum    : ∀{u n} →
                  hole-fresh u (N n)
       HFVar    : ∀{u x} →

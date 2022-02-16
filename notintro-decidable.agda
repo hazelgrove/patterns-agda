@@ -11,6 +11,7 @@ module notintro-decidable where
   notintro-bool (match e ·: τ of rs) = true
   notintro-bool ⦇-⦈⟨ u , σ ⟩ = true
   notintro-bool ⦇⌜ e ⌟⦈⟨ u , σ ⟩ = true
+  notintro-bool unit = false
   notintro-bool (N n) = false
   notintro-bool (X x) = false
   notintro-bool (·λ x ·[ τ ] e) = false

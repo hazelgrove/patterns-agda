@@ -33,6 +33,7 @@ module lemmas-subst-type where
                  (Γ ,, (x , τ1)) , Δ , Δp ⊢ e1 :: τ →
                  Γ , Δ , Δp ⊢ e2 :: τ1 →
                  Γ , Δ , Δp ⊢ [ e2 / x ] e1 :: τ
+    subst-type bd hbd fin2 TAUnit wt2 = TAUnit
     subst-type bd hbd fin2 TANum wt2 = TANum
     subst-type {x = x} bd hbd fin2 (TAVar {x = y} y∈) wt2
       with nat-dec y x
@@ -264,6 +265,7 @@ module lemmas-subst-type where
                           unbound-in-p x p →
                           e ·: τ ▹ p ⊣ θ →
                           unbound-in-θ x θ
+  unbound-in-mat-substs ube UBPUnit MUnit = UBθEmpty
   unbound-in-mat-substs ube UBPNum MNum = UBθEmpty
   unbound-in-mat-substs ube (UBPVar x≠y) MVar =
     UBθExtend ube x≠y UBθEmpty
@@ -291,6 +293,7 @@ module lemmas-subst-type where
                           e1 ·: τ1 ▹ p1 ⊣ θ1 →
                           e2 ·: τ2 ▹ p2 ⊣ θ2 →
                           concatable θ1 θ2
+  mat-substs-concatable p1bdp2 p1bde2 MUnit mat2 = CθEmpty
   mat-substs-concatable p1bdp2 p1bde2 MNum mat2 = CθEmpty
   mat-substs-concatable (BDPVar xubp2) (BDPVar xube2) MVar mat2 =
     CθExtend (unbound-in-mat-substs xube2 xubp2 mat2) CθEmpty
@@ -327,6 +330,7 @@ module lemmas-subst-type where
                             binders-disjoint-p p e →
                             (e ·: τ ▹ p ⊣ θ) →
                             θ simultaneous
+  mat-substs-simultaneous bue bup bd MUnit = SθEmpty
   mat-substs-simultaneous bue bup bd MNum = SθEmpty
   mat-substs-simultaneous bue bup bd MVar =
     SθExtend UBθEmpty SθEmpty
@@ -389,6 +393,7 @@ module lemmas-subst-type where
                     Γ ## Γp →
                     (e ·: τ ▹ p ⊣ θ) →
                     Γ , Δ , Δp ⊢ θ :sl: Γp
+  mat-substs-type wt PTUnit Γ##Γp MUnit = STAEmpty
   mat-substs-type wt PTNum Γ##Γp MNum = STAEmpty
   mat-substs-type {Γ = Γ} {Δ = Δ} {Δp = Δp}
                   {e = e} {τ = τ}

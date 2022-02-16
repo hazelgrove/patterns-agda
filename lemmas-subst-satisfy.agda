@@ -29,6 +29,7 @@ module lemmas-subst-satisfy where
                     e1 final →
                     ([ e2 / x ] e1) ⊧̇ ξ →
                     e1 ⊧̇ ξ
+  final-sat-subst (FVal VUnit) sat = sat
   final-sat-subst (FVal VNum) sat = sat
   final-sat-subst {x = x} (FVal (VLam {x = y})) sat
     with nat-dec y x
@@ -138,6 +139,7 @@ module lemmas-subst-satisfy where
                        e1 final →
                        ([ e2 / x ] e1) ⊧̇? ξ →
                        e1 ⊧̇? ξ
+  final-maysat-subst (FVal VUnit) msat = msat
   final-maysat-subst (FVal VNum) msat = msat
   final-maysat-subst {x = x} (FVal (VLam {x = y})) msat
     with nat-dec y x

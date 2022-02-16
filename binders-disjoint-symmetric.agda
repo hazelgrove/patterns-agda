@@ -21,6 +21,7 @@ module binders-disjoint-symmetric where
                  binders-disjoint e (·λ x ·[ τ1 ] e1) →
                  unbound-in-e x e ×
                    binders-disjoint e e1
+    lem-bd-lam BDUnit = UBUnit , BDUnit
     lem-bd-lam BDNum = UBNum , BDNum 
     lem-bd-lam BDVar = UBVar , BDVar
     lem-bd-lam (BDLam (UBLam x≠y ub) bd)
@@ -97,6 +98,7 @@ module binders-disjoint-symmetric where
                    binders-disjoint-p p (·λ x ·[ τ1 ] e1) →
                    unbound-in-p x p ×
                      binders-disjoint-p p e1
+    lem-bd-p-lam BDPUnit = UBPUnit , BDPUnit
     lem-bd-p-lam BDPNum = UBPNum , BDPNum 
     lem-bd-p-lam (BDPVar (UBLam x≠y ub)) =
       UBPVar (flip x≠y) , BDPVar ub
@@ -121,6 +123,7 @@ module binders-disjoint-symmetric where
                 binders-disjoint e (e1 ∘ e2) →
                 binders-disjoint e e1 ×
                   binders-disjoint e e2
+    lem-bd-ap BDUnit = BDUnit , BDUnit
     lem-bd-ap BDNum = BDNum , BDNum
     lem-bd-ap BDVar = BDVar , BDVar
     lem-bd-ap (BDLam (UBAp ub1 ub2) bd)
@@ -197,6 +200,7 @@ module binders-disjoint-symmetric where
                   binders-disjoint-p p (e1 ∘ e2) →
                   binders-disjoint-p p e1 ×
                     binders-disjoint-p p e2
+    lem-bd-p-ap BDPUnit = BDPUnit , BDPUnit
     lem-bd-p-ap BDPNum = BDPNum , BDPNum
     lem-bd-p-ap (BDPVar (UBAp ub1 ub2)) =
       BDPVar ub1 , BDPVar ub2
@@ -220,6 +224,7 @@ module binders-disjoint-symmetric where
     lem-bd-inl : {e : ihexp} {τ : htyp} {e1 : ihexp} →
                  binders-disjoint e (inl τ e1) →
                  binders-disjoint e e1
+    lem-bd-inl BDUnit = BDUnit
     lem-bd-inl BDNum = BDNum
     lem-bd-inl BDVar = BDVar
     lem-bd-inl (BDLam (UBInl ub) bd) =
@@ -264,6 +269,7 @@ module binders-disjoint-symmetric where
     lem-bd-p-inl : {p : pattrn} {τ : htyp} {e1 : ihexp} →
                    binders-disjoint-p p (inl τ e1) →
                    binders-disjoint-p p e1
+    lem-bd-p-inl BDPUnit = BDPUnit
     lem-bd-p-inl BDPNum = BDPNum
     lem-bd-p-inl (BDPVar (UBInl ub)) = BDPVar ub
     lem-bd-p-inl (BDPInl bd) = BDPInl (lem-bd-p-inl bd)
@@ -279,6 +285,7 @@ module binders-disjoint-symmetric where
     lem-bd-inr : {e : ihexp} {τ : htyp} {e1 : ihexp} →
                  binders-disjoint e (inr τ e1) →
                  binders-disjoint e e1
+    lem-bd-inr BDUnit = BDUnit
     lem-bd-inr BDNum = BDNum
     lem-bd-inr BDVar = BDVar
     lem-bd-inr (BDLam (UBInr ub) bd) =
@@ -323,6 +330,7 @@ module binders-disjoint-symmetric where
     lem-bd-p-inr : {p : pattrn} {τ : htyp} {e1 : ihexp} →
                    binders-disjoint-p p (inr τ e1) →
                    binders-disjoint-p p e1
+    lem-bd-p-inr BDPUnit = BDPUnit
     lem-bd-p-inr BDPNum = BDPNum
     lem-bd-p-inr (BDPVar (UBInr ub)) = BDPVar ub
     lem-bd-p-inr (BDPInl bd) = BDPInl (lem-bd-p-inr bd)
@@ -343,6 +351,7 @@ module binders-disjoint-symmetric where
                      binders-disjoint e rs-pre ×
                        binders-disjoint e r ×
                          binders-disjoint e rs-post
+    lem-bd-match BDUnit = BDUnit , BDUnit , BDUnit , BDUnit
     lem-bd-match BDNum = BDNum , BDNum , BDNum , BDNum
     lem-bd-match BDVar = BDVar , BDVar , BDVar , BDVar
     lem-bd-match (BDLam (UBMatch ub
@@ -480,6 +489,7 @@ module binders-disjoint-symmetric where
                        binders-disjoint-p p rs-pre ×
                          binders-disjoint-p p r1 ×
                            binders-disjoint-p p rs-post
+    lem-bd-p-match BDPUnit = BDPUnit , BDPUnit , BDPUnit , BDPUnit
     lem-bd-p-match BDPNum = BDPNum , BDPNum , BDPNum , BDPNum
     lem-bd-p-match (BDPVar (UBMatch ub
                                     (UBZRules ubpre
@@ -515,6 +525,7 @@ module binders-disjoint-symmetric where
                   binders-disjoint e ⟨ e1 , e2 ⟩ →
                   binders-disjoint e e1 ×
                     binders-disjoint e e2
+    lem-bd-pair BDUnit = BDUnit , BDUnit
     lem-bd-pair BDNum = BDNum , BDNum
     lem-bd-pair BDVar = BDVar , BDVar
     lem-bd-pair (BDLam (UBPair ub1 ub2) bd)
@@ -592,6 +603,7 @@ module binders-disjoint-symmetric where
                     binders-disjoint-p p ⟨ e1 , e2 ⟩ →
                     binders-disjoint-p p e1 ×
                       binders-disjoint-p p e2
+    lem-bd-p-pair BDPUnit = BDPUnit , BDPUnit
     lem-bd-p-pair BDPNum = BDPNum , BDPNum
     lem-bd-p-pair (BDPVar (UBPair ub1 ub2)) =
       BDPVar ub1 , BDPVar ub2
@@ -615,6 +627,7 @@ module binders-disjoint-symmetric where
     lem-bd-fst : {e : ihexp} {e1 : ihexp} →
                  binders-disjoint e (fst e1) →
                  binders-disjoint e e1
+    lem-bd-fst BDUnit = BDUnit
     lem-bd-fst BDNum = BDNum
     lem-bd-fst BDVar = BDVar
     lem-bd-fst (BDLam (UBFst ub) bd) = BDLam ub (lem-bd-fst bd)
@@ -657,6 +670,7 @@ module binders-disjoint-symmetric where
     lem-bd-p-fst : {p : pattrn} {e1 : ihexp} →
                    binders-disjoint-p p (fst e1) →
                    binders-disjoint-p p e1
+    lem-bd-p-fst BDPUnit = BDPUnit
     lem-bd-p-fst BDPNum = BDPNum
     lem-bd-p-fst (BDPVar (UBFst ub)) = BDPVar ub
     lem-bd-p-fst (BDPInl bd) = BDPInl (lem-bd-p-fst bd)
@@ -672,6 +686,7 @@ module binders-disjoint-symmetric where
     lem-bd-snd : {e : ihexp} {e1 : ihexp} →
                  binders-disjoint e (snd e1) →
                  binders-disjoint e e1
+    lem-bd-snd BDUnit = BDUnit
     lem-bd-snd BDNum = BDNum
     lem-bd-snd BDVar = BDVar
     lem-bd-snd (BDLam (UBSnd ub) bd) =
@@ -715,6 +730,7 @@ module binders-disjoint-symmetric where
     lem-bd-p-snd : {p : pattrn} {e1 : ihexp} →
                    binders-disjoint-p p (snd e1) →
                    binders-disjoint-p p e1
+    lem-bd-p-snd BDPUnit = BDPUnit
     lem-bd-p-snd BDPNum = BDPNum
     lem-bd-p-snd (BDPVar (UBSnd ub)) = BDPVar ub
     lem-bd-p-snd (BDPInl bd) = BDPInl (lem-bd-p-snd bd)
@@ -730,6 +746,7 @@ module binders-disjoint-symmetric where
     lem-bd-ehole : {e : ihexp} {u : Nat} {σ : subst-env} →
                    binders-disjoint e ⦇-⦈⟨ u , σ ⟩ →
                    binders-disjoint e σ
+    lem-bd-ehole BDUnit = BDUnit
     lem-bd-ehole BDNum = BDNum
     lem-bd-ehole BDVar = BDVar
     lem-bd-ehole (BDLam (UBEHole ubσ) bd) =
@@ -775,6 +792,7 @@ module binders-disjoint-symmetric where
     lem-bd-p-ehole : {p : pattrn} {u : Nat} {σ : subst-env} →
                      binders-disjoint-p p ⦇-⦈⟨ u , σ ⟩ →
                      binders-disjoint-p p σ
+    lem-bd-p-ehole BDPUnit = BDPUnit
     lem-bd-p-ehole BDPNum = BDPNum
     lem-bd-p-ehole (BDPVar (UBEHole ubσ)) = BDPVar ubσ
     lem-bd-p-ehole (BDPInl bd) = BDPInl (lem-bd-p-ehole bd)
@@ -791,6 +809,7 @@ module binders-disjoint-symmetric where
                     binders-disjoint e ⦇⌜ e1 ⌟⦈⟨ u , σ ⟩ →
                     binders-disjoint e σ ×
                       binders-disjoint e e1
+    lem-bd-nehole BDUnit = BDUnit , BDUnit
     lem-bd-nehole BDNum = BDNum , BDNum
     lem-bd-nehole BDVar = BDVar , BDVar
     lem-bd-nehole (BDLam (UBNEHole ubσ ub) bd)
@@ -870,6 +889,7 @@ module binders-disjoint-symmetric where
                       binders-disjoint-p p ⦇⌜ e1 ⌟⦈⟨ u , σ ⟩ →
                       binders-disjoint-p p σ ×
                         binders-disjoint-p p e1
+    lem-bd-p-nehole BDPUnit = BDPUnit , BDPUnit
     lem-bd-p-nehole BDPNum = BDPNum , BDPNum
     lem-bd-p-nehole (BDPVar (UBNEHole ubσ ub)) =
       BDPVar ubσ , BDPVar ub 
@@ -899,6 +919,7 @@ module binders-disjoint-symmetric where
                      binders-disjoint e d ×
                        unbound-in-e y e ×
                          binders-disjoint e σ
+    lem-σ-bd-subst BDUnit = BDUnit , UBUnit , BDUnit
     lem-σ-bd-subst BDNum = BDNum , UBNum , BDNum
     lem-σ-bd-subst BDVar = BDVar , UBVar , BDVar
     lem-σ-bd-subst (BDLam (UBσSubst ub x≠y ubσ) bd)
@@ -987,6 +1008,7 @@ module binders-disjoint-symmetric where
                        binders-disjoint-p p d ×
                          unbound-in-p y p ×
                            binders-disjoint-p p σ
+    lem-σ-bd-p-subst BDPUnit = BDPUnit , UBPUnit , BDPUnit
     lem-σ-bd-p-subst BDPNum = BDPNum , UBPNum , BDPNum
     lem-σ-bd-p-subst (BDPVar (UBσSubst ub x≠y ubσ)) =
       BDPVar ub , UBPVar (flip x≠y) , BDPVar ubσ
@@ -1008,132 +1030,13 @@ module binders-disjoint-symmetric where
       with lem-σ-bd-p-subst bd
     ... | bd' , ub , bdσ =
       BDPNEHole bd' , UBPNEHole ub , BDPNEHole bdσ
-
-  mutual
-    lem-θ-bd-extend : {e : ihexp} {d : ihexp} {τ : htyp} {y : Nat} {θ : subst-list} →
-                      binders-disjoint e ((d , τ , y) :: θ) →
-                      binders-disjoint e d ×
-                        unbound-in-e y e ×
-                          binders-disjoint e θ
-    lem-θ-bd-extend BDNum = BDNum , UBNum , BDNum
-    lem-θ-bd-extend BDVar = BDVar , UBVar , BDVar
-    lem-θ-bd-extend (BDLam (UBθExtend ub x≠y ubθ) bd)
-      with lem-θ-bd-extend bd
-    ... | bd' , ub' , bdθ =
-      BDLam ub bd' , UBLam (flip x≠y) ub' , BDLam ubθ bdθ
-    lem-θ-bd-extend (BDAp bd1 bd2)
-      with lem-θ-bd-extend bd1 | lem-θ-bd-extend bd2
-    ... | bd1' , ub1 , bdθ1 | bd2' , ub2 , bdθ2 =
-      BDAp bd1' bd2' , UBAp ub1 ub2 , BDAp bdθ1 bdθ2
-    lem-θ-bd-extend (BDInl bd)
-      with lem-θ-bd-extend bd
-    ... | bd' , ub , bdθ =
-      BDInl bd' , UBInl ub , BDInl bdθ
-    lem-θ-bd-extend (BDInr bd)
-      with lem-θ-bd-extend bd
-    ... | bd' , ub , bdθ =
-      BDInr bd' , UBInr ub , BDInr bdθ
-    lem-θ-bd-extend (BDMatch bd (BDZRules bdpre bdpost))
-      with lem-θ-bd-extend bd |
-           lem-θ-bd-rs-extend bdpre |
-           lem-θ-bd-rs-extend bdpost
-    ... | bd' , ub , bdθ
-        | bdpre' , ubpre , bdpreθ
-        | bdpost' , ubpost , bdpostθ =
-      BDMatch bd' (BDZRules bdpre' bdpost') ,
-      UBMatch ub (UBZRules ubpre ubpost) ,
-      BDMatch bdθ (BDZRules bdpreθ bdpostθ)
-    lem-θ-bd-extend (BDPair bd1 bd2)
-      with lem-θ-bd-extend bd1 | lem-θ-bd-extend bd2
-    ... | bd1' , ub1 , bdθ1 | bd2' , ub2 , bdθ2 =
-      BDPair bd1' bd2' , UBPair ub1 ub2 , BDPair bdθ1 bdθ2
-    lem-θ-bd-extend (BDFst bd)
-      with lem-θ-bd-extend bd
-    ... | bd' , ub , bdθ =
-      BDFst bd' , UBFst ub , BDFst bdθ
-    lem-θ-bd-extend (BDSnd bd)
-      with lem-θ-bd-extend bd
-    ... | bd' , ub , bdθ =
-      BDSnd bd' , UBSnd ub , BDSnd bdθ
-    lem-θ-bd-extend (BDEHole bdσ)
-      with lem-θ-bd-σ-extend bdσ
-    ... | bdσ' , ubσ , bdσθ =
-      BDEHole bdσ' , UBEHole ubσ , BDEHole bdσθ
-    lem-θ-bd-extend (BDNEHole bdσ bde)
-      with lem-θ-bd-σ-extend bdσ | lem-θ-bd-extend bde
-    ... | bdσ' , ubσ , bdσθ | bde' , ube , bdeθ =
-      BDNEHole bdσ' bde' , UBNEHole ubσ ube , BDNEHole bdσθ bdeθ
-
-    lem-θ-bd-σ-extend : {σ : subst-env} {d : ihexp} {τ : htyp}
-                        {y : Nat} {θ : subst-list} →
-                        binders-disjoint-σ σ ((d , τ , y) :: θ) →
-                        binders-disjoint-σ σ d ×
-                          unbound-in-σ y σ ×
-                            binders-disjoint-σ σ θ
-    lem-θ-bd-σ-extend BDσId = BDσId , UBσId , BDσId
-    lem-θ-bd-σ-extend (BDσSubst bdd (UBθExtend ub x≠y ubθ) bdσ)
-      with lem-θ-bd-extend bdd | lem-θ-bd-σ-extend bdσ
-    ... | bdd' , ubd , bddθ | bdσ' , ubσ' , bdσθ =
-      BDσSubst bdd' ub bdσ' ,
-      UBσSubst ubd (flip x≠y) ubσ' ,
-      BDσSubst bddθ ubθ bdσθ
-
-    lem-θ-bd-rs-extend : {rs : rules} {d : ihexp} {τ : htyp}
-                         {y : Nat} {θ : subst-list} →
-                         binders-disjoint-rs rs ((d , τ , y) :: θ) →
-                         binders-disjoint-rs rs d ×
-                           unbound-in-rs y rs ×
-                             binders-disjoint-rs rs θ
-    lem-θ-bd-rs-extend BDNoRules = BDNoRules , UBNoRules , BDNoRules
-    lem-θ-bd-rs-extend (BDRules bdr bdrs)
-      with lem-θ-bd-r-extend bdr | lem-θ-bd-rs-extend bdrs
-    ... | bdr' , ubr , bdrθ | bdrs' , ubrs , bdrsθ =
-      BDRules bdr' bdrs' , UBRules ubr ubrs , BDRules bdrθ bdrsθ
-
-    lem-θ-bd-r-extend : {r : rule} {d : ihexp} {τ : htyp}
-                        {y : Nat} {θ : subst-list} →
-                        binders-disjoint-r r ((d , τ , y) :: θ) →
-                        binders-disjoint-r r d ×
-                          unbound-in-r y r ×
-                            binders-disjoint-r r θ
-    lem-θ-bd-r-extend (BDRule bdp bd)
-      with lem-θ-bd-p-extend bdp | lem-θ-bd-extend bd
-    ... | bdp' , ubp , bdpθ | bd' , ub , bdθ =
-      BDRule bdp' bd' , UBRule ubp ub , BDRule bdpθ bdθ
-
-    lem-θ-bd-p-extend : {p : pattrn} {d : ihexp} {τ : htyp}
-                        {y : Nat} {θ : subst-list} →
-                        binders-disjoint-p p ((d , τ , y) :: θ) →
-                        binders-disjoint-p p d ×
-                          unbound-in-p y p ×
-                            binders-disjoint-p p θ
-    lem-θ-bd-p-extend BDPNum = BDPNum , UBPNum , BDPNum
-    lem-θ-bd-p-extend (BDPVar (UBθExtend ub x≠y ubθ)) =
-      BDPVar ub , UBPVar (flip x≠y) , BDPVar ubθ
-    lem-θ-bd-p-extend (BDPInl bd)
-      with lem-θ-bd-p-extend bd
-    ... | bd' , ub , bdθ =
-      BDPInl bd' , UBPInl ub , BDPInl bdθ
-    lem-θ-bd-p-extend (BDPInr bd)
-      with lem-θ-bd-p-extend bd
-    ... | bd' , ub , bdθ =
-      BDPInr bd' , UBPInr ub , BDPInr bdθ
-    lem-θ-bd-p-extend (BDPPair bd1 bd2)
-      with lem-θ-bd-p-extend bd1 | lem-θ-bd-p-extend bd2
-    ... | bd1' , ub1 , bdθ1 | bd2' , ub2 , bdθ2 =
-      BDPPair bd1' bd2' , UBPPair ub1 ub2 , BDPPair bdθ1 bdθ2
-    lem-θ-bd-p-extend BDPWild = BDPWild , UBPWild , BDPWild
-    lem-θ-bd-p-extend BDPEHole = BDPEHole , UBPEHole , BDPEHole
-    lem-θ-bd-p-extend (BDPNEHole bd)
-      with lem-θ-bd-p-extend bd
-    ... | bd' , ub , bdθ =
-      BDPNEHole bd' , UBPNEHole ub , BDPNEHole bdθ
     
   mutual
     lem-rs-bd : {e : ihexp} {r : rule} {rs : rules} →
                 binders-disjoint e (r / rs) →
                 binders-disjoint e r ×
                   binders-disjoint e rs
+    lem-rs-bd BDUnit = BDUnit , BDUnit
     lem-rs-bd BDNum = BDNum , BDNum
     lem-rs-bd BDVar = BDVar , BDVar
     lem-rs-bd (BDLam (UBRules ubr ubrs) bd)
@@ -1209,6 +1112,7 @@ module binders-disjoint-symmetric where
                   binders-disjoint-p p (r / rs) →
                   binders-disjoint-p p r ×
                     binders-disjoint-p p rs
+    lem-rs-bd-p BDPUnit = BDPUnit , BDPUnit
     lem-rs-bd-p BDPNum = BDPNum , BDPNum
     lem-rs-bd-p (BDPVar (UBRules ubr ubrs)) =
       BDPVar ubr , BDPVar ubrs
@@ -1233,6 +1137,7 @@ module binders-disjoint-symmetric where
                binders-disjoint e (pr => er) →
                binders-disjoint e pr ×
                  binders-disjoint e er
+    lem-r-bd BDUnit = BDUnit , BDUnit
     lem-r-bd BDNum = BDNum , BDNum
     lem-r-bd BDVar = BDVar , BDVar
     lem-r-bd (BDLam (UBRule ubr ube) bd)
@@ -1308,6 +1213,7 @@ module binders-disjoint-symmetric where
                  binders-disjoint-p p (pr => er) →
                  binders-disjoint-p p pr ×
                    binders-disjoint-p p er
+    lem-r-bd-p BDPUnit = BDPUnit , BDPUnit
     lem-r-bd-p BDPNum = BDPNum , BDPNum
     lem-r-bd-p (BDPVar (UBRule ubr ubrs)) =
       BDPVar ubr , BDPVar ubrs
@@ -1332,6 +1238,7 @@ module binders-disjoint-symmetric where
     lem-p-bd-var : {e : ihexp} {x : Nat} →
                    binders-disjoint {T = pattrn} e (X x) →
                    unbound-in-e x e
+    lem-p-bd-var BDUnit = UBUnit
     lem-p-bd-var BDNum = UBNum
     lem-p-bd-var BDVar = UBVar
     lem-p-bd-var (BDLam (UBPVar x≠y) bd) =
@@ -1377,6 +1284,7 @@ module binders-disjoint-symmetric where
     lem-p-bd-p-var : {p : pattrn} {x : Nat} →
                      binders-disjoint-p {T = pattrn} p (X x) →
                      unbound-in-p x p
+    lem-p-bd-p-var BDPUnit = UBPUnit
     lem-p-bd-p-var BDPNum = UBPNum
     lem-p-bd-p-var (BDPVar (UBPVar x≠y)) =
       UBPVar (flip x≠y)
@@ -1396,6 +1304,7 @@ module binders-disjoint-symmetric where
     lem-p-bd-inl : {e : ihexp} {p1 : pattrn} →
                    binders-disjoint e (inl p1) →
                    binders-disjoint e p1
+    lem-p-bd-inl BDUnit = BDUnit
     lem-p-bd-inl BDNum = BDNum
     lem-p-bd-inl BDVar = BDVar
     lem-p-bd-inl (BDLam (UBPInl ub) bd) =
@@ -1440,6 +1349,7 @@ module binders-disjoint-symmetric where
     lem-p-bd-p-inl : {p : pattrn} {p1 : pattrn} →
                      binders-disjoint-p p (inl p1) →
                      binders-disjoint-p p p1
+    lem-p-bd-p-inl BDPUnit = BDPUnit
     lem-p-bd-p-inl BDPNum = BDPNum
     lem-p-bd-p-inl (BDPVar (UBPInl ub)) = BDPVar ub
     lem-p-bd-p-inl (BDPInl bd) =
@@ -1458,6 +1368,7 @@ module binders-disjoint-symmetric where
     lem-p-bd-inr : {e : ihexp} {p1 : pattrn} →
                    binders-disjoint e (inr p1) →
                    binders-disjoint e p1
+    lem-p-bd-inr BDUnit = BDUnit 
     lem-p-bd-inr BDNum = BDNum
     lem-p-bd-inr BDVar = BDVar
     lem-p-bd-inr (BDLam (UBPInr ub) bd) =
@@ -1502,6 +1413,7 @@ module binders-disjoint-symmetric where
     lem-p-bd-p-inr : {p : pattrn} {p1 : pattrn} →
                      binders-disjoint-p p (inr p1) →
                      binders-disjoint-p p p1
+    lem-p-bd-p-inr BDPUnit = BDPUnit
     lem-p-bd-p-inr BDPNum = BDPNum
     lem-p-bd-p-inr (BDPVar (UBPInr ub)) = BDPVar ub
     lem-p-bd-p-inr (BDPInl bd) =
@@ -1521,6 +1433,7 @@ module binders-disjoint-symmetric where
                     binders-disjoint e ⟨ p1 , p2 ⟩ →
                     binders-disjoint e p1 ×
                       binders-disjoint e p2
+    lem-p-bd-pair BDUnit = BDUnit , BDUnit
     lem-p-bd-pair BDNum = BDNum , BDNum
     lem-p-bd-pair BDVar = BDVar , BDVar
     lem-p-bd-pair (BDLam (UBPPair ub1 ub2) bd)
@@ -1598,6 +1511,7 @@ module binders-disjoint-symmetric where
                       binders-disjoint-p p ⟨ p1 , p2 ⟩ →
                       binders-disjoint-p p p1 ×
                         binders-disjoint-p p p2
+    lem-p-bd-p-pair BDPUnit = BDPUnit , BDPUnit
     lem-p-bd-p-pair BDPNum = BDPNum , BDPNum
     lem-p-bd-p-pair (BDPVar (UBPPair ub1 ub2)) =
       BDPVar ub1 , BDPVar ub2
@@ -1623,6 +1537,7 @@ module binders-disjoint-symmetric where
                       {p1 : pattrn} {w : Nat} {τ : htyp} →
                       binders-disjoint e ⦇⌜ p1 ⌟⦈[ w , τ ] →
                       binders-disjoint e p1
+    lem-p-bd-nehole BDUnit = BDUnit
     lem-p-bd-nehole BDNum = BDNum
     lem-p-bd-nehole BDVar = BDVar
     lem-p-bd-nehole (BDLam (UBPNEHole ub) bd) =
@@ -1671,6 +1586,7 @@ module binders-disjoint-symmetric where
     lem-p-bd-p-nehole : {p : pattrn} {p1 : pattrn} {w : Nat} {τ : htyp} →
                         binders-disjoint-p p ⦇⌜ p1 ⌟⦈[ w , τ ] →
                         binders-disjoint-p p p1
+    lem-p-bd-p-nehole BDPUnit = BDPUnit
     lem-p-bd-p-nehole BDPNum = BDPNum
     lem-p-bd-p-nehole (BDPVar (UBPNEHole ub)) = BDPVar ub
     lem-p-bd-p-nehole (BDPInl bd) =
@@ -1691,6 +1607,7 @@ module binders-disjoint-symmetric where
     binders-disjoint-sym : {e1 e2 : ihexp} →
                            binders-disjoint e1 e2 →
                            binders-disjoint e2 e1
+    binders-disjoint-sym {e2 = unit} bd = BDUnit
     binders-disjoint-sym {e2 = N n} bd = BDNum
     binders-disjoint-sym {e2 = X x} bd = BDVar
     binders-disjoint-sym {e2 = ·λ x ·[ τ ] e2} bd
@@ -1765,6 +1682,7 @@ module binders-disjoint-symmetric where
     p-binders-disjoint-sym : {e : ihexp} {p : pattrn} →
                              binders-disjoint e p →
                              binders-disjoint-p p e
+    p-binders-disjoint-sym {p = unit} bd = BDPUnit
     p-binders-disjoint-sym {p = N n} bd = BDPNum
     p-binders-disjoint-sym {p = X x} bd =
       BDPVar (lem-p-bd-var bd)
@@ -1786,6 +1704,7 @@ module binders-disjoint-symmetric where
     binders-disjoint-σ-sym : {σ : subst-env} {e : ihexp} →
                              binders-disjoint-σ σ e →
                              binders-disjoint e σ
+    binders-disjoint-σ-sym {e = unit} bd = BDUnit
     binders-disjoint-σ-sym {e = N n} bd = BDNum
     binders-disjoint-σ-sym {e = X x} bd = BDVar
     binders-disjoint-σ-sym {e = ·λ x ·[ τ ] e} bd
@@ -1857,6 +1776,7 @@ module binders-disjoint-symmetric where
     p-binders-disjoint-σ-sym : {σ : subst-env} {p : pattrn} →
                                binders-disjoint-σ σ p →
                                binders-disjoint-p p σ
+    p-binders-disjoint-σ-sym {p = unit} bd = BDPUnit
     p-binders-disjoint-σ-sym {p = N n} bd = BDPNum
     p-binders-disjoint-σ-sym {p = X x} bd =
       BDPVar (lem-p-bd-σ-var bd)
@@ -1878,6 +1798,7 @@ module binders-disjoint-symmetric where
     binders-disjoint-rs-sym : {rs : rules} {e : ihexp} →
                               binders-disjoint-rs rs e →
                               binders-disjoint e rs
+    binders-disjoint-rs-sym {e = unit} bd = BDUnit
     binders-disjoint-rs-sym {e = N n} bd = BDNum
     binders-disjoint-rs-sym {e = X x} bd = BDVar
     binders-disjoint-rs-sym {e = ·λ x ·[ τ ] e} bd
@@ -1950,6 +1871,7 @@ module binders-disjoint-symmetric where
     p-binders-disjoint-rs-sym : {rs : rules} {p : pattrn} →
                                 binders-disjoint-rs rs p →
                                 binders-disjoint-p p rs
+    p-binders-disjoint-rs-sym {p = unit} bd = BDPUnit
     p-binders-disjoint-rs-sym {p = N n} bd = BDPNum
     p-binders-disjoint-rs-sym {p = X x} bd =
       BDPVar (lem-p-bd-rs-var bd)
@@ -1971,6 +1893,7 @@ module binders-disjoint-symmetric where
     binders-disjoint-r-sym : {r : rule} {e : ihexp} →
                              binders-disjoint-r r e →
                              binders-disjoint e r
+    binders-disjoint-r-sym {e = unit} bd = BDUnit
     binders-disjoint-r-sym {e = N n} bd = BDNum
     binders-disjoint-r-sym {e = X x} bd = BDVar
     binders-disjoint-r-sym {e = ·λ x ·[ τ ] e} bd
@@ -2043,6 +1966,7 @@ module binders-disjoint-symmetric where
     p-binders-disjoint-r-sym : {r : rule} {p : pattrn} →
                                binders-disjoint-r r p →
                                binders-disjoint-p p r
+    p-binders-disjoint-r-sym {p = unit} bd = BDPUnit
     p-binders-disjoint-r-sym {p = N n} bd = BDPNum
     p-binders-disjoint-r-sym {p = X x} bd =
       BDPVar (lem-p-bd-r-var bd)
@@ -2064,6 +1988,7 @@ module binders-disjoint-symmetric where
     binders-disjoint-p-sym : {p : pattrn} {e : ihexp} →
                              binders-disjoint-p p e →
                              binders-disjoint e p
+    binders-disjoint-p-sym {e = unit} bd = BDUnit
     binders-disjoint-p-sym {e = N n} bd = BDNum
     binders-disjoint-p-sym {e = X x} bd = BDVar
     binders-disjoint-p-sym {e = ·λ x ·[ τ ] e} bd
@@ -2136,6 +2061,7 @@ module binders-disjoint-symmetric where
     p-binders-disjoint-p-sym : {p1 : pattrn} {p2 : pattrn} →
                                binders-disjoint-p p1 p2 →
                                binders-disjoint-p p2 p1
+    p-binders-disjoint-p-sym {p2 = unit} bd = BDPUnit
     p-binders-disjoint-p-sym {p2 = N n} bd = BDPNum
     p-binders-disjoint-p-sym {p2 = X x} bd =
       BDPVar (lem-p-bd-p-var bd)

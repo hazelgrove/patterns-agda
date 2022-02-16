@@ -9,6 +9,7 @@ open import patterns-core
 module binders-uniqueness where
   mutual
     data binders-unique-p : pattrn → Set where
+      BUPUnit   : binders-unique-p unit
       BUPNum    : ∀{n} →
                   binders-unique-p (N n)
       BUPVar    : ∀{x} →
@@ -63,6 +64,7 @@ module binders-uniqueness where
                  binders-unique-σ (Subst d y σ)
               
     data binders-unique : ihexp → Set where
+      BUUnit   : binders-unique unit
       BUNum    : ∀{n} →
                  binders-unique (N n)
       BUVar    : ∀{x} →
@@ -109,6 +111,7 @@ module binders-uniqueness where
               
   mutual
     data hole-binders-unique-p : pattrn → Set where
+      HBUPUnit   : hole-binders-unique-p unit
       HBUPNum    : ∀{n} →
                    hole-binders-unique-p (N n)
       HBUPVar    : ∀{x} →
@@ -164,6 +167,7 @@ module binders-uniqueness where
                   hole-binders-unique-σ (Subst d y σ)
 
     data hole-binders-unique : ihexp → Set where
+      HBUUnit   : hole-binders-unique unit
       HBUNum    : ∀{n} →
                   hole-binders-unique (N n)
       HBUVar    : ∀{x} →

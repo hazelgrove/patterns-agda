@@ -14,6 +14,7 @@ module type-assignment-unicity where
                         Γ , Δ , Δp ⊢ e :: τ →
                         Γ , Δ , Δp ⊢ e :: τ' →
                         τ == τ'
+    expr-type-unicity TAUnit TAUnit = refl
     expr-type-unicity TANum TANum = refl
     expr-type-unicity {Γ = Γ} (TAVar wt) (TAVar wt') =
       ctx-unicity {Γ = Γ} wt wt'
@@ -88,6 +89,7 @@ module type-assignment-unicity where
                       Δp ⊢ p :: τ [ ξ ]⊣ Γ →
                       Δp ⊢ p :: τ [ ξ' ]⊣ Γ' →
                       (ξ == ξ') × (Γ == Γ')
+    pattern-unicity PTUnit PTUnit = refl , refl
     pattern-unicity PTVar PTVar = refl , refl
     pattern-unicity PTNum PTNum = refl , refl
     pattern-unicity (PTInl pt) (PTInl pt')

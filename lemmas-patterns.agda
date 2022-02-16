@@ -15,6 +15,7 @@ module lemmas-patterns where
   pattern-constr-same-type : ∀{Δp p τ ξ Γ} →
                              Δp ⊢ p :: τ [ ξ ]⊣ Γ →
                              ξ :c: τ
+  pattern-constr-same-type PTUnit = CTTruth
   pattern-constr-same-type PTVar = CTTruth
   pattern-constr-same-type PTNum = CTNum
   pattern-constr-same-type (PTInl pt) =
@@ -40,6 +41,7 @@ module lemmas-patterns where
   pattern-constr-pos : ∀{Δp p τ ξ Γ} →
                        Δp ⊢ p :: τ [ ξ ]⊣ Γ →
                        ξ possible
+  pattern-constr-pos PTUnit = PTruth
   pattern-constr-pos PTVar = PTruth
   pattern-constr-pos PTNum = PNum
   pattern-constr-pos (PTInl pt) =

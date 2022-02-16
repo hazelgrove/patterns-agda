@@ -8,6 +8,7 @@ module freshness-decidable where
   unbound-in-p-dec : (x : Nat) →
                      (p : pattrn) →
                      (unbound-in-p x p) + (unbound-in-p x p → ⊥)
+  unbound-in-p-dec x unit = Inl UBPUnit
   unbound-in-p-dec x (N n) = Inl UBPNum
   unbound-in-p-dec x (X y)
     with nat-dec x y
@@ -41,6 +42,7 @@ module freshness-decidable where
     fresh-dec : (x : Nat) →
                 (e : ihexp) →
                 (fresh x e) + (fresh x e → ⊥)
+    fresh-dec x unit = Inl FUnit
     fresh-dec x (N n) = Inl FNum
     fresh-dec x (X y)
       with nat-dec x y

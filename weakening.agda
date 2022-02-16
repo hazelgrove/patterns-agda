@@ -20,6 +20,7 @@ module weakening where
                     fresh x e) →
                     Γ , Δ , Δp ⊢ e :: τ →
                    (Γ' ∪ Γ) , Δ , Δp ⊢ e :: τ
+    weaken-ta-∪Γ frsh TAUnit = TAUnit
     weaken-ta-∪Γ frsh TANum = TANum
     weaken-ta-∪Γ {Γ' = Γ'} {Γ = Γ} {τ = τ} frsh (TAVar {x = x} x∈Γ)
       with Γ' x in Γ'x
@@ -367,6 +368,7 @@ module weakening where
                     hole-fresh u e) →
                    Γ , Δ , Δp ⊢ e :: τ →
                    Γ , (Δ' ∪ Δ) , Δp ⊢ e :: τ
+    weaken-ta-∪Δ frsh TAUnit = TAUnit
     weaken-ta-∪Δ frsh TANum = TANum
     weaken-ta-∪Δ frsh (TAVar x∈Γ) = TAVar x∈Γ
     weaken-ta-∪Δ {Δ' = Δ'} {e = ·λ x ·[ τ1 ] e}

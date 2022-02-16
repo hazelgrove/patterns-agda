@@ -45,6 +45,8 @@ module patterns-core where
   -- e matches the pattern p, emitting the substitutions θ
   data _·:_▹_⊣_ : (e : ihexp) → (τ : htyp) →
                   (p : pattrn) → (θ : subst-list) → Set where
+    MUnit : ∀{e} →
+            e ·: unit ▹ unit ⊣ []
     MNum  : ∀{n} →
             (N n) ·: num ▹ (N n) ⊣ []
     MVar  : ∀{e τ x} →
@@ -125,10 +127,12 @@ module patterns-core where
   -- type of free variables
   data _⊢_::_[_]⊣_ : (Δp : phctx) → (p : pattrn) → (τ : htyp) →
                      (ξ : constr) → (Γ : tctx) → Set where
-    PTVar    : ∀{Δp x τ} →
-               Δp ⊢ X x :: τ [ ·⊤ ]⊣ (■ (x , τ))
+    PTUnit   : ∀{Δp} →
+               Δp ⊢ unit :: unit [ ·⊤ ]⊣ ∅
     PTNum    : ∀{Δp n} →
                Δp ⊢ N n :: num [ N n ]⊣ ∅
+    PTVar    : ∀{Δp x τ} →
+               Δp ⊢ X x :: τ [ ·⊤ ]⊣ (■ (x , τ))
     PTInl    : ∀{Δp p τ1 τ2 ξ Γ} →
                Δp ⊢ p :: τ1 [ ξ ]⊣ Γ →
                Δp ⊢ inl p :: (τ1 ⊕ τ2) [ inl ξ ]⊣ Γ

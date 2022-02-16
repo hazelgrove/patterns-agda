@@ -16,6 +16,7 @@ module hole-binders-disjoint-symmetric where
     lem-hbd-lam : {e : ihexp} {x : Nat} {τ1 : htyp} {e1 : ihexp} →
                   hole-binders-disjoint e (·λ x ·[ τ1 ] e1) →
                   hole-binders-disjoint e e1
+    lem-hbd-lam HBDUnit = HBDUnit
     lem-hbd-lam HBDNum = HBDNum
     lem-hbd-lam HBDVar = HBDVar
     lem-hbd-lam (HBDLam bd) = HBDLam (lem-hbd-lam bd)
@@ -58,6 +59,7 @@ module hole-binders-disjoint-symmetric where
     lem-hbd-p-lam : {p : pattrn} {x : Nat} {τ1 : htyp} {e1 : ihexp} →
                     hole-binders-disjoint-p p (·λ x ·[ τ1 ] e1) →
                     hole-binders-disjoint-p p e1
+    lem-hbd-p-lam HBDPUnit = HBDPUnit
     lem-hbd-p-lam HBDPNum = HBDPNum
     lem-hbd-p-lam HBDPVar = HBDPVar
     lem-hbd-p-lam (HBDPInl bd) = HBDPInl (lem-hbd-p-lam bd)
@@ -74,6 +76,7 @@ module hole-binders-disjoint-symmetric where
                  hole-binders-disjoint e (e1 ∘ e2) →
                  hole-binders-disjoint e e1 ×
                    hole-binders-disjoint e e2
+    lem-hbd-ap HBDUnit = HBDUnit , HBDUnit
     lem-hbd-ap HBDNum = HBDNum , HBDNum
     lem-hbd-ap HBDVar = HBDVar , HBDVar
     lem-hbd-ap (HBDLam bd)
@@ -149,6 +152,7 @@ module hole-binders-disjoint-symmetric where
                    hole-binders-disjoint-p p (e1 ∘ e2) →
                    hole-binders-disjoint-p p e1 ×
                      hole-binders-disjoint-p p e2
+    lem-hbd-p-ap HBDPUnit = HBDPUnit , HBDPUnit
     lem-hbd-p-ap HBDPNum = HBDPNum , HBDPNum
     lem-hbd-p-ap HBDPVar = HBDPVar , HBDPVar
     lem-hbd-p-ap (HBDPInl bd)
@@ -173,6 +177,7 @@ module hole-binders-disjoint-symmetric where
     lem-hbd-inl : {e : ihexp} {τ : htyp} {e1 : ihexp} →
                   hole-binders-disjoint e (inl τ e1) →
                   hole-binders-disjoint e e1
+    lem-hbd-inl HBDUnit = HBDUnit
     lem-hbd-inl HBDNum = HBDNum
     lem-hbd-inl HBDVar = HBDVar
     lem-hbd-inl (HBDLam bd) = HBDLam (lem-hbd-inl bd)
@@ -216,6 +221,7 @@ module hole-binders-disjoint-symmetric where
     lem-hbd-p-inl : {p : pattrn} {τ : htyp} {e1 : ihexp} →
                     hole-binders-disjoint-p p (inl τ e1) →
                     hole-binders-disjoint-p p e1
+    lem-hbd-p-inl HBDPUnit = HBDPUnit
     lem-hbd-p-inl HBDPNum = HBDPNum
     lem-hbd-p-inl HBDPVar = HBDPVar
     lem-hbd-p-inl (HBDPInl bd) = HBDPInl (lem-hbd-p-inl bd)
@@ -231,6 +237,7 @@ module hole-binders-disjoint-symmetric where
     lem-hbd-inr : {e : ihexp} {τ : htyp} {e1 : ihexp} →
                   hole-binders-disjoint e (inr τ e1) →
                   hole-binders-disjoint e e1
+    lem-hbd-inr HBDUnit = HBDUnit
     lem-hbd-inr HBDNum = HBDNum
     lem-hbd-inr HBDVar = HBDVar
     lem-hbd-inr (HBDLam bd) = HBDLam (lem-hbd-inr bd)
@@ -274,6 +281,7 @@ module hole-binders-disjoint-symmetric where
     lem-hbd-p-inr : {p : pattrn} {τ : htyp} {e1 : ihexp} →
                     hole-binders-disjoint-p p (inr τ e1) →
                     hole-binders-disjoint-p p e1
+    lem-hbd-p-inr HBDPUnit = HBDPUnit
     lem-hbd-p-inr HBDPNum = HBDPNum
     lem-hbd-p-inr HBDPVar = HBDPVar
     lem-hbd-p-inr (HBDPInl bd) = HBDPInl (lem-hbd-p-inr bd)
@@ -294,6 +302,7 @@ module hole-binders-disjoint-symmetric where
                       hole-binders-disjoint e rs-pre ×
                         hole-binders-disjoint e r ×
                           hole-binders-disjoint e rs-post
+    lem-hbd-match HBDUnit = HBDUnit , HBDUnit , HBDUnit , HBDUnit
     lem-hbd-match HBDNum = HBDNum , HBDNum , HBDNum , HBDNum
     lem-hbd-match HBDVar = HBDVar , HBDVar , HBDVar , HBDVar
     lem-hbd-match (HBDLam bd)
@@ -421,6 +430,7 @@ module hole-binders-disjoint-symmetric where
                         hole-binders-disjoint-p p rs-pre ×
                           hole-binders-disjoint-p p r1 ×
                             hole-binders-disjoint-p p rs-post
+    lem-hbd-p-match HBDPUnit = HBDPUnit , HBDPUnit , HBDPUnit , HBDPUnit
     lem-hbd-p-match HBDPNum = HBDPNum , HBDPNum , HBDPNum , HBDPNum
     lem-hbd-p-match HBDPVar =
       HBDPVar , HBDPVar , HBDPVar , HBDPVar
@@ -459,6 +469,7 @@ module hole-binders-disjoint-symmetric where
                    hole-binders-disjoint e ⟨ e1 , e2 ⟩ →
                    (hole-binders-disjoint e e1) ×
                      (hole-binders-disjoint e e2)
+    lem-hbd-pair HBDUnit = HBDUnit , HBDUnit
     lem-hbd-pair HBDNum = HBDNum , HBDNum
     lem-hbd-pair HBDVar = HBDVar , HBDVar
     lem-hbd-pair (HBDLam bd)
@@ -536,6 +547,7 @@ module hole-binders-disjoint-symmetric where
                      hole-binders-disjoint-p p ⟨ e1 , e2 ⟩ →
                      (hole-binders-disjoint-p p e1) ×
                        (hole-binders-disjoint-p p e2)
+    lem-hbd-p-pair HBDPUnit = HBDPUnit , HBDPUnit
     lem-hbd-p-pair HBDPNum = HBDPNum , HBDPNum
     lem-hbd-p-pair HBDPVar = HBDPVar , HBDPVar
     lem-hbd-p-pair (HBDPInl bd)
@@ -559,6 +571,7 @@ module hole-binders-disjoint-symmetric where
     lem-hbd-fst : {e : ihexp} {e1 : ihexp} →
                   hole-binders-disjoint e (fst e1) →
                   hole-binders-disjoint e e1
+    lem-hbd-fst HBDUnit = HBDUnit
     lem-hbd-fst HBDNum = HBDNum
     lem-hbd-fst HBDVar = HBDVar
     lem-hbd-fst (HBDLam bd) = HBDLam (lem-hbd-fst bd)
@@ -601,6 +614,7 @@ module hole-binders-disjoint-symmetric where
     lem-hbd-p-fst : {p : pattrn} {e1 : ihexp} →
                     hole-binders-disjoint-p p (fst e1) →
                     hole-binders-disjoint-p p e1
+    lem-hbd-p-fst HBDPUnit = HBDPUnit
     lem-hbd-p-fst HBDPNum = HBDPNum
     lem-hbd-p-fst HBDPVar = HBDPVar
     lem-hbd-p-fst (HBDPInl bd) = HBDPInl (lem-hbd-p-fst bd)
@@ -616,6 +630,7 @@ module hole-binders-disjoint-symmetric where
     lem-hbd-snd : {e : ihexp} {e1 : ihexp} →
                   hole-binders-disjoint e (snd e1) →
                   hole-binders-disjoint e e1
+    lem-hbd-snd HBDUnit = HBDUnit
     lem-hbd-snd HBDNum = HBDNum
     lem-hbd-snd HBDVar = HBDVar
     lem-hbd-snd (HBDLam bd) = HBDLam (lem-hbd-snd bd)
@@ -658,6 +673,7 @@ module hole-binders-disjoint-symmetric where
     lem-hbd-p-snd : {p : pattrn} {e1 : ihexp} →
                     hole-binders-disjoint-p p (snd e1) →
                     hole-binders-disjoint-p p e1
+    lem-hbd-p-snd HBDPUnit = HBDPUnit
     lem-hbd-p-snd HBDPNum = HBDPNum
     lem-hbd-p-snd HBDPVar = HBDPVar
     lem-hbd-p-snd (HBDPInl bd) = HBDPInl (lem-hbd-p-snd bd)
@@ -673,6 +689,7 @@ module hole-binders-disjoint-symmetric where
     lem-hbd-ehole : {e : ihexp} {u : Nat} {σ : subst-env} →
                     hole-binders-disjoint e ⦇-⦈⟨ u , σ ⟩ →
                     hole-binders-disjoint e σ
+    lem-hbd-ehole HBDUnit = HBDUnit
     lem-hbd-ehole HBDNum = HBDNum
     lem-hbd-ehole HBDVar = HBDVar
     lem-hbd-ehole (HBDLam bd) =
@@ -718,6 +735,7 @@ module hole-binders-disjoint-symmetric where
     lem-hbd-p-ehole : {p : pattrn} {u : Nat} {σ : subst-env} →
                       hole-binders-disjoint-p p ⦇-⦈⟨ u , σ ⟩ →
                       hole-binders-disjoint-p p σ
+    lem-hbd-p-ehole HBDPUnit = HBDPUnit
     lem-hbd-p-ehole HBDPNum = HBDPNum
     lem-hbd-p-ehole HBDPVar = HBDPVar
     lem-hbd-p-ehole (HBDPInl bd) = HBDPInl (lem-hbd-p-ehole bd)
@@ -735,6 +753,7 @@ module hole-binders-disjoint-symmetric where
                      hole-binders-disjoint e ⦇⌜ e1 ⌟⦈⟨ u , σ ⟩ →
                      hole-binders-disjoint e σ ×
                        hole-binders-disjoint e e1
+    lem-hbd-nehole HBDUnit = HBDUnit , HBDUnit
     lem-hbd-nehole HBDNum = HBDNum , HBDNum
     lem-hbd-nehole HBDVar = HBDVar , HBDVar
     lem-hbd-nehole (HBDLam bd)
@@ -814,6 +833,7 @@ module hole-binders-disjoint-symmetric where
                        hole-binders-disjoint-p p ⦇⌜ e1 ⌟⦈⟨ u , σ ⟩ →
                        hole-binders-disjoint-p p σ ×
                          hole-binders-disjoint-p p e1
+    lem-hbd-p-nehole HBDPUnit = HBDPUnit , HBDPUnit
     lem-hbd-p-nehole HBDPNum = HBDPNum , HBDPNum
     lem-hbd-p-nehole HBDPVar = HBDPVar , HBDPVar
     lem-hbd-p-nehole (HBDPInl bd)
@@ -842,6 +862,7 @@ module hole-binders-disjoint-symmetric where
                       hole-binders-disjoint e (Subst d y σ) →
                       hole-binders-disjoint e d ×
                         hole-binders-disjoint e σ
+    lem-σ-hbd-subst HBDUnit = HBDUnit , HBDUnit
     lem-σ-hbd-subst HBDNum = HBDNum , HBDNum
     lem-σ-hbd-subst HBDVar = HBDVar , HBDVar
     lem-σ-hbd-subst (HBDLam bd)
@@ -923,6 +944,7 @@ module hole-binders-disjoint-symmetric where
                         hole-binders-disjoint-p p (Subst d y σ) →
                         hole-binders-disjoint-p p d ×
                           hole-binders-disjoint-p p σ
+    lem-σ-hbd-p-subst HBDPUnit = HBDPUnit , HBDPUnit
     lem-σ-hbd-p-subst HBDPNum = HBDPNum , HBDPNum
     lem-σ-hbd-p-subst HBDPVar = HBDPVar , HBDPVar 
     lem-σ-hbd-p-subst (HBDPInl bd)
@@ -950,6 +972,7 @@ module hole-binders-disjoint-symmetric where
                  hole-binders-disjoint e (r / rs) →
                  hole-binders-disjoint e r ×
                    hole-binders-disjoint e rs
+    lem-rs-hbd HBDUnit = HBDUnit , HBDUnit
     lem-rs-hbd HBDNum = HBDNum , HBDNum
     lem-rs-hbd HBDVar = HBDVar , HBDVar
     lem-rs-hbd (HBDLam bd)
@@ -1025,6 +1048,7 @@ module hole-binders-disjoint-symmetric where
                    hole-binders-disjoint-p p (r / rs) →
                    hole-binders-disjoint-p p r ×
                      hole-binders-disjoint-p p rs
+    lem-rs-hbd-p HBDPUnit = HBDPUnit , HBDPUnit
     lem-rs-hbd-p HBDPNum = HBDPNum , HBDPNum
     lem-rs-hbd-p HBDPVar = HBDPVar , HBDPVar
     lem-rs-hbd-p (HBDPInl bd)
@@ -1049,6 +1073,7 @@ module hole-binders-disjoint-symmetric where
                 hole-binders-disjoint e (pr => er) →
                 hole-binders-disjoint e pr ×
                   hole-binders-disjoint e er
+    lem-r-hbd HBDUnit = HBDUnit , HBDUnit
     lem-r-hbd HBDNum = HBDNum , HBDNum
     lem-r-hbd HBDVar = HBDVar , HBDVar
     lem-r-hbd (HBDLam bd)
@@ -1124,6 +1149,7 @@ module hole-binders-disjoint-symmetric where
                   hole-binders-disjoint-p p (pr => er) →
                   hole-binders-disjoint-p p pr ×
                     hole-binders-disjoint-p p er
+    lem-r-hbd-p HBDPUnit = HBDPUnit , HBDPUnit
     lem-r-hbd-p HBDPNum = HBDPNum , HBDPNum
     lem-r-hbd-p HBDPVar = HBDPVar , HBDPVar
     lem-r-hbd-p (HBDPInl bd)
@@ -1148,6 +1174,7 @@ module hole-binders-disjoint-symmetric where
     lem-p-hbd-inl : {e : ihexp} {p1 : pattrn} →
                     hole-binders-disjoint e (inl p1) →
                     hole-binders-disjoint e p1
+    lem-p-hbd-inl HBDUnit = HBDUnit
     lem-p-hbd-inl HBDNum = HBDNum
     lem-p-hbd-inl HBDVar = HBDVar
     lem-p-hbd-inl (HBDLam bd) = HBDLam (lem-p-hbd-inl bd)
@@ -1191,6 +1218,7 @@ module hole-binders-disjoint-symmetric where
     lem-p-hbd-p-inl : {p : pattrn} {p1 : pattrn} →
                       hole-binders-disjoint-p p (inl p1) →
                       hole-binders-disjoint-p p p1
+    lem-p-hbd-p-inl HBDPUnit = HBDPUnit
     lem-p-hbd-p-inl HBDPNum = HBDPNum
     lem-p-hbd-p-inl HBDPVar = HBDPVar
     lem-p-hbd-p-inl (HBDPInl bd) =
@@ -1210,6 +1238,7 @@ module hole-binders-disjoint-symmetric where
     lem-p-hbd-inr : {e : ihexp} {p1 : pattrn} →
                     hole-binders-disjoint e (inr p1) →
                     hole-binders-disjoint e p1
+    lem-p-hbd-inr HBDUnit = HBDUnit
     lem-p-hbd-inr HBDNum = HBDNum
     lem-p-hbd-inr HBDVar = HBDVar
     lem-p-hbd-inr (HBDLam bd) =
@@ -1254,6 +1283,7 @@ module hole-binders-disjoint-symmetric where
     lem-p-hbd-p-inr : {p : pattrn} {p1 : pattrn} →
                       hole-binders-disjoint-p p (inr p1) →
                       hole-binders-disjoint-p p p1
+    lem-p-hbd-p-inr HBDPUnit = HBDPUnit
     lem-p-hbd-p-inr HBDPNum = HBDPNum
     lem-p-hbd-p-inr HBDPVar = HBDPVar
     lem-p-hbd-p-inr (HBDPInl bd) =
@@ -1274,6 +1304,7 @@ module hole-binders-disjoint-symmetric where
                      hole-binders-disjoint e ⟨ p1 , p2 ⟩ →
                      hole-binders-disjoint e p1 ×
                        hole-binders-disjoint e p2
+    lem-p-hbd-pair HBDUnit = HBDUnit , HBDUnit
     lem-p-hbd-pair HBDNum = HBDNum , HBDNum
     lem-p-hbd-pair HBDVar = HBDVar , HBDVar
     lem-p-hbd-pair (HBDLam bd)
@@ -1351,6 +1382,7 @@ module hole-binders-disjoint-symmetric where
                        hole-binders-disjoint-p p ⟨ p1 , p2 ⟩ →
                        hole-binders-disjoint-p p p1 ×
                          hole-binders-disjoint-p p p2
+    lem-p-hbd-p-pair HBDPUnit = HBDPUnit , HBDPUnit
     lem-p-hbd-p-pair HBDPNum = HBDPNum , HBDPNum
     lem-p-hbd-p-pair HBDPVar = HBDPVar , HBDPVar
     lem-p-hbd-p-pair (HBDPInl bd)
@@ -1376,6 +1408,7 @@ module hole-binders-disjoint-symmetric where
     lem-p-hbd-ehole : {e : ihexp} {u : Nat} →
                       hole-binders-disjoint {T = pattrn} e ⦇-⦈[ u ] →
                       hole-unbound-in-e u e
+    lem-p-hbd-ehole HBDUnit = HUBUnit
     lem-p-hbd-ehole HBDNum = HUBNum
     lem-p-hbd-ehole HBDVar = HUBVar
     lem-p-hbd-ehole (HBDLam bd) =
@@ -1422,6 +1455,7 @@ module hole-binders-disjoint-symmetric where
     lem-p-hbd-p-ehole : {p : pattrn} {w : Nat} →
                         hole-binders-disjoint-p {T = pattrn} p ⦇-⦈[ w ] →
                         hole-unbound-in-p w p
+    lem-p-hbd-p-ehole HBDPUnit = HUBPUnit
     lem-p-hbd-p-ehole HBDPNum = HUBPNum
     lem-p-hbd-p-ehole HBDPVar = HUBPVar
     lem-p-hbd-p-ehole (HBDPInl bd) =
@@ -1442,6 +1476,7 @@ module hole-binders-disjoint-symmetric where
                        hole-binders-disjoint e ⦇⌜ p1 ⌟⦈[ w , τ ] →
                        hole-unbound-in-e w e ×
                          hole-binders-disjoint e p1
+    lem-p-hbd-nehole HBDUnit = HUBUnit , HBDUnit
     lem-p-hbd-nehole HBDNum = HUBNum , HBDNum
     lem-p-hbd-nehole HBDVar = HUBVar , HBDVar
     lem-p-hbd-nehole (HBDLam bd)
@@ -1517,6 +1552,7 @@ module hole-binders-disjoint-symmetric where
                          hole-binders-disjoint-p p ⦇⌜ p1 ⌟⦈[ w , τ ] →
                          hole-unbound-in-p w p ×
                            hole-binders-disjoint-p p p1
+    lem-p-hbd-p-nehole HBDPUnit = HUBPUnit , HBDPUnit
     lem-p-hbd-p-nehole HBDPNum = HUBPNum , HBDPNum
     lem-p-hbd-p-nehole HBDPVar = HUBPVar , HBDPVar
     lem-p-hbd-p-nehole (HBDPInl bd)
@@ -1541,6 +1577,7 @@ module hole-binders-disjoint-symmetric where
     hole-binders-disjoint-sym : {e1 e2 : ihexp} →
                                 hole-binders-disjoint e1 e2 →
                                 hole-binders-disjoint e2 e1
+    hole-binders-disjoint-sym {e2 = unit} bd = HBDUnit
     hole-binders-disjoint-sym {e2 = N n} bd = HBDNum
     hole-binders-disjoint-sym {e2 = X x} bd = HBDVar
     hole-binders-disjoint-sym {e2 = ·λ x ·[ τ ] e2} bd = 
@@ -1612,6 +1649,7 @@ module hole-binders-disjoint-symmetric where
     p-hole-binders-disjoint-sym : {e : ihexp} {p : pattrn} →
                                   hole-binders-disjoint e p →
                                   hole-binders-disjoint-p p e
+    p-hole-binders-disjoint-sym {p = unit} bd = HBDPUnit
     p-hole-binders-disjoint-sym {p = N n} bd = HBDPNum
     p-hole-binders-disjoint-sym {p = X x} bd = HBDPVar
     p-hole-binders-disjoint-sym {p = inl p} bd =
@@ -1635,6 +1673,7 @@ module hole-binders-disjoint-symmetric where
     hole-binders-disjoint-σ-sym : {σ : subst-env} {e : ihexp} →
                                   hole-binders-disjoint-σ σ e →
                                   hole-binders-disjoint e σ
+    hole-binders-disjoint-σ-sym {e = unit} hbd = HBDUnit
     hole-binders-disjoint-σ-sym {e = N n} hbd = HBDNum
     hole-binders-disjoint-σ-sym {e = X x} hbd = HBDVar
     hole-binders-disjoint-σ-sym {e = ·λ x ·[ τ ] e} hbd
@@ -1705,6 +1744,7 @@ module hole-binders-disjoint-symmetric where
     p-hole-binders-disjoint-σ-sym : {σ : subst-env} {p : pattrn} →
                                     hole-binders-disjoint-σ σ p →
                                     hole-binders-disjoint-p p σ
+    p-hole-binders-disjoint-σ-sym {p = unit} hbd = HBDPUnit
     p-hole-binders-disjoint-σ-sym {p = N n} hbd = HBDPNum
     p-hole-binders-disjoint-σ-sym {p = X x} hbd = HBDPVar
     p-hole-binders-disjoint-σ-sym {p = inl p} hbd =
@@ -1729,6 +1769,7 @@ module hole-binders-disjoint-symmetric where
     hole-binders-disjoint-rs-sym : {rs : rules} {e : ihexp} →
                                    hole-binders-disjoint-rs rs e →
                                    hole-binders-disjoint e rs
+    hole-binders-disjoint-rs-sym {e = unit} hbd = HBDUnit
     hole-binders-disjoint-rs-sym {e = N n} hbd = HBDNum
     hole-binders-disjoint-rs-sym {e = X x} hbd = HBDVar
     hole-binders-disjoint-rs-sym {e = ·λ x ·[ τ ] e} hbd =
@@ -1798,6 +1839,7 @@ module hole-binders-disjoint-symmetric where
     p-hole-binders-disjoint-rs-sym : {rs : rules} {p : pattrn} →
                                      hole-binders-disjoint-rs rs p →
                                      hole-binders-disjoint-p p rs
+    p-hole-binders-disjoint-rs-sym {p = unit} hbd = HBDPUnit
     p-hole-binders-disjoint-rs-sym {p = N n} hbd = HBDPNum
     p-hole-binders-disjoint-rs-sym {p = X x} hbd = HBDPVar
     p-hole-binders-disjoint-rs-sym {p = inl p} hbd =
@@ -1822,6 +1864,7 @@ module hole-binders-disjoint-symmetric where
     hole-binders-disjoint-r-sym : {r : rule} {e : ihexp} →
                                   hole-binders-disjoint-r r e →
                                   hole-binders-disjoint e r
+    hole-binders-disjoint-r-sym {e = unit} hbd = HBDUnit
     hole-binders-disjoint-r-sym {e = N n} hbd = HBDNum
     hole-binders-disjoint-r-sym {e = X x} hbd = HBDVar
     hole-binders-disjoint-r-sym {e = ·λ x ·[ τ ] e} hbd =
@@ -1891,6 +1934,7 @@ module hole-binders-disjoint-symmetric where
     p-hole-binders-disjoint-r-sym : {r : rule} {p : pattrn} →
                                     hole-binders-disjoint-r r p →
                                     hole-binders-disjoint-p p r
+    p-hole-binders-disjoint-r-sym {p = unit} hbd = HBDPUnit
     p-hole-binders-disjoint-r-sym {p = N n} hbd = HBDPNum
     p-hole-binders-disjoint-r-sym {p = X x} hbd = HBDPVar
     p-hole-binders-disjoint-r-sym {p = inl p} hbd =
@@ -1915,6 +1959,7 @@ module hole-binders-disjoint-symmetric where
     hole-binders-disjoint-p-sym : {p : pattrn} {e : ihexp} →
                                   hole-binders-disjoint-p p e →
                                   hole-binders-disjoint e p
+    hole-binders-disjoint-p-sym {e = unit} hbd = HBDUnit
     hole-binders-disjoint-p-sym {e = N n} hbd = HBDNum
     hole-binders-disjoint-p-sym {e = X x} hbd = HBDVar
     hole-binders-disjoint-p-sym {e = ·λ x ·[ τ ] e} hbd =
@@ -1984,6 +2029,7 @@ module hole-binders-disjoint-symmetric where
     p-hole-binders-disjoint-p-sym : {p1 : pattrn} {p2 : pattrn} →
                                     hole-binders-disjoint-p p1 p2 →
                                     hole-binders-disjoint-p p2 p1
+    p-hole-binders-disjoint-p-sym {p2 = unit} hbd = HBDPUnit
     p-hole-binders-disjoint-p-sym {p2 = N n} hbd = HBDPNum
     p-hole-binders-disjoint-p-sym {p2 = X x} hbd = HBDPVar
     p-hole-binders-disjoint-p-sym {p2 = inl p2} hbd =

@@ -84,7 +84,8 @@ module complete-constraints-core where
   (N̸ n) ◆d = N n
   (inl ξ) ◆d = inl (ξ ◆d) ∨ inr ·⊤
   (inr ξ) ◆d = inr (ξ ◆d) ∨ inl ·⊤
-  ⟨ ξ1 , ξ2 ⟩ ◆d = (⟨ ξ1 , ξ2 ◆d ⟩ ∨ ⟨ ξ1 ◆d , ξ2 ⟩) ∨ ⟨ ξ1 ◆d , ξ2 ◆d ⟩
+  ⟨ ξ1 , ξ2 ⟩ ◆d =
+    (⟨ ξ1 , ξ2 ◆d ⟩ ∨ ⟨ ξ1 ◆d , ξ2 ⟩) ∨ ⟨ ξ1 ◆d , ξ2 ◆d ⟩
   (ξ1 ∨ ξ2) ◆d = (ξ1 ◆d) ∧ (ξ2 ◆d)
   (ξ1 ∧ ξ2) ◆d = (ξ1 ◆d) ∨ (ξ2 ◆d)
   

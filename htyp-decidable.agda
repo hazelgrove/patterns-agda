@@ -21,9 +21,17 @@ module htyp-decidable where
   
   htyp-dec : (τ1 τ2 : htyp) →
              τ1 == τ2 + (τ1 == τ2 → ⊥)
+  htyp-dec unit unit = Inl refl
+  htyp-dec unit num = Inr (λ ())
+  htyp-dec unit (τ3 ==> τ4) = Inr (λ ())
+  htyp-dec unit (τ3 ⊕ τ4) = Inr (λ ())
+  htyp-dec unit (τ3 ⊠ τ4) = Inr (λ ())
+  htyp-dec num unit = Inr (λ ())
   htyp-dec num num = Inl refl
   htyp-dec num (τ1 ==> τ2) = Inr (λ ())
   htyp-dec num (τ1 ⊕ τ2) = Inr (λ ())
+  htyp-dec num (τ3 ⊠ τ4) = Inr (λ ())
+  htyp-dec (τ1 ==> τ2) unit = Inr (λ ())
   htyp-dec (τ1 ==> τ2) num = Inr (λ ())
   htyp-dec (τ1 ==> τ2) (τ3 ==> τ4)
     with htyp-dec τ1 τ3 | htyp-dec τ2 τ4
@@ -35,6 +43,8 @@ module htyp-decidable where
   ... | Inr τ1≠τ3 | Inr τ2≠τ4 =
     Inr (λ eq → τ1≠τ3 (π1 (arr-htyp-eq eq)))
   htyp-dec (τ1 ==> τ2) (τ3 ⊕ τ4) = Inr (λ ())
+  htyp-dec (τ1 ==> τ2) (τ3 ⊠ τ4) = Inr (λ ())
+  htyp-dec (τ1 ⊕ τ2) unit = Inr (λ ())
   htyp-dec (τ1 ⊕ τ2) num = Inr (λ ())
   htyp-dec (τ1 ⊕ τ2) (τ3 ==> τ4) = Inr (λ ())
   htyp-dec (τ1 ⊕ τ2) (τ3 ⊕ τ4)
@@ -46,9 +56,8 @@ module htyp-decidable where
     Inr (λ eq → τ1≠τ3 (π1 (sum-htyp-eq eq)))
   ... | Inr τ1≠τ3 | Inr τ2≠τ4 =
     Inr (λ eq → τ1≠τ3 (π1 (sum-htyp-eq eq)))
-  htyp-dec num (τ3 ⊠ τ4) = Inr (λ ())
-  htyp-dec (τ1 ==> τ2) (τ3 ⊠ τ4) = Inr (λ ())
   htyp-dec (τ1 ⊕ τ2) (τ3 ⊠ τ4) = Inr (λ ())
+  htyp-dec (τ1 ⊠ τ2) unit = Inr (λ ())
   htyp-dec (τ1 ⊠ τ2) num = Inr (λ ())
   htyp-dec (τ1 ⊠ τ2) (τ3 ==> τ4) = Inr (λ ())
   htyp-dec (τ1 ⊠ τ2) (τ3 ⊕ τ4) = Inr (λ ())
@@ -61,12 +70,13 @@ module htyp-decidable where
     Inr (λ eq → τ1≠τ3 (π1 (prod-htyp-eq eq)))
   ... | Inr τ1≠τ3 | Inr τ2≠τ4 =
     Inr (λ eq → τ1≠τ3 (π1 (prod-htyp-eq eq)))
-
+  
   htyp-prod-dec : (τ : htyp) →
                   (Σ[ τ1 ∈ htyp ] Σ[ τ2 ∈ htyp ]
                     τ == τ1 ⊠ τ2) +
                   ((Σ[ τ1 ∈ htyp ] Σ[ τ2 ∈ htyp ]
                     τ == τ1 ⊠ τ2) → ⊥)
+  htyp-prod-dec unit = Inr (λ{(_ , _ , ())})
   htyp-prod-dec num = Inr (λ{(_ , _ , ())})
   htyp-prod-dec (τ1 ==> τ2) = Inr (λ{(_ , _ , ())})
   htyp-prod-dec (τ1 ⊕ τ2) = Inr (λ{(_ , _ , ())})

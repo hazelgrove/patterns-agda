@@ -267,6 +267,7 @@ module lemmas-or-append where
                Δp ⊢ p :: τ [ ξp ]⊣ Γp →
                (ξ : constr) →
                ξp ∨+ ξ == ξp ∨ ξ
+  pattern-∨+ PTUnit ξ = refl
   pattern-∨+ PTVar ξ = refl
   pattern-∨+ PTNum ξ = refl
   pattern-∨+ (PTInl pt) ξ = refl

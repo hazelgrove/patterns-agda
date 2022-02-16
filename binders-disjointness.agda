@@ -10,6 +10,8 @@ module binders-disjointness where
   mutual
     data binders-disjoint-p {T : Set} {{_ : UnboundIn T}} :
                             pattrn → T → Set where
+      BDPUnit   : ∀{t} →
+                  binders-disjoint-p unit t
       BDPNum    : ∀{n t} →
                   binders-disjoint-p (N n) t
       BDPVar    : ∀{x t} →
@@ -68,6 +70,8 @@ module binders-disjointness where
                  
     data binders-disjoint {T : Set} {{_ : UnboundIn T}} :
                           ihexp → T → Set where
+      BDUnit   : ∀{t} →
+                 binders-disjoint unit t
       BDNum    : ∀{n t} →
                  binders-disjoint (N n) t
       BDVar    : ∀{x t} →
@@ -111,6 +115,8 @@ module binders-disjointness where
   mutual
     data hole-binders-disjoint-p {T : Set} {{_ : HoleUnboundIn T}} :
                                  pattrn → T → Set where
+      HBDPUnit   : ∀{t} →
+                   hole-binders-disjoint-p unit t
       HBDPNum    : ∀{n t} →
                    hole-binders-disjoint-p (N n) t
       HBDPVar    : ∀{x t} →
@@ -169,6 +175,8 @@ module binders-disjointness where
                   
     data hole-binders-disjoint {T : Set} {{_ : HoleUnboundIn T}} :
                                ihexp → T → Set where
+      HBDUnit   : ∀{t} →
+                  hole-binders-disjoint unit t
       HBDNum    : ∀{n t} →
                   hole-binders-disjoint (N n) t
       HBDVar    : ∀{x t} →

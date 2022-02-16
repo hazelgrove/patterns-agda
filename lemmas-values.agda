@@ -72,6 +72,8 @@ module lemmas-values where
                    e val ×
                    (∅ , Δ , Δp ⊢ e :: τ) ×
                    (∀{x} → x ∈l vars → fresh x e)
+  type-has-val unit vars Δ Δp =
+    unit , VUnit , TAUnit , λ _ → FUnit
   type-has-val num vars Δ Δp =
     N 0 , VNum , TANum , λ _ → FNum
   type-has-val (τ1 ==> τ2) vars Δ Δp

@@ -22,9 +22,8 @@ module matching-determinism where
                      ∅ , Δ , Δpe ⊢ e :: τ →
                      Δp ⊢ p :: τ [ ξ ]⊣ Γ →
                      ExhaustMatch e τ p
-  matching-exhaust {e = e} {τ = τ} {p = p}
-                   fin wt (PTVar {x = x}) =
-    Match ((e , τ , x) :: [] , MVar)
+  matching-exhaust {e = e} {p = p} fin wt PTUnit =
+    Match ([] , MUnit)
   matching-exhaust {e = e} {p = p} fin wt (PTNum {n = n})
     with notintro-dec e
   ... | Inl ni =
@@ -44,6 +43,9 @@ module matching-determinism where
     Match ([] , MNum)
   ... | Inr m≠n =
     NotMatch (NMNum m≠n)
+  matching-exhaust {e = e} {τ = τ} {p = p}
+                   fin wt (PTVar {x = x}) =
+    Match ((e , τ , x) :: [] , MVar)
   matching-exhaust {e = e} {p = p} fin wt (PTInl pt)
     with notintro-dec e
   ... | Inl ni =
