@@ -25,6 +25,13 @@ open import type-assignment-unicity
 open import weakening
 
 module lemmas-subst-type where
+  subst-erase : ∀{rs-pre r rs-post rs x e2} →
+                erase-r (rs-pre / r / rs-post) rs →
+                erase-r ([ e2 / x ]zrs (rs-pre / r / rs-post))
+                        ([ e2 / x ]rs rs)
+  subst-erase ERZPre = ERZPre
+  subst-erase (ERNZPre er) = ERNZPre (subst-erase er)
+  
   mutual
     subst-type : ∀{Γ Δ Δp x τ1 e1 τ e2} →
                  binders-disjoint e1 e2 →
@@ -212,13 +219,13 @@ module lemmas-subst-type where
                ((d , τ , y) :: θ) simultaneous
 
   -- if θ1 and θ2 are simultaneous, then so is θ1 ++ θ2
-  data concatable : (θ1 θ2 : subst-list) → Set where
+  data jointly-simultaneous : (θ1 θ2 : subst-list) → Set where
     CθEmpty  : ∀{θ2} →
-               concatable [] θ2
+               jointly-simultaneous [] θ2
     CθExtend : ∀{d τ y θ1 θ2} →
                unbound-in-θ y θ2 →
-               concatable θ1 θ2 →
-               concatable ((d , τ , y) :: θ1) θ2
+               jointly-simultaneous θ1 θ2 →
+               jointly-simultaneous ((d , τ , y) :: θ1) θ2
   
   substs-concat-type : ∀{Γ Δ Δp θ1 θ2 Γ1 Γ2} →
                        Γ , Δ , Δp ⊢ θ1 :sl: Γ1 →
@@ -242,7 +249,7 @@ module lemmas-subst-type where
 
 
   substs-concat-simultaneous : ∀{θ1 θ2} →
-                               concatable θ1 θ2 →
+                               jointly-simultaneous θ1 θ2 →
                                θ1 simultaneous →
                                θ2 simultaneous →
                                (θ1 ++ θ2) simultaneous
@@ -252,13 +259,13 @@ module lemmas-subst-type where
     SθExtend (substs-concat-unbound-in yubθ yubθ2)
              (substs-concat-simultaneous con sim1 sim2)
 
-  substs-concat-concatable : ∀{θ1 θ2 θ3} →
-                             concatable θ1 θ3 →
-                             concatable θ2 θ3 →
-                             concatable (θ1 ++ θ2) θ3
-  substs-concat-concatable CθEmpty con2 = con2
-  substs-concat-concatable (CθExtend yub3 con1) con2 =
-    CθExtend yub3 (substs-concat-concatable con1 con2)
+  substs-concat-jointly-simultaneous : ∀{θ1 θ2 θ3} →
+                             jointly-simultaneous θ1 θ3 →
+                             jointly-simultaneous θ2 θ3 →
+                             jointly-simultaneous (θ1 ++ θ2) θ3
+  substs-concat-jointly-simultaneous CθEmpty con2 = con2
+  substs-concat-jointly-simultaneous (CθExtend yub3 con1) con2 =
+    CθExtend yub3 (substs-concat-jointly-simultaneous con1 con2)
   
   unbound-in-mat-substs : ∀{x e τ p θ} →
                           unbound-in-e x e →
@@ -287,21 +294,21 @@ module lemmas-subst-type where
   unbound-in-mat-substs ube UBPWild MWild = UBθEmpty
 
   
-  mat-substs-concatable : ∀{e1 e2 τ1 τ2 p1 p2 θ1 θ2} →
+  mat-substs-jointly-simultaneous : ∀{e1 e2 τ1 τ2 p1 p2 θ1 θ2} →
                           binders-disjoint-p p1 p2 →
                           binders-disjoint-p p1 e2 →
                           e1 ·: τ1 ▹ p1 ⊣ θ1 →
                           e2 ·: τ2 ▹ p2 ⊣ θ2 →
-                          concatable θ1 θ2
-  mat-substs-concatable p1bdp2 p1bde2 MUnit mat2 = CθEmpty
-  mat-substs-concatable p1bdp2 p1bde2 MNum mat2 = CθEmpty
-  mat-substs-concatable (BDPVar xubp2) (BDPVar xube2) MVar mat2 =
+                          jointly-simultaneous θ1 θ2
+  mat-substs-jointly-simultaneous p1bdp2 p1bde2 MUnit mat2 = CθEmpty
+  mat-substs-jointly-simultaneous p1bdp2 p1bde2 MNum mat2 = CθEmpty
+  mat-substs-jointly-simultaneous (BDPVar xubp2) (BDPVar xube2) MVar mat2 =
     CθExtend (unbound-in-mat-substs xube2 xubp2 mat2) CθEmpty
-  mat-substs-concatable (BDPInl p1bdp2) (BDPInl p1bde2) (MInl mat1) mat2 =
-    mat-substs-concatable p1bdp2 p1bde2 mat1 mat2
-  mat-substs-concatable (BDPInr p1bdp2) (BDPInr p1bde2) (MInr mat1) mat2 =
-    mat-substs-concatable p1bdp2 p1bde2 mat1 mat2
-  mat-substs-concatable (BDPPair p1₁bdp2 p1₂bdp2)
+  mat-substs-jointly-simultaneous (BDPInl p1bdp2) (BDPInl p1bde2) (MInl mat1) mat2 =
+    mat-substs-jointly-simultaneous p1bdp2 p1bde2 mat1 mat2
+  mat-substs-jointly-simultaneous (BDPInr p1bdp2) (BDPInr p1bde2) (MInr mat1) mat2 =
+    mat-substs-jointly-simultaneous p1bdp2 p1bde2 mat1 mat2
+  mat-substs-jointly-simultaneous (BDPPair p1₁bdp2 p1₂bdp2)
                         (BDPPair p1₁bde2 p1₂bde2)
                         (MPair {e1 = e1₁} {e2 = e1₂}
                                {τ1 = τ1₁} {τ2 = τ1₂}
@@ -309,20 +316,20 @@ module lemmas-subst-type where
                                {θ1 = θ1₁} {θ2 = θ1₂}
                                mat1₁ mat1₂)
                         mat2 =
-    substs-concat-concatable
-      (mat-substs-concatable p1₁bdp2 p1₁bde2 mat1₁ mat2)
-      (mat-substs-concatable p1₂bdp2 p1₂bde2 mat1₂ mat2)
-  mat-substs-concatable (BDPPair p1₁bdp2 p1₂bdp2)
+    substs-concat-jointly-simultaneous
+      (mat-substs-jointly-simultaneous p1₁bdp2 p1₁bde2 mat1₁ mat2)
+      (mat-substs-jointly-simultaneous p1₂bdp2 p1₂bde2 mat1₂ mat2)
+  mat-substs-jointly-simultaneous (BDPPair p1₁bdp2 p1₂bdp2)
                         (BDPPair p1₁bde2 p1₂bde2)
                         (MNotIntroPair {τ1 = τ1₁} {τ2 = τ1₂}
                                        {p1 = p1₁} {p2 = p1₂}
                                        {θ1 = θ1₁} {θ2 = θ1₂}
                                        ni mat1₁ mat1₂)
                         mat2 =
-    substs-concat-concatable
-      (mat-substs-concatable p1₁bdp2 p1₁bde2 mat1₁ mat2)
-      (mat-substs-concatable p1₂bdp2 p1₂bde2 mat1₂ mat2)
-  mat-substs-concatable p1bdp2 p1bde2 MWild mat2 = CθEmpty
+    substs-concat-jointly-simultaneous
+      (mat-substs-jointly-simultaneous p1₁bdp2 p1₁bde2 mat1₁ mat2)
+      (mat-substs-jointly-simultaneous p1₂bdp2 p1₂bde2 mat1₂ mat2)
+  mat-substs-jointly-simultaneous p1bdp2 p1bde2 MWild mat2 = CθEmpty
                           
   mat-substs-simultaneous : ∀{e τ p θ} →
                             binders-unique e →
@@ -356,7 +363,7 @@ module lemmas-subst-type where
          binders-disjoint-p-sym p2bde
   ... | BDPair e1bdp1 e2bdp1 | BDPair e1bdp2 e2bdp2 =
     substs-concat-simultaneous
-      (mat-substs-concatable
+      (mat-substs-jointly-simultaneous
         p1bdp2
         (p-binders-disjoint-sym e2bdp1)
         mat1 mat2)
@@ -373,7 +380,7 @@ module lemmas-subst-type where
                           (BDPPair p1bde p2bde)
                           (MNotIntroPair ni mat1 mat2) =
     substs-concat-simultaneous
-      (mat-substs-concatable
+      (mat-substs-jointly-simultaneous
         p1bdp2
         (p-binders-disjoint-sym (BDSnd (binders-disjoint-p-sym p1bde)))
         mat1 mat2)

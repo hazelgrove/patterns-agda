@@ -16,35 +16,6 @@ open import statics-core
 open import type-assignment-unicity
 
 module progress where
-  -- a quick lemma needed for some of the match cases of progress
-  -- effectively, this just shows that we can break up the constraint
-  -- emitted by an erased list
-  exhaust-erase : ∀{rs-pre r rs-post rss Δp τ ξpre ξrest ξ} →
-                  erase-r (rs-pre / r / rs-post) rss →
-                  Δp ⊢ rs-pre ::s τ [ ξpre ] →
-                  Δp ⊢ (r / rs-post) ::s τ [ ξrest ] →
-                  Δp ⊢ rss ::s τ [ ξ ] →
-                  ·⊤ ·: τ c⊧̇†? ξ →
-                  ·⊤ ·: τ c⊧̇†? (ξpre ∨ ξrest)
-  exhaust-erase {τ = τ} {ξpre = ξpre} {ξrest = ξrest}
-                er pret restt ert (PotEntails CTTruth ct ent)
-    with rules-no-target-unicity
-           ert
-           (rules-erase-constr-no-target er pret restt)
-  ... | refl =
-    PotEntails CTTruth
-               (CTOr (rules-constr-same-type pret)
-                     (rules-constr-same-type restt))
-               ent'
-    where
-      ent' : ∀{Δ Δp e} →
-             ∅ , Δ , Δp ⊢ e :: τ →
-             e final →
-             e ⊧̇†? ·⊤ →
-             e ⊧̇†? (ξpre ∨ ξrest)
-      ent' wt fin satt =
-        satormay-∨+-satormay-∨ (ent wt fin satt)
-
   -- every expression is either final or takes a step
   progress : ∀{Δ Δp e τ} →
              ∅ , Δ , Δp ⊢ e :: τ →
@@ -74,15 +45,12 @@ module progress where
     with progress wt ex
   ... | Inl fin = Inl (final-inr fin)
   ... | Inr (_ , stp) = Inr (_ , ITInr stp)
-  progress (TAMatchZPre wt
-                        (RTOneRule (RTRule pt
-                                           Γ##Γp
-                                           wt')))
-           (EXMatch exe ERZPre (RTOneRule pt')
-                    (PotEntails CTTruth ct ent)
-                    exts)
+  progress (TAMatchZPre wt (RTOneRule (RTRule pt Γ##Γp wt')))
+           (EXMatchZPre exe (RTOneRule pt')
+                        (PotEntails CTTruth ct ent)
+                        ext)
     with progress wt exe
-  ... | Inr (_ , stp) = Inr (_ , (ITExpMatch stp))
+  ... | Inr (_ , stp) = Inr (_ , ITExpMatch stp)
   ... | Inl fin
     with matching-exhaust fin wt pt
   ... | Match (_ , mat) =
@@ -96,22 +64,14 @@ module progress where
   ... | satm =
     abort (notmat-not-satormay fin wt pt nmat satm)
   progress (TAMatchZPre wt
-                        (RTRules (RTRule pt
-                                         Γ##Γp
-                                         wt')
-                                 ()))
-           (EXMatch exe ERZPre (RTOneRule pt') ent exts)
-  progress (TAMatchZPre wt
                         (RTRules {rs = r' / rs'}
-                                 (RTRule pt
-                                         Γ##Γp
-                                         wt')
+                                 (RTRule pt Γ##Γp wt')
                                  rst))
-           (EXMatch exe ERZPre (RTRules pt' rst')
-                    (PotEntails CTTruth ct ent)
-                    exts)
-   with progress wt exe
-  ... | Inr (_ , stp) = Inr (_ , (ITExpMatch stp))
+           (EXMatchZPre exe (RTRules pt' rst')
+                        (PotEntails CTTruth ct ent)
+                        ext)
+    with progress wt exe
+  ... | Inr (_ , stp) = Inr (_ , ITExpMatch stp)
   ... | Inl fin
     with matching-exhaust fin wt pt
   ... | Match (_ , mat) =
@@ -126,24 +86,12 @@ module progress where
     abort (notmat-not-satormay fin wt pt nmat satmr)
   ... | Inr satmrs =
     Inr (_ , ITFailMatch fin nmat ERZPre)
-  progress (TAMatchNZPre wt fin ()
-                         (RTOneRule (RTRule pt
-                                            Γ##Γp
-                                            wt'))
-                         ¬red)
-           (EXMatch exe ERZPre (RTOneRule pt') ent exts)
   progress (TAMatchNZPre wt fin pret
-                         (RTOneRule (RTRule pt
-                                            Γ##Γp
-                                            wt'))
+                         (RTOneRule (RTRule pt Γ##Γp wt'))
                          ¬red)
-           (EXMatch exe (ERNZPre ()) (RTOneRule pt') ent exts)
-  progress (TAMatchNZPre wt fin pret
-                         (RTOneRule (RTRule pt
-                                            Γ##Γp
-                                            wt'))
-                         ¬red)
-           (EXMatch exe (ERNZPre er) (RTRules rt' rst') ex exts)
+           (EXMatchNZPre exe pret' (RTOneRule pt')
+                         (PotEntails CTTruth ct ent)
+                         expret exrestt)
     with progress wt exe
   ... | Inr (_ , stp) = Inr (_ , (ITExpMatch stp))
   ... | Inl fin
@@ -153,12 +101,10 @@ module progress where
   ... | MayMatch mmat =
     Inl (FIndet (IMatch fin mmat))
   ... | NotMatch nmat
-    with exhaust-erase (ERNZPre er)
-                       (rules-type-no-target pret)
-                       (rules-type-no-target
-                         (RTOneRule (RTRule pt Γ##Γp wt')))
-                       (RTRules rt' rst') ex
-  ... | PotEntails CTTruth ct ent
+    with pattern-unicity pt pt'
+  ... | refl , refl
+    with rules-target-no-target-unicity pret pret'
+  ... | refl
     with or-satormay (ent wt fin (CSMSSat CSTruth))
   ... | Inl satmpre =
     abort (¬red satmpre)
@@ -166,12 +112,11 @@ module progress where
     abort (notmat-not-satormay fin wt pt nmat satmrest)
   progress (TAMatchNZPre wt fin pret
                          (RTRules {rs = r' / rs'}
-                                 (RTRule pt
-                                         Γ##Γp
-                                         wt')
-                                 rst)
+                                  (RTRule pt Γ##Γp wt') rst)
                          ¬red)
-           (EXMatch exe er rst' ex exts)
+           (EXMatchNZPre exe pret' (RTRules pt' rst')
+                         (PotEntails CTTruth ct ent)
+                         expret exrestt)
     with progress wt exe
   ... | Inr (_ , stp) = Inr (_ , (ITExpMatch stp))
   ... | Inl fin

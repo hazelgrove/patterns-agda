@@ -11,7 +11,13 @@ open import patterns-core
 open import result-judgements
 open import statics-core
 
-module lemmas-patterns where  
+module lemmas-patterns where
+  -- judgemental and functional pointer erasure align
+  rel◆er : (rs : zrules) →
+           erase-r rs (rs ◆er)
+  rel◆er (nil / r / rs) = ERZPre
+  rel◆er ((r' / rs') / r / rs) = ERNZPre (rel◆er (rs' / r / rs))
+  
   pattern-constr-same-type : ∀{Δp p τ ξ Γ} →
                              Δp ⊢ p :: τ [ ξ ]⊣ Γ →
                              ξ :c: τ
@@ -92,12 +98,6 @@ module lemmas-patterns where
     RTOneRule pt
   rules-type-no-target (RTRules (RTRule pt Γ##Γp wt') rst) =
     RTRules pt (rules-type-no-target rst)
-
-  -- judgemental and functional pointer erasure align
-  rel◆er : (rs : zrules) →
-           erase-r rs (rs ◆er)
-  rel◆er (nil / r / rs) = ERZPre
-  rel◆er ((r' / rs') / r / rs) = ERNZPre (rel◆er (rs' / r / rs))
   
   -- appending more rules to the end of a list of rules
   -- ∨+s the emitted constraints

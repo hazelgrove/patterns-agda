@@ -35,6 +35,21 @@ module lemmas-or-append where
   ⟨ ξ1 , ξ2 ⟩ ∨+ ξ = ⟨ ξ1 , ξ2 ⟩ ∨ ξ
   (ξ1 ∨ ξ2) ∨+ ξ = ξ1 ∨ (ξ2 ∨+ ξ)
 
+  ∨+-type : ∀{ξ1 ξ2 τ} →
+            ξ1 :c: τ →
+            ξ2 :c: τ →
+            (ξ1 ∨+ ξ2) :c: τ
+  ∨+-type CTTruth ct2 = CTOr CTTruth ct2
+  ∨+-type CTFalsity ct2 = CTOr CTFalsity ct2
+  ∨+-type CTUnknown ct2 = CTOr CTUnknown ct2
+  ∨+-type CTNum ct2 = CTOr CTNum ct2
+  ∨+-type (CTInl ct1) ct2 = CTOr (CTInl ct1) ct2
+  ∨+-type (CTInr ct1) ct2 = CTOr (CTInr ct1) ct2
+  ∨+-type (CTPair ct1₁ ct1₂) ct2 =
+    CTOr (CTPair ct1₁ ct1₂) ct2
+  ∨+-type (CTOr ct1₁ ct1₂) ct2 =
+    CTOr ct1₁ (∨+-type ct1₂ ct2)
+  
   ref-∨+-ref-∨ : ∀{ξ1 ξ2} →
                  (ξ1 ∨+ ξ2) xrefutable →
                  (ξ1 ∨ ξ2) xrefutable

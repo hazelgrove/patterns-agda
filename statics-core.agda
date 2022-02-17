@@ -223,132 +223,163 @@ module statics-core where
   mutual
     -- all match expressions occuring in e are exhaustive
     data _⊢_exhaustive : (Δp : phctx) → (e : ihexp) → Set where
-      EXUnit   : ∀{Δp} →
-                 Δp ⊢ unit exhaustive
-      EXNum    : ∀{Δp n} →
-                 Δp ⊢ (N n) exhaustive
-      EXVar    : ∀{Δp x} →
-                 Δp ⊢ (X x) exhaustive
-      EXLam    : ∀{Δp x τ1 e} →
-                 Δp ⊢ e exhaustive →
-                 Δp ⊢ (·λ x ·[ τ1 ] e) exhaustive
-      EXAp     : ∀{Δp e1 e2} →
-                 Δp ⊢ e1 exhaustive →
-                 Δp ⊢ e2 exhaustive →
-                 Δp ⊢ (e1 ∘ e2) exhaustive
-      EXInl    : ∀{Δp e τ2} →
-                 Δp ⊢ e exhaustive →
-                 Δp ⊢ (inl τ2 e) exhaustive
-      EXInr    : ∀{Δp e τ1} →
-                 Δp ⊢ e exhaustive →
-                 Δp ⊢ (inr τ1 e) exhaustive        
-      EXMatch  : ∀{Δp e τ rsz rs ξ} →
-                 Δp ⊢ e exhaustive →
-                 erase-r rsz rs →
-                 Δp ⊢ rs ::s τ [ ξ ] →
-                 ·⊤ ·: τ c⊧̇†? ξ →
-                 Δp ⊢ rs targets-exhaustive →
-                 Δp ⊢ (match e ·: τ of rsz) exhaustive
-      EXPair   : ∀{Δp e1 e2} →
-                 Δp ⊢ e1 exhaustive →
-                 Δp ⊢ e2 exhaustive →
-                 Δp ⊢ ⟨ e1 , e2 ⟩ exhaustive
-      EXFst    : ∀{Δp e} →
-                 Δp ⊢ e exhaustive →
-                 Δp ⊢ (fst e) exhaustive
-      EXSnd    : ∀{Δp e} →
-                 Δp ⊢ e exhaustive →
-                 Δp ⊢ (snd e) exhaustive
-      EXEHole  : ∀{Δp u σ} →
-                 Δp ⊢ σ substs-exhaustive →
-                 Δp ⊢ ⦇-⦈⟨ u , σ ⟩ exhaustive
-      EXNEHole : ∀{Δp e u σ} →
-                 Δp ⊢ σ substs-exhaustive →
-                 Δp ⊢ e exhaustive →
-                 Δp ⊢ ⦇⌜ e ⌟⦈⟨ u , σ ⟩ exhaustive
+      EXUnit       : ∀{Δp} →
+                     Δp ⊢ unit exhaustive
+      EXNum        : ∀{Δp n} →
+                     Δp ⊢ (N n) exhaustive
+      EXVar        : ∀{Δp x} →
+                     Δp ⊢ (X x) exhaustive
+      EXLam        : ∀{Δp x τ1 e} →
+                     Δp ⊢ e exhaustive →
+                     Δp ⊢ (·λ x ·[ τ1 ] e) exhaustive
+      EXAp         : ∀{Δp e1 e2} →
+                     Δp ⊢ e1 exhaustive →
+                     Δp ⊢ e2 exhaustive →
+                     Δp ⊢ (e1 ∘ e2) exhaustive
+      EXInl        : ∀{Δp e τ2} →
+                     Δp ⊢ e exhaustive →
+                     Δp ⊢ (inl τ2 e) exhaustive
+      EXInr        : ∀{Δp e τ1} →
+                     Δp ⊢ e exhaustive →
+                     Δp ⊢ (inr τ1 e) exhaustive
+      EXMatchZPre  : ∀{Δp e τ r rs ξ} →
+                     Δp ⊢ e exhaustive →
+                     Δp ⊢ (r / rs) ::s τ [ ξ ] →
+                     ·⊤ ·: τ c⊧̇†? ξ →
+                     Δp ⊢ (r / rs) exhaustive-targets →
+                     Δp ⊢ (match e ·: τ of (nil / r / rs)) exhaustive
+      EXMatchNZPre : ∀{Δp e τ rs-pre r rs-post ξpre ξrest} →
+                     Δp ⊢ e exhaustive →
+                     Δp ⊢ rs-pre ::s τ [ ξpre ] →
+                     Δp ⊢ (r / rs-post) ::s τ [ ξrest ] →
+                     ·⊤ ·: τ c⊧̇†? (ξpre ∨ ξrest) →
+                     Δp ⊢ rs-pre exhaustive-targets →
+                     Δp ⊢ (r / rs-post) exhaustive-targets →
+                     Δp ⊢ (match e ·: τ of (rs-pre / r / rs-post)) exhaustive
+      EXPair       : ∀{Δp e1 e2} →
+                     Δp ⊢ e1 exhaustive →
+                     Δp ⊢ e2 exhaustive →
+                     Δp ⊢ ⟨ e1 , e2 ⟩ exhaustive
+      EXFst        : ∀{Δp e} →
+                     Δp ⊢ e exhaustive →
+                     Δp ⊢ (fst e) exhaustive
+      EXSnd        : ∀{Δp e} →
+                     Δp ⊢ e exhaustive →
+                     Δp ⊢ (snd e) exhaustive
+      EXEHole      : ∀{Δp u σ} →
+                     Δp ⊢ σ exhaustive-σ →
+                     Δp ⊢ ⦇-⦈⟨ u , σ ⟩ exhaustive
+      EXNEHole     : ∀{Δp e u σ} →
+                     Δp ⊢ σ exhaustive-σ →
+                     Δp ⊢ e exhaustive →
+                     Δp ⊢ ⦇⌜ e ⌟⦈⟨ u , σ ⟩ exhaustive
 
     -- for each substituted expression d in σ, all match expressions
     -- occurring in d are exhaustive
-    data _⊢_substs-exhaustive : (Δp : phctx) → (σ : subst-env) → Set where
+    data _⊢_exhaustive-σ : (Δp : phctx) → (σ : subst-env) → Set where
       EXσId    : ∀{Δp Γ} →
-                 Δp ⊢ (Id Γ) substs-exhaustive
+                 Δp ⊢ (Id Γ) exhaustive-σ
       EXσSubst : ∀{Δp d y σ} →
-                 Δp ⊢ σ substs-exhaustive →
+                 Δp ⊢ σ exhaustive-σ →
                  Δp ⊢ d exhaustive →
-                 Δp ⊢ (Subst d y σ) substs-exhaustive
-                 
+                 Δp ⊢ (Subst d y σ) exhaustive-σ
+
+    -- for each substituted expression d in θ, all match expressions
+    -- occurring in d are exhaustive
+    data _⊢_exhaustive-θ : (Δp : phctx) → (θ : subst-list) → Set where
+      NRθEmpty  : ∀{Δp} →
+                  Δp ⊢ [] exhaustive-θ
+      NRθExtend : ∀{Δp d τ y θ} →
+                  Δp ⊢ θ exhaustive-θ →
+                  Δp ⊢ d exhaustive →
+                  Δp ⊢ ((d , τ , y) :: θ) exhaustive-θ
+
     -- for each rule p => e in rs, all match expressions
     -- occurring in e are exhaustive
-    data _⊢_targets-exhaustive : (Δp : phctx) → (rs : rules) → Set where
+    data _⊢_exhaustive-targets : (Δp : phctx) → (rs : rules) → Set where
       EXNoRules : ∀{Δp} →
-                   Δp ⊢ nil targets-exhaustive
+                   Δp ⊢ nil exhaustive-targets
       EXRules   : ∀{Δp p e rs} →
                    Δp ⊢ e exhaustive →
-                   Δp ⊢ rs targets-exhaustive →
-                   Δp ⊢ ((p => e) / rs) targets-exhaustive
+                   Δp ⊢ rs exhaustive-targets →
+                   Δp ⊢ ((p => e) / rs) exhaustive-targets
 
   mutual
     -- no match expression occurring in e contains redundant rules
     data _⊢_nonredundant : (Δp : phctx) → (e : ihexp) → Set where
-      NRUnit      : ∀{Δp} →
-                    Δp ⊢ unit nonredundant
-      NRNum       : ∀{Δp n} →
-                    Δp ⊢ (N n) nonredundant
-      NRVar       : ∀{Δp x} →
-                    Δp ⊢ (X x) nonredundant
-      NRLam       : ∀{Δp x τ1 e} →
-                    Δp ⊢ e nonredundant →
-                    Δp ⊢ (·λ x ·[ τ1 ] e) nonredundant
-      NRAp        : ∀{Δp e1 e2} →
-                    Δp ⊢ e1 nonredundant →
-                    Δp ⊢ e2 nonredundant →
-                    Δp ⊢ (e1 ∘ e2) nonredundant
-      NRInl       : ∀{Δp e τ2} →
-                    Δp ⊢ e nonredundant →
-                    Δp ⊢ (inl τ2 e) nonredundant
-      NRInr       : ∀{Δp e τ1} →
-                    Δp ⊢ e nonredundant →
-                    Δp ⊢ (inr τ1 e) nonredundant        
-      NRMatchZPre : ∀{Δp e τ rsz rs ξ} →
-                    Δp ⊢ e nonredundant →
-                    erase-r rsz rs →
-                    Δp ⊢ rs ::s τ [ ·⊥ nr/ ξ ] →
-                    Δp ⊢ rs targets-nonredundant →
-                    Δp ⊢ (match e ·: τ of rsz) nonredundant
-      NRPair      : ∀{Δp e1 e2} →
-                    Δp ⊢ e1 nonredundant →
-                    Δp ⊢ e2 nonredundant →
-                    Δp ⊢ ⟨ e1 , e2 ⟩ nonredundant
-      NRFst       : ∀{Δp e} →
-                    Δp ⊢ e nonredundant →
-                    Δp ⊢ (fst e) nonredundant
-      NRSnd       : ∀{Δp e} →
-                    Δp ⊢ e nonredundant →
-                    Δp ⊢ (snd e) nonredundant
-      NREHole     : ∀{Δp u σ} →
-                    Δp ⊢ ⦇-⦈⟨ u , σ ⟩ nonredundant
-      NRNEHole    : ∀{Δp e u σ} →
-                    Δp ⊢ e nonredundant →
-                    Δp ⊢ ⦇⌜ e ⌟⦈⟨ u , σ ⟩ nonredundant
+      NRUnit       : ∀{Δp} →
+                     Δp ⊢ unit nonredundant
+      NRNum        : ∀{Δp n} →
+                     Δp ⊢ (N n) nonredundant
+      NRVar        : ∀{Δp x} →
+                     Δp ⊢ (X x) nonredundant
+      NRLam        : ∀{Δp x τ1 e} →
+                     Δp ⊢ e nonredundant →
+                     Δp ⊢ (·λ x ·[ τ1 ] e) nonredundant
+      NRAp         : ∀{Δp e1 e2} →
+                     Δp ⊢ e1 nonredundant →
+                     Δp ⊢ e2 nonredundant →
+                     Δp ⊢ (e1 ∘ e2) nonredundant
+      NRInl        : ∀{Δp e τ2} →
+                     Δp ⊢ e nonredundant →
+                     Δp ⊢ (inl τ2 e) nonredundant
+      NRInr        : ∀{Δp e τ1} →
+                     Δp ⊢ e nonredundant →
+                     Δp ⊢ (inr τ1 e) nonredundant
+      NRMatchZPre  : ∀{Δp e τ r rs ξ} →
+                     Δp ⊢ e nonredundant →
+                     Δp ⊢ (r / rs) ::s τ [ ·⊥ nr/ ξ ] →
+                     Δp ⊢ (r / rs) nonredundant-targets →
+                     Δp ⊢ (match e ·: τ of (nil / r / rs)) nonredundant
+      NRMatchNZPre : ∀{Δp e τ rs-pre r rs-post ξpre ξrest} →
+                     Δp ⊢ e nonredundant →
+                     Δp ⊢ rs-pre ::s τ [ ·⊥ nr/ ξpre ] →
+                     Δp ⊢ (r / rs-post) ::s τ [ ·⊥ ∨ ξpre nr/ ξrest ] →
+                     Δp ⊢ rs-pre nonredundant-targets →
+                     Δp ⊢ (r / rs-post) nonredundant-targets →
+                     Δp ⊢ (match e ·: τ of (rs-pre / r / rs-post)) nonredundant
+      NRPair       : ∀{Δp e1 e2} →
+                     Δp ⊢ e1 nonredundant →
+                     Δp ⊢ e2 nonredundant →
+                     Δp ⊢ ⟨ e1 , e2 ⟩ nonredundant
+      NRFst        : ∀{Δp e} →
+                     Δp ⊢ e nonredundant →
+                     Δp ⊢ (fst e) nonredundant
+      NRSnd        : ∀{Δp e} →
+                     Δp ⊢ e nonredundant →
+                     Δp ⊢ (snd e) nonredundant
+      NREHole      : ∀{Δp u σ} →
+                     Δp ⊢ ⦇-⦈⟨ u , σ ⟩ nonredundant
+      NRNEHole     : ∀{Δp e u σ} →
+                     Δp ⊢ e nonredundant →
+                     Δp ⊢ ⦇⌜ e ⌟⦈⟨ u , σ ⟩ nonredundant
 
     -- for each substituted expression d in σ, no match expression
     -- occurring in d contains redundant rules
-    data _⊢_substs-nonredundant : (Δp : phctx) →
-                                  (σ : subst-env) → Set where
+    data _⊢_nonredundant-σ : (Δp : phctx) → (σ : subst-env) → Set where
       NRσId    : ∀{Δp Γ} →
-                 Δp ⊢ (Id Γ) substs-nonredundant
+                 Δp ⊢ (Id Γ) nonredundant-σ
       NRσSubst : ∀{Δp d y σ} →
-                 Δp ⊢ σ substs-nonredundant →
+                 Δp ⊢ σ nonredundant-σ →
                  Δp ⊢ d nonredundant →
-                 Δp ⊢ (Subst d y σ) substs-nonredundant
+                 Δp ⊢ (Subst d y σ) nonredundant-σ
 
+    -- for each substituted expression d in θ, no match expression
+    -- occurring in d contains redundant rules
+    data _⊢_nonredundant-θ : (Δp : phctx) → (θ : subst-list) → Set where
+      NRθEmpty  : ∀{Δp} →
+                  Δp ⊢ [] nonredundant-θ
+      NRθExtend : ∀{Δp d τ y θ} →
+                  Δp ⊢ θ nonredundant-θ →
+                  Δp ⊢ d nonredundant →
+                  Δp ⊢ ((d , τ , y) :: θ) nonredundant-θ
+    
     -- for each rule p => e in rs, no match expression
     -- occurring in e contains redundant rules
-    data _⊢_targets-nonredundant : (Δp : phctx) →
-                                   (rs : rules) → Set where
+    data _⊢_nonredundant-targets : (Δp : phctx) → (rs : rules) → Set where
       NRNoRules : ∀{Δp} →
-                  Δp ⊢ nil targets-nonredundant
+                  Δp ⊢ nil nonredundant-targets
       NRRules   : ∀{Δp p e rs} →
                   Δp ⊢ e nonredundant →
-                  Δp ⊢ rs targets-nonredundant →
-                  Δp ⊢ ((p => e) / rs) targets-nonredundant
+                  Δp ⊢ rs nonredundant-targets →
+                  Δp ⊢ ((p => e) / rs) nonredundant-targets

@@ -11,6 +11,7 @@ open import lemmas-contexts
 open import lemmas-or-append
 open import lemmas-patterns
 open import lemmas-satisfy
+open import lemmas-subst-exhaustive
 open import lemmas-subst-type
 open import matching-coherence
 open import patterns-core
@@ -162,3 +163,112 @@ module preservation where
                (TANEHole u∈Δ wst wt) (ITNEHole stp) =
     TANEHole u∈Δ wst (preservation bue hbue wt stp)
   
+
+  exhaustive-targets-erase : ∀{Δp rs-pre r rs-post rss} →
+                             erase-r (rs-pre / r / rs-post) rss →
+                             Δp ⊢ rs-pre exhaustive-targets →
+                             Δp ⊢ (r / rs-post) exhaustive-targets →
+                             Δp ⊢ rss exhaustive-targets
+  exhaustive-targets-erase ERZPre expret exrestt = exrestt
+  exhaustive-targets-erase {rs-pre = (p => e) / rs}
+                           (ERNZPre er) (EXRules exe exrs) exrestt =
+    EXRules exe (exhaustive-targets-erase er exrs exrestt)
+  
+  exhaustive-preservation : ∀{Δp e1 e2} →
+                            binders-unique e1 →
+                            hole-binders-unique e1 →
+                            Δp ⊢ e1 exhaustive →
+                            e1 ↦ e2 →
+                            Δp ⊢ e2 exhaustive
+  exhaustive-preservation (BUAp bu1 bu2 bd) (HBUAp hbu1 hbu2 hbd)
+                          (EXAp ex1 ex2) (ITApFun stp) =
+    EXAp (exhaustive-preservation bu1 hbu1 ex1 stp) ex2
+  exhaustive-preservation (BUAp bu1 bu2 bd) (HBUAp hbu1 hbu2 hbd)
+                          (EXAp ex1 ex2) (ITApArg fin stp) =
+    EXAp ex1 (exhaustive-preservation bu2 hbu2 ex2 stp)
+  exhaustive-preservation (BUAp bu1 bu2 bd) (HBUAp hbu1 hbu2 hbd)
+                          (EXAp (EXLam ex1) ex2) (ITAp fin) =
+    subst-exhaustive ex1 ex2
+  exhaustive-preservation (BUPair bu1 bu2 bd) (HBUPair hbu1 hbu2 hbd)
+                          (EXPair ex1 ex2) (ITPairL stp) =
+    EXPair (exhaustive-preservation bu1 hbu1 ex1 stp) ex2
+  exhaustive-preservation (BUPair bu1 bu2 bd) (HBUPair hbu1 hbu2 hbd)
+                          (EXPair ex1 ex2) (ITPairR fin stp) =
+    EXPair ex1 (exhaustive-preservation bu2 hbu2 ex2 stp)
+  exhaustive-preservation (BUFst bu) (HBUFst hbu)
+                          (EXFst ex1) (ITFst stp) =
+    EXFst (exhaustive-preservation bu hbu ex1 stp)
+  exhaustive-preservation (BUFst bu) (HBUFst hbu)
+                          (EXFst (EXPair ex1 ex2)) (ITFstPair fin) = ex1
+  exhaustive-preservation (BUSnd bu) (HBUSnd hbu)
+                          (EXSnd ex1) (ITSnd stp) =
+    EXSnd (exhaustive-preservation bu hbu ex1 stp)
+  exhaustive-preservation (BUSnd bu) (HBUSnd hbu)
+                          (EXSnd (EXPair ex1 ex2)) (ITSndPair fin) = ex2
+  exhaustive-preservation (BUInl bu) (HBUInl hbu)
+                          (EXInl ex1) (ITInl stp) =
+    EXInl (exhaustive-preservation bu hbu ex1 stp)
+  exhaustive-preservation (BUInr bu) (HBUInr hbu)
+                          (EXInr ex1) (ITInr stp) =
+    EXInr (exhaustive-preservation bu hbu ex1 stp)
+  exhaustive-preservation (BUMatch bue buzrs bd) (HBUMatch hbue hbuzrs hbd)
+                          (EXMatchZPre ex rst ent exts) (ITExpMatch stp) =
+    EXMatchZPre (exhaustive-preservation bue hbue ex stp)
+                rst
+                ent
+                exts
+  exhaustive-preservation (BUMatch bue buzrs bd) (HBUMatch hbue hbuzrs hbd)
+                          (EXMatchZPre ex rst ent (EXRules exet exrst))
+                          (ITSuccMatch fin mat) =
+    substs-exhaustive (mat-substs-exhaustive ex mat)
+                      exet
+  exhaustive-preservation (BUMatch bue buzrs bd) (HBUMatch hbue hbuzrs hbd)
+                          (EXMatchZPre ex (RTRules pt rst) ent (EXRules exe exrs))
+                          (ITFailMatch fin nmat ERZPre) =
+    EXMatchNZPre ex (RTOneRule pt) rst ent (EXRules exe EXNoRules) exrs
+  exhaustive-preservation (BUMatch bue buzrs bd) (HBUMatch hbue hbuzrs hbd)
+                          (EXMatchNZPre ex pret restt ent expret exrestt)
+                          (ITExpMatch stp) =
+    EXMatchNZPre (exhaustive-preservation bue hbue ex stp)
+                 pret restt ent expret exrestt
+  exhaustive-preservation (BUMatch bue buzrs bd) (HBUMatch hbue hbuzrs hbd)
+                          (EXMatchNZPre ex pret restt ent exprett
+                                        (EXRules exet expostt))
+                          (ITSuccMatch fin mat) =
+    substs-exhaustive (mat-substs-exhaustive ex mat) exet
+  exhaustive-preservation (BUMatch bue buzrs bd) (HBUMatch hbue hbuzrs hbd)
+                          (EXMatchNZPre {ξpre = ξpre} {ξrest = ξr ∨ ξrs}
+                                        ex pret
+                                        (RTRules pt postt)
+                                        (PotEntails {τ = τ}
+                                                    CTTruth
+                                                    (CTOr ctpre (CTOr ctr ctrs))
+                                                    ent)
+                                        expret
+                                        (EXRules exet expostt))
+                          (ITFailMatch fin nmat er) =
+    EXMatchNZPre ex
+                 (rules-erase-constr-no-target er pret (RTOneRule pt))
+                 postt
+                 (PotEntails CTTruth (CTOr (∨+-type ctpre ctr) ctrs) ent')
+                 (exhaustive-targets-erase er expret (EXRules exet EXNoRules))
+                 expostt
+    where
+      ent' : ∀{Δ Δp e} →
+             ∅ , Δ , Δp ⊢ e :: τ →
+             e final →
+             e ⊧̇†? ·⊤ →
+             e ⊧̇†? ((ξpre ∨+ ξr) ∨ ξrs)
+      ent' wt fin satt
+        with or-satormay (ent wt fin satt)
+      ... | Inl satpre =
+        satormay-or-l (satormay-∨-satormay-∨+ (satormay-or-l satpre))
+      ... | Inr satrest
+        with or-satormay satrest
+      ... | Inl satr =
+        satormay-or-l (satormay-∨-satormay-∨+ (satormay-or-r satr))
+      ... | Inr satrs =
+        satormay-or-r satrs
+  exhaustive-preservation (BUNEHole buσ bu bd) (HBUNEHole hbuσ hbu hbd)
+                          (EXNEHole exσ ex1) (ITNEHole stp) =
+    EXNEHole exσ (exhaustive-preservation bu hbu ex1 stp)
