@@ -81,24 +81,24 @@ module lemmas-subst-exhaustive where
     ... | Inl ub =
       EXRules (subst-exhaustive ex ex2)
               (subst-exhaustive-targets exrs ex2)
-    ... | Inr ub =
+    ... | Inr ¬ub =
       EXRules ex (subst-exhaustive-targets exrs ex2)
 
   substs-concat-exhaustive : ∀{Δp θ1 θ2} →
                              Δp ⊢ θ1 exhaustive-θ →
                              Δp ⊢ θ2 exhaustive-θ →
                              Δp ⊢ (θ1 ++ θ2) exhaustive-θ
-  substs-concat-exhaustive NRθEmpty ex2 = ex2
-  substs-concat-exhaustive (NRθExtend ex1 exd) ex2 =
-    NRθExtend (substs-concat-exhaustive ex1 ex2) exd
+  substs-concat-exhaustive EXθEmpty ex2 = ex2
+  substs-concat-exhaustive (EXθExtend ex1 exd) ex2 =
+    EXθExtend (substs-concat-exhaustive ex1 ex2) exd
   
   mat-substs-exhaustive : ∀{Δp e τ p θ} →
                           Δp ⊢ e exhaustive →
                           e ·: τ ▹ p ⊣ θ →
                           Δp ⊢ θ exhaustive-θ
-  mat-substs-exhaustive ex MUnit = NRθEmpty
-  mat-substs-exhaustive ex MNum = NRθEmpty
-  mat-substs-exhaustive ex MVar = NRθExtend NRθEmpty ex
+  mat-substs-exhaustive ex MUnit = EXθEmpty
+  mat-substs-exhaustive ex MNum = EXθEmpty
+  mat-substs-exhaustive ex MVar = EXθExtend EXθEmpty ex
   mat-substs-exhaustive (EXInl ex) (MInl mat) =
     mat-substs-exhaustive ex mat
   mat-substs-exhaustive (EXInr ex) (MInr mat) =
@@ -113,12 +113,12 @@ module lemmas-subst-exhaustive where
     substs-concat-exhaustive
       (mat-substs-exhaustive (EXFst ex) mat1)
       (mat-substs-exhaustive (EXSnd ex) mat2)
-  mat-substs-exhaustive ex MWild = NRθEmpty
+  mat-substs-exhaustive ex MWild = EXθEmpty
 
   substs-exhaustive : ∀{Δp θ e} →
                       Δp ⊢ θ exhaustive-θ →
                       Δp ⊢ e exhaustive →
                       Δp ⊢ (apply-substs θ e) exhaustive
-  substs-exhaustive NRθEmpty ex = ex
-  substs-exhaustive (NRθExtend exθ exd) ex =
+  substs-exhaustive EXθEmpty ex = ex
+  substs-exhaustive (EXθExtend exθ exd) ex =
     EXAp (EXLam (substs-exhaustive exθ ex)) exd

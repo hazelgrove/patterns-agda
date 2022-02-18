@@ -51,6 +51,7 @@ open import lemmas-subst-matching
 open import lemmas-subst-satisfy
 open import lemmas-subst-type
 open import lemmas-subst-exhaustive
+open import lemmas-subst-nonredundant
 open import finality
 open import lemmas-or-append
 open import preservation

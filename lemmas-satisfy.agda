@@ -365,3 +365,17 @@ module lemmas-satisfy where
            (all-notintro-maysat ni msat2 ni')
   all-notintro-maysat ni (CMSNotIntro _ ref pos) ni' =
     CMSNotIntro ni' ref pos
+
+  entails-trans : ∀{τ ξ1 ξ2 ξ3} →
+                  ξ1 ·: τ c⊧̇ ξ2 →
+                  ξ3 :c: τ →
+                  (∀{Δ Δp e} →
+                   ∅ , Δ , Δp ⊢ e :: τ →
+                   e val →
+                   e ⊧̇ ξ2 →
+                   e ⊧̇ ξ3) →
+                  ξ1 ·: τ c⊧̇ ξ3
+  entails-trans (Entails ct1 ct2 ent12) ct3 ent23 =
+    Entails ct1 ct3
+            (λ wt val satm1 →
+               ent23 wt val (ent12 wt val satm1))

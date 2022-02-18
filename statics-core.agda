@@ -287,9 +287,9 @@ module statics-core where
     -- for each substituted expression d in θ, all match expressions
     -- occurring in d are exhaustive
     data _⊢_exhaustive-θ : (Δp : phctx) → (θ : subst-list) → Set where
-      NRθEmpty  : ∀{Δp} →
+      EXθEmpty  : ∀{Δp} →
                   Δp ⊢ [] exhaustive-θ
-      NRθExtend : ∀{Δp d τ y θ} →
+      EXθExtend : ∀{Δp d τ y θ} →
                   Δp ⊢ θ exhaustive-θ →
                   Δp ⊢ d exhaustive →
                   Δp ⊢ ((d , τ , y) :: θ) exhaustive-θ

@@ -7,6 +7,7 @@ open import dynamics-core
 open import htyp-decidable
 open import lemmas-contexts
 open import lemmas-or-append
+open import lemmas-satisfy
 open import patterns-core
 open import result-judgements
 open import statics-core
@@ -36,14 +37,24 @@ module lemmas-patterns where
   pattern-constr-same-type PTWild = CTTruth
                                  
   rules-constr-same-type : ∀{Δp rs τ ξ} →
-                                     Δp ⊢ rs ::s τ [ ξ ] →
-                                     ξ :c: τ
+                           Δp ⊢ rs ::s τ [ ξ ] →
+                           ξ :c: τ
   rules-constr-same-type (RTOneRule pt) =
     pattern-constr-same-type pt
   rules-constr-same-type (RTRules pt rst) =
     CTOr (pattern-constr-same-type pt)
          (rules-constr-same-type rst)
-  
+
+  rules-constr-same-type-nonredundant : ∀{Δp rs τ ξpre ξ} →
+                                        Δp ⊢ rs ::s τ [ ξpre nr/ ξ ] →
+                                        ξ :c: τ
+  rules-constr-same-type-nonredundant
+    (RTOneRule pt ¬red) = pattern-constr-same-type pt
+  rules-constr-same-type-nonredundant
+    (RTRules pt ¬red rst) =
+      CTOr (pattern-constr-same-type pt)
+           (rules-constr-same-type-nonredundant rst)
+
   pattern-constr-pos : ∀{Δp p τ ξ Γ} →
                        Δp ⊢ p :: τ [ ξ ]⊣ Γ →
                        ξ possible
@@ -89,7 +100,7 @@ module lemmas-patterns where
   pattern-ref-constr-ref (PTEHole w∈Δp) ref = RXUnknown
   pattern-ref-constr-ref (PTNEHole w∈Δp pt) ref = RXUnknown
 
-  -- the two rules typing judgement behave as expected
+  -- the different rule typing judgement behave as expected
   rules-type-no-target : ∀{Γ Δ Δp rs τ ξ τ'} →
                          Γ , Δ , Δp ⊢ rs ::s τ [ ξ ]=> τ' →
                          Δp ⊢ rs ::s τ [ ξ ]
@@ -98,27 +109,9 @@ module lemmas-patterns where
     RTOneRule pt
   rules-type-no-target (RTRules (RTRule pt Γ##Γp wt') rst) =
     RTRules pt (rules-type-no-target rst)
-  
+
   -- appending more rules to the end of a list of rules
   -- ∨+s the emitted constraints
-  rules-erase-constr-no-target : ∀{rs-pre r rs-post rss Δp τ ξpre ξrest} →
-                                 erase-r (rs-pre / r / rs-post) rss →
-                                 Δp ⊢ rs-pre ::s τ [ ξpre ] →
-                                 Δp ⊢ (r / rs-post) ::s τ [ ξrest ] →
-                                 Δp ⊢ rss ::s τ [ ξpre ∨+ ξrest ]
-  rules-erase-constr-no-target
-    {rs-pre = (p => e) / nil} {r = r} {rs-post = rs-post}
-    {Δp = Δp} {τ = τ} {ξpre = ξpre} {ξrest = ξrest}
-    (ERNZPre ERZPre) (RTOneRule pt) restt =
-    tr (λ qq → Δp ⊢ (p => e) / (r / rs-post) ::s τ [ qq ])
-       (! (pattern-∨+ pt ξrest))
-       (RTRules pt restt)
-  rules-erase-constr-no-target
-    {rs-pre = r' / (_ / _)}
-    (ERNZPre (ERNZPre er)) (RTRules rt' rst') restt =
-    RTRules rt' (rules-erase-constr-no-target (ERNZPre er) rst' restt)
-
-  -- same as the above, but tracking the type of the target
   rules-erase-constr : ∀{rs-pre r rs-post rss Γ Δ Δp τ ξpre ξrest τ'} →
                        erase-r (rs-pre / r / rs-post) rss →
                        Γ , Δ , Δp ⊢ rs-pre ::s τ [ ξpre ]=> τ' →
@@ -139,7 +132,95 @@ module lemmas-patterns where
     (RTRules (RTRule pt Γ##Γp wt') rst') restt =
     RTRules (RTRule pt Γ##Γp wt')
             (rules-erase-constr (ERNZPre er) rst' restt)
-  
+
+  -- same as above but for the rule typing judgement
+  -- without the target type
+  rules-erase-constr-no-target : ∀{rs-pre r rs-post rss Δp τ ξpre ξrest} →
+                                 erase-r (rs-pre / r / rs-post) rss →
+                                 Δp ⊢ rs-pre ::s τ [ ξpre ] →
+                                 Δp ⊢ (r / rs-post) ::s τ [ ξrest ] →
+                                 Δp ⊢ rss ::s τ [ ξpre ∨+ ξrest ]
+  rules-erase-constr-no-target
+    {rs-pre = (p => e) / nil} {r = r} {rs-post = rs-post}
+    {Δp = Δp} {τ = τ} {ξpre = ξpre} {ξrest = ξrest}
+    (ERNZPre ERZPre) (RTOneRule pt) restt =
+    tr (λ qq → Δp ⊢ (p => e) / (r / rs-post) ::s τ [ qq ])
+       (! (pattern-∨+ pt ξrest))
+       (RTRules pt restt)
+  rules-erase-constr-no-target
+    {rs-pre = r' / (_ / _)}
+    (ERNZPre (ERNZPre er)) (RTRules rt' rst') restt =
+    RTRules rt' (rules-erase-constr-no-target (ERNZPre er) rst' restt)
+
+  -- we can weaken the non-redundancy assumption
+  -- to something which entails ξpre
+  weaken-nonredundant : ∀{Δp rs τ ξpre ξpre' ξ} →
+                        ξpre :c: τ →
+                        Δp ⊢ rs ::s τ [ ξpre nr/ ξ ] →
+                        (∀{Δ Δp e} →
+                         ∅ , Δ , Δp ⊢ e :: τ →
+                         e val →
+                         e ⊧̇ ξpre' →
+                         e ⊧̇ ξpre) →
+                        Δp ⊢ rs ::s τ [ ξpre' nr/ ξ ]
+  weaken-nonredundant ctpre (RTOneRule pt ¬ent) ent' =
+    RTOneRule pt (λ ent → ¬ent (entails-trans ent ctpre ent'))
+  weaken-nonredundant {τ = τ} {ξpre = ξpre} {ξpre' = ξpre'}
+                      ctpre (RTRules {ξr = ξr} pt ¬ent rst) ent' =
+    RTRules pt (λ ent → ¬ent (entails-trans ent ctpre ent'))
+            (weaken-nonredundant
+              (CTOr ctpre (pattern-constr-same-type pt))
+              rst
+              entor)
+    where
+      entor : ∀{Δ Δp e} →
+              ∅ , Δ , Δp ⊢ e :: τ →
+              e val →
+              e ⊧̇ (ξpre' ∨ ξr) →
+              e ⊧̇ (ξpre ∨ ξr)
+      entor wt val (CSOrL satpre') =
+        CSOrL (ent' wt val satpre')
+      entor wt val (CSOrR satr) = CSOrR satr
+      
+  -- same as above but for the rule typing judgement
+  -- keeping track of nonredundancy
+  rules-erase-constr-nonredundant : ∀{rs-pre r rs-post rss Δp τ ξnr ξpre ξrest} →
+                                    ξnr :c: τ →
+                                    erase-r (rs-pre / r / rs-post) rss →
+                                    Δp ⊢ rs-pre ::s τ [ ξnr nr/ ξpre ] →
+                                    Δp ⊢ (r / rs-post) ::s τ [ ξnr ∨ ξpre nr/ ξrest ] →
+                                    Δp ⊢ rss ::s τ [ ξnr nr/ ξpre ∨+ ξrest ]
+  rules-erase-constr-nonredundant
+    {rs-pre = (p => e) / nil} {r = r} {rs-post = rs-post}
+    {Δp = Δp} {τ = τ} {ξnr = ξnr} {ξpre = ξpre} {ξrest = ξrest}
+    ctnr  (ERNZPre ERZPre) (RTOneRule pt ¬red) restt =
+    tr (λ qq → Δp ⊢ (p => e) / (r / rs-post) ::s τ [ ξnr nr/ qq ])
+       (! (pattern-∨+ pt ξrest))
+       (RTRules pt ¬red restt)
+  rules-erase-constr-nonredundant
+    {rs-pre = r' / (_ / _)} {τ = τ} {ξnr = ξnr} {ξpre = ξr ∨ ξrs}
+    ctnr (ERNZPre (ERNZPre er)) (RTRules pt ¬red rst) restt =
+      RTRules pt ¬red
+              (rules-erase-constr-nonredundant
+                (CTOr ctnr (pattern-constr-same-type pt))
+                (ERNZPre er)
+                rst
+                (weaken-nonredundant
+                  (CTOr ctnr
+                        (CTOr (pattern-constr-same-type pt)
+                              (rules-constr-same-type-nonredundant rst)))
+                  restt
+                  ent))
+    where
+      ent : ∀{Δ Δp e} →
+            ∅ , Δ , Δp ⊢ e :: τ →
+            e val →
+            e ⊧̇ ((ξnr ∨ ξr) ∨ ξrs) →
+            e ⊧̇ (ξnr ∨ (ξr ∨ ξrs))
+      ent wt eval (CSOrL (CSOrL sat)) = CSOrL sat
+      ent wt eval (CSOrL (CSOrR sat)) = CSOrR (CSOrL sat)
+      ent wt eval (CSOrR sat) = CSOrR (CSOrR sat)
+      
   notintro-mat-ref-not : ∀{e τ p θ} →
                          e notintro →
                          e ·: τ ▹ p ⊣ θ →

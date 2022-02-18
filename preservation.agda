@@ -12,6 +12,7 @@ open import lemmas-or-append
 open import lemmas-patterns
 open import lemmas-satisfy
 open import lemmas-subst-exhaustive
+open import lemmas-subst-nonredundant
 open import lemmas-subst-type
 open import matching-coherence
 open import patterns-core
@@ -175,69 +176,54 @@ module preservation where
     EXRules exe (exhaustive-targets-erase er exrs exrestt)
   
   exhaustive-preservation : ∀{Δp e1 e2} →
-                            binders-unique e1 →
-                            hole-binders-unique e1 →
                             Δp ⊢ e1 exhaustive →
                             e1 ↦ e2 →
                             Δp ⊢ e2 exhaustive
-  exhaustive-preservation (BUAp bu1 bu2 bd) (HBUAp hbu1 hbu2 hbd)
-                          (EXAp ex1 ex2) (ITApFun stp) =
-    EXAp (exhaustive-preservation bu1 hbu1 ex1 stp) ex2
-  exhaustive-preservation (BUAp bu1 bu2 bd) (HBUAp hbu1 hbu2 hbd)
-                          (EXAp ex1 ex2) (ITApArg fin stp) =
-    EXAp ex1 (exhaustive-preservation bu2 hbu2 ex2 stp)
-  exhaustive-preservation (BUAp bu1 bu2 bd) (HBUAp hbu1 hbu2 hbd)
-                          (EXAp (EXLam ex1) ex2) (ITAp fin) =
+  exhaustive-preservation (EXAp ex1 ex2) (ITApFun stp) =
+    EXAp (exhaustive-preservation ex1 stp) ex2
+  exhaustive-preservation (EXAp ex1 ex2) (ITApArg fin stp) =
+    EXAp ex1 (exhaustive-preservation ex2 stp)
+  exhaustive-preservation (EXAp (EXLam ex1) ex2) (ITAp fin) =
     subst-exhaustive ex1 ex2
-  exhaustive-preservation (BUPair bu1 bu2 bd) (HBUPair hbu1 hbu2 hbd)
-                          (EXPair ex1 ex2) (ITPairL stp) =
-    EXPair (exhaustive-preservation bu1 hbu1 ex1 stp) ex2
-  exhaustive-preservation (BUPair bu1 bu2 bd) (HBUPair hbu1 hbu2 hbd)
-                          (EXPair ex1 ex2) (ITPairR fin stp) =
-    EXPair ex1 (exhaustive-preservation bu2 hbu2 ex2 stp)
-  exhaustive-preservation (BUFst bu) (HBUFst hbu)
-                          (EXFst ex1) (ITFst stp) =
-    EXFst (exhaustive-preservation bu hbu ex1 stp)
-  exhaustive-preservation (BUFst bu) (HBUFst hbu)
-                          (EXFst (EXPair ex1 ex2)) (ITFstPair fin) = ex1
-  exhaustive-preservation (BUSnd bu) (HBUSnd hbu)
-                          (EXSnd ex1) (ITSnd stp) =
-    EXSnd (exhaustive-preservation bu hbu ex1 stp)
-  exhaustive-preservation (BUSnd bu) (HBUSnd hbu)
-                          (EXSnd (EXPair ex1 ex2)) (ITSndPair fin) = ex2
-  exhaustive-preservation (BUInl bu) (HBUInl hbu)
-                          (EXInl ex1) (ITInl stp) =
-    EXInl (exhaustive-preservation bu hbu ex1 stp)
-  exhaustive-preservation (BUInr bu) (HBUInr hbu)
-                          (EXInr ex1) (ITInr stp) =
-    EXInr (exhaustive-preservation bu hbu ex1 stp)
-  exhaustive-preservation (BUMatch bue buzrs bd) (HBUMatch hbue hbuzrs hbd)
-                          (EXMatchZPre ex rst ent exts) (ITExpMatch stp) =
-    EXMatchZPre (exhaustive-preservation bue hbue ex stp)
-                rst
-                ent
-                exts
-  exhaustive-preservation (BUMatch bue buzrs bd) (HBUMatch hbue hbuzrs hbd)
-                          (EXMatchZPre ex rst ent (EXRules exet exrst))
+  exhaustive-preservation (EXPair ex1 ex2) (ITPairL stp) =
+    EXPair (exhaustive-preservation ex1 stp) ex2
+  exhaustive-preservation (EXPair ex1 ex2) (ITPairR fin stp) =
+    EXPair ex1 (exhaustive-preservation ex2 stp)
+  exhaustive-preservation (EXFst ex1) (ITFst stp) =
+    EXFst (exhaustive-preservation ex1 stp)
+  exhaustive-preservation (EXFst (EXPair ex1 ex2))
+                          (ITFstPair fin) = ex1
+  exhaustive-preservation (EXSnd ex1) (ITSnd stp) =
+    EXSnd (exhaustive-preservation ex1 stp)
+  exhaustive-preservation (EXSnd (EXPair ex1 ex2))
+                          (ITSndPair fin) = ex2
+  exhaustive-preservation (EXInl ex1) (ITInl stp) =
+    EXInl (exhaustive-preservation ex1 stp)
+  exhaustive-preservation (EXInr ex1) (ITInr stp) =
+    EXInr (exhaustive-preservation ex1 stp)
+  exhaustive-preservation (EXMatchZPre ex rst ent exts)
+                          (ITExpMatch stp) =
+    EXMatchZPre (exhaustive-preservation ex stp)
+                rst ent exts
+  exhaustive-preservation (EXMatchZPre ex rst ent (EXRules exet exrst))
                           (ITSuccMatch fin mat) =
     substs-exhaustive (mat-substs-exhaustive ex mat)
                       exet
-  exhaustive-preservation (BUMatch bue buzrs bd) (HBUMatch hbue hbuzrs hbd)
-                          (EXMatchZPre ex (RTRules pt rst) ent (EXRules exe exrs))
+  exhaustive-preservation (EXMatchZPre ex (RTRules pt rst) ent
+                                       (EXRules exe exrs))
                           (ITFailMatch fin nmat ERZPre) =
-    EXMatchNZPre ex (RTOneRule pt) rst ent (EXRules exe EXNoRules) exrs
-  exhaustive-preservation (BUMatch bue buzrs bd) (HBUMatch hbue hbuzrs hbd)
-                          (EXMatchNZPre ex pret restt ent expret exrestt)
+    EXMatchNZPre ex (RTOneRule pt) rst ent
+                 (EXRules exe EXNoRules) exrs
+  exhaustive-preservation (EXMatchNZPre ex pret restt ent expret exrestt)
                           (ITExpMatch stp) =
-    EXMatchNZPre (exhaustive-preservation bue hbue ex stp)
+    EXMatchNZPre (exhaustive-preservation ex stp)
                  pret restt ent expret exrestt
-  exhaustive-preservation (BUMatch bue buzrs bd) (HBUMatch hbue hbuzrs hbd)
-                          (EXMatchNZPre ex pret restt ent exprett
+  exhaustive-preservation (EXMatchNZPre ex pret restt ent exprett
                                         (EXRules exet expostt))
                           (ITSuccMatch fin mat) =
-    substs-exhaustive (mat-substs-exhaustive ex mat) exet
-  exhaustive-preservation (BUMatch bue buzrs bd) (HBUMatch hbue hbuzrs hbd)
-                          (EXMatchNZPre {ξpre = ξpre} {ξrest = ξr ∨ ξrs}
+    substs-exhaustive (mat-substs-exhaustive ex mat)
+                      exet
+  exhaustive-preservation (EXMatchNZPre {ξpre = ξpre} {ξrest = ξr ∨ ξrs}
                                         ex pret
                                         (RTRules pt postt)
                                         (PotEntails {τ = τ}
@@ -269,6 +255,98 @@ module preservation where
         satormay-or-l (satormay-∨-satormay-∨+ (satormay-or-r satr))
       ... | Inr satrs =
         satormay-or-r satrs
-  exhaustive-preservation (BUNEHole buσ bu bd) (HBUNEHole hbuσ hbu hbd)
-                          (EXNEHole exσ ex1) (ITNEHole stp) =
-    EXNEHole exσ (exhaustive-preservation bu hbu ex1 stp)
+  exhaustive-preservation (EXNEHole exσ ex1) (ITNEHole stp) =
+    EXNEHole exσ (exhaustive-preservation ex1 stp)
+
+  nonredundant-targets-erase : ∀{Δp rs-pre r rs-post rss} →
+                               erase-r (rs-pre / r / rs-post) rss →
+                               Δp ⊢ rs-pre nonredundant-targets →
+                               Δp ⊢ (r / rs-post) nonredundant-targets →
+                               Δp ⊢ rss nonredundant-targets
+  nonredundant-targets-erase ERZPre nrpret nrrestt = nrrestt
+  nonredundant-targets-erase {rs-pre = (p => e) / rs}
+                             (ERNZPre er) (NRRules nre nrrs) nrrestt =
+    NRRules nre (nonredundant-targets-erase er nrrs nrrestt)
+
+  nonredundant-preservation : ∀{Δp e1 e2} →
+                              Δp ⊢ e1 nonredundant →
+                              e1 ↦ e2 →
+                              Δp ⊢ e2 nonredundant
+  nonredundant-preservation (NRAp nr1 nr2) (ITApFun stp) =
+    NRAp (nonredundant-preservation nr1 stp) nr2
+  nonredundant-preservation (NRAp nr1 nr2) (ITApArg fin stp) =
+    NRAp nr1 (nonredundant-preservation nr2 stp)
+  nonredundant-preservation (NRAp (NRLam nr1) nr2) (ITAp fin) =
+    subst-nonredundant nr1 nr2
+  nonredundant-preservation (NRPair nr1 nr2) (ITPairL stp) =
+    NRPair (nonredundant-preservation nr1 stp) nr2
+  nonredundant-preservation (NRPair nr1 nr2) (ITPairR fin stp) =
+    NRPair nr1 (nonredundant-preservation nr2 stp)
+  nonredundant-preservation (NRFst nr) (ITFst stp) =
+    NRFst (nonredundant-preservation nr stp)
+  nonredundant-preservation (NRFst (NRPair nr1 nr2))
+                            (ITFstPair fin) =
+    nr1
+  nonredundant-preservation (NRSnd nr) (ITSnd stp) =
+    NRSnd (nonredundant-preservation nr stp)
+  nonredundant-preservation (NRSnd (NRPair nr1 nr2))
+                            (ITSndPair fin) =
+    nr2
+  nonredundant-preservation (NRInl nr) (ITInl stp) =
+    NRInl (nonredundant-preservation nr stp)
+  nonredundant-preservation (NRInr nr) (ITInr stp) =
+    NRInr (nonredundant-preservation nr stp)
+  nonredundant-preservation (NRMatchZPre nre rst nrt)
+                            (ITExpMatch stp) =
+    NRMatchZPre (nonredundant-preservation nre stp) rst nrt
+  nonredundant-preservation (NRMatchNZPre nre pret restt
+                                          nrpret nrrestt)
+                            (ITExpMatch stp) =
+    NRMatchNZPre (nonredundant-preservation nre stp)
+                 pret restt nrpret nrrestt
+  nonredundant-preservation (NRMatchZPre nre rst (NRRules nr nrs))
+                            (ITSuccMatch fin mat) =
+    substs-nonredundant (mat-substs-nonredundant nre mat)
+                        nr
+  nonredundant-preservation (NRMatchNZPre nre pret restt
+                                          nrpret (NRRules nr nrpost))
+                            (ITSuccMatch fin mat) =
+    substs-nonredundant (mat-substs-nonredundant nre mat)
+                        nr
+  nonredundant-preservation (NRMatchZPre nr (RTRules pt ¬red rst)
+                                         (NRRules nre nrrs))
+                            (ITFailMatch fin nmat ERZPre) =
+    NRMatchNZPre nr (RTOneRule pt ¬red) rst
+                 (NRRules nre NRNoRules) nrrs
+  nonredundant-preservation (NRMatchNZPre {τ = τ}
+                                          {ξpre = ξpre} {ξrest = ξr ∨ ξrs}
+                                          nr pret
+                                          (RTRules pt ¬red restt)
+                                          nrpret
+                                          (NRRules nrt nrpostt))
+                            (ITFailMatch fin nmat er) =
+    NRMatchNZPre nr
+                 (rules-erase-constr-nonredundant
+                   CTFalsity er pret (RTOneRule pt ¬red))
+                 (weaken-nonredundant
+                   (CTOr (CTOr CTFalsity
+                               (rules-constr-same-type-nonredundant pret))
+                         (pattern-constr-same-type pt))
+                   restt
+                   ent)
+                 (nonredundant-targets-erase
+                   er nrpret (NRRules nrt NRNoRules))
+                 nrpostt
+    where
+      ent : ∀{Δ Δp e} →
+            ∅ , Δ , Δp ⊢ e :: τ →
+            e val →
+            e ⊧̇ (·⊥ ∨ (ξpre ∨+ ξr)) →
+            e ⊧̇ ((·⊥ ∨ ξpre) ∨ ξr)
+      ent wt eval (CSOrR sat)
+        with sat-∨+-sat-∨ sat
+      ... | CSOrL satpre = CSOrL (CSOrR satpre)
+      ... | CSOrR satr = CSOrR satr 
+  nonredundant-preservation (NRNEHole nr) (ITNEHole stp) =
+    NRNEHole (nonredundant-preservation nr stp)
+
