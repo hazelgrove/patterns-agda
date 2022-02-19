@@ -4,6 +4,11 @@ open import core
 open import freshness
 open import patterns-core
 
+-- unsurprisingly, it is decidable whether a given
+-- variable is bound or fresh in an expression.
+-- we use this in a few places, e.g., to check if
+-- a variable is bound in a pattern when defining
+-- capture-avoiding substitution
 module freshness-decidable where
   unbound-in-p-dec : (x : Nat) →
                      (p : pattrn) →

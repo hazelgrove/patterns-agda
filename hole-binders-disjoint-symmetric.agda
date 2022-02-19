@@ -9,9 +9,15 @@ open import lemmas-contexts
 open import patterns-core
 
 module hole-binders-disjoint-symmetric where
-  -- these lemmas build up to proving that the
-  -- hole-binders-disjoint judgement is symmetric.
-  -- all of them are entirely mechanical, but horribly tedious
+  -- these lemmas build up to proving that the various
+  -- hole disjointness judgements are symmetric.
+  --
+  -- more specifically, the definitions of the disjointness
+  -- judgements deconstruct on the first argument, while
+  -- leaving the second argument generic. these lemmas
+  -- show that you can instead deconstruct on the second
+  -- arugment. all of these results are entirely mechanical,
+  -- but horribly tedious.
   mutual
     lem-hbd-lam : {e : ihexp} {x : Nat} {τ1 : htyp} {e1 : ihexp} →
                   hole-binders-disjoint e (·λ x ·[ τ1 ] e1) →

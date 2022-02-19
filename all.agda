@@ -1,4 +1,5 @@
 -- standard definitions of basic datatypes
+-- and some quick lemmas about them
 open import Bool
 open import List
 open import Nat
@@ -28,7 +29,7 @@ open import patterns-core
 open import dynamics-core
 open import statics-core
 
--- decidability results 
+-- decidability theorems 
 open import htyp-decidable
 open import satisfy-decidable
 open import complete-satisfy-decidable
@@ -43,7 +44,7 @@ open import lemmas-satisfy
 open import lemmas-or-append
 open import type-assignment-unicity
 
--- exclusivity
+-- exclusivity theorems
 open import satisfy-exclusive
 open import complete-satisfy-exclusive
 
@@ -68,7 +69,7 @@ open import lemmas-subst-type
 open import lemmas-subst-exhaustive
 open import lemmas-subst-nonredundant
 
--- type safety
+-- type safety theorems
 open import preservation
 open import finality
 open import progress

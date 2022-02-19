@@ -6,6 +6,9 @@ open import core
 open import freshness
 open import patterns-core
 
+-- various judgements stating that all binders
+-- or hole binders in a term are unique a la
+-- Barendregt's convention
 module binders-uniqueness where
   mutual
     data binders-unique-p : pattrn → Set where

@@ -19,6 +19,23 @@ module statics-core where
     -- however, since expression holes require hole closures while
     -- pattern holes only require the type of the hole, we must
     -- explicitly separate this into two contexts Δ and Δp here.
+    --
+    -- additionally, note that we do not include exhaustiveness
+    -- or redundancy checking as part of this judgement, and
+    -- instead include them as separate judgements. while this
+    -- is beneficial in its own right, it is not merely a matter
+    -- of taste. these checks are defined in terms of the
+    -- entailment judgement given below, which in turn uses
+    -- this typing judgement to the left of an arrow. thus,
+    -- including such checks here would break positivity.
+    --
+    -- morally, however, this does not actually matter. while the
+    -- definition of entailment technically relies on the typing
+    -- judgement, as proved on paper (although unfortunately not
+    -- mechanized here), entailment ends up being equivalent
+    -- to certain inconsistency conditions looking only at the
+    -- constraints themselves without making reference to typing.
+    -- this avoids any actual circularity
     data _,_,_⊢_::_ : (Γ : tctx) → (Δ : hctx) → (Δp : phctx) →
                       (e : ihexp) → (τ : htyp) → Set where
       TAUnit       : ∀{Γ Δ Δp} →
@@ -41,7 +58,7 @@ module statics-core where
                      Γ , Δ , Δp ⊢ inl τ2 e :: τ1 ⊕ τ2
       TAInr        : ∀{Γ Δ Δp e τ1 τ2} →
                      Γ , Δ , Δp ⊢ e :: τ2 →
-                     Γ , Δ , Δp ⊢ inr τ1 e :: τ1 ⊕ τ2        
+                     Γ , Δ , Δp ⊢ inr τ1 e :: τ1 ⊕ τ2
       TAMatchZPre  : ∀{Γ Δ Δp e τ τ' r rs ξ} →
                      Γ , Δ , Δp ⊢ e :: τ →
                      Γ , Δ , Δp ⊢ (r / rs) ::s τ [ ξ ]=> τ' →
@@ -77,7 +94,7 @@ module statics-core where
 
     -- substitution environment typing
     -- 
-    -- typing for hole closures a la Hazelnut
+    -- typing for hole closures a la Hazel
     data _,_,_⊢_:se:_ : (Γ : tctx) → (Δ : hctx) → (Δp : phctx) →
                        (σ : subst-env) → (Γ' : tctx) → Set where
       STAId    : ∀{Γ Δ Δp Γ'} →
@@ -119,13 +136,8 @@ module statics-core where
                   Γ , Δ , Δp ⊢ (r / rs) ::s τ [ ξr ∨ ξrs ]=> τ'
 
   -- substitution list typing
-  -- since the e ▹ p ⊣ θ judgement is used for the dynamics and
-  -- thus does not have typing information, it emits a list of
-  -- substitutions θ rather than an actual substitution environment
-  -- as used for holes. we then have a separate typing judgement
-  -- for these substitution lists
   --
-  -- the purpose of this typing is also somewhat different to that
+  -- the purpose of this typing is somewhat different to that
   -- of substitution environments. an environment σ records a
   -- series of substitutions which are applied one after another,
   -- and the typing judgement Γ , Δ , Δp ⊢ σ :se: Γσ tells us that
@@ -150,8 +162,10 @@ module statics-core where
   -- ξ1 entails ξ2
   --
   -- note that, while suppressed on paper, the definition of
-  -- entailment assumes a fixed type assignent for ξ1 and ξ2.
-  -- this is needed since we lack type unicity for contraints
+  -- entailment assumes a fixed type assignment for ξ1 and ξ2.
+  -- since we don't actually have type unicity for constraints,
+  -- we need to be explicit about that typing assumption here
+  -- in order to ever make use of the entailment.
   data _·:_c⊧̇_ : (ξ1 : constr) → (τ : htyp) →
                  (ξ2 : constr) → Set where
     Entails : ∀{ξ1 ξ2 τ} →
@@ -192,8 +206,11 @@ module statics-core where
 
   -- rs is matched by expressions of type τ, emitting constraint ξrs.
   --
-  -- this is similar to rules typing, but does not check the type
-  -- of branches and does not require a typing context.
+  -- since we separate exhaustiveness checking from type checking in
+  -- this mechanization, for exhaustiveness, we don't actually care
+  -- about anything other than the patterns in our term. thus,
+  -- we use this is slightly modified version of the other rule typing
+  -- judgement, but without checking the types of any expressions
   data _⊢_::s_[_] : (Δp : phctx) → (rs : rules) →
                     (τ : htyp) → (ξrs : constr) → Set where
      RTOneRule : ∀{Δp p e τ ξr Γp} →
@@ -205,7 +222,7 @@ module statics-core where
                  Δp ⊢ ((p => e) / rs) ::s τ [ ξr ∨ ξrs ]
                  
   -- rs is matched by expressions of type τ, emitting constraint ξrs.
-  -- moreover, ξrs does not entail ξpre, i.e., rs is non-redundant
+  -- moreover, ξrs does not entail ξpre, i.e., ξrs is non-redundant
   -- assuming ξpre denotes the constraint given by all previously
   -- considered patterns
   data _⊢_::s_[_nr/_] : (Δp : phctx) → (rs : rules) → (τ : htyp) →

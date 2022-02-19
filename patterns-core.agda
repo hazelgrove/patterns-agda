@@ -12,6 +12,8 @@ module patterns-core where
   (nil / r / rs) ◆er = r / rs
   ((r' / rs') / r / rs) ◆er = r' / ((rs' / r / rs) ◆er)
 
+  -- a judgemental version of the above which
+  -- is often easier to work with
   data erase-r : zrules → rules → Set where
     ERZPre  : ∀{r rs} →
               erase-r (nil / r / rs) (r / rs)
@@ -39,10 +41,19 @@ module patterns-core where
               ⦇⌜ p ⌟⦈[ w , τ ] refutable
 
   -- lists of substitutions as emitted by pattern matches
+  --
+  -- note that, in contrast to the paper, we include
+  -- the type of substituted expressions in the emitted
+  -- substitution. see the comment on the apply-substs
+  -- function in dynamics-core.agda for why this is necessary
   subst-list : Set
   subst-list = List (ihexp × htyp × Nat)
 
   -- e matches the pattern p, emitting the substitutions θ
+  --
+  -- again, we include type ascriptions here
+  -- in order to record typing information in the emitted
+  -- substitution list.
   data _·:_▹_⊣_ : (e : ihexp) → (τ : htyp) →
                   (p : pattrn) → (θ : subst-list) → Set where
     MUnit : ∀{e} →
@@ -70,6 +81,9 @@ module patterns-core where
             e ·: τ ▹ wild ⊣ []
 
   -- e may match p
+  --
+  -- the type ascription here is really only required
+  -- to pass it down to the e ·: τ ▹ p judgement above
   data _·:_?▹_ : (e : ihexp) → (τ : htyp) →
                  (p : pattrn) → Set where
     MMNotIntro : ∀{e τ p} →

@@ -2,9 +2,7 @@ open import Prelude
 open import Nat
 
 module List where
-  -- lets us omit a bunch of parens
   infixr 5 _::_
-  infixr 5 _++_
 
   -- standard definition of polymorphic lists
   data List (A : Set) : Set where
@@ -14,6 +12,7 @@ module List where
   {-# BUILTIN LIST List #-}
   
   -- list append
+  infixr 5 _++_
   _++_ : {A : Set} → List A → List A → List A
   [] ++ l2 = l2
   (x :: l1) ++ l2 = x :: (l1 ++ l2)

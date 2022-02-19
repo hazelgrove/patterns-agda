@@ -22,8 +22,8 @@ module Bool where
   true or b = true
 
   -- when proving results about functions returning a boolean, e.g.,
-  -- for decidability, Agda often struggles to match on the result, so these
-  -- functions can be used instead
+  -- when arguing about decidability, Agda often struggles to match
+  -- on the result, so these functions can be used instead
   neq-true-false : ∀{P} → ((P == true) → ⊥) → P == false
   neq-true-false {false} ¬true = refl
   neq-true-false {true} ¬true = abort (¬true refl)

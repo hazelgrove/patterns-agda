@@ -6,6 +6,12 @@ open import core
 open import freshness
 open import patterns-core
 
+-- this module contains various judgements which
+-- state that two term do not share any binders, or
+-- do not share any hole binders. to avoid duplication,
+-- each judgement is generic in its second argument.
+-- we insert these assumptions as needed to follow
+-- Barendregt's convention
 module binders-disjointness where
   mutual
     data binders-disjoint-p {T : Set} {{_ : UnboundIn T}} :

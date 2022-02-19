@@ -9,7 +9,6 @@ open import dynamics-core
 open import freshness
 open import freshness-decidable
 open import hole-binders-disjoint-symmetric
-open import lemmas-binders-disjointness
 
 module lemmas-subst-disjointness where
   mutual

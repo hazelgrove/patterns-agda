@@ -12,7 +12,6 @@ open import exchange
 open import freshness
 open import freshness-decidable
 open import hole-binders-disjoint-symmetric
-open import lemmas-binders-disjointness
 open import lemmas-contexts
 open import lemmas-freshness
 open import lemmas-subst-disjointness

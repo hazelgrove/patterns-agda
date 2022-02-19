@@ -7,15 +7,20 @@ open import patterns-core
 
 module freshness where
   -- types T where we can determine if a Nat is unbound in T.
-  -- we use this as a type-class so that the disjointness
-  -- judgements can be generic
+  -- since we have various types which may contain binders, e.g.,
+  -- ihexp, patterns, substitution environments, we use
+  -- this type-class to make the disjointness judgements generic
   record UnboundIn {a : Level} (T : Set a) : Set (lsuc a) where
     field
       unbound-in : Nat → T → Set
       
   open UnboundIn {{...}} public
   
-  -- the variable name x is not bound in e
+  -- the variable name x is not bound in e, i.e., it occurs
+  -- as neither the binder in a lambda expression,
+  -- any var in a pattern, or any substituted var in a
+  -- substitution environment. note that this does not
+  -- include hole names
   mutual
     data unbound-in-p : Nat → pattrn → Set where
       UBPUnit   : ∀{x} →
@@ -152,7 +157,8 @@ module freshness where
     IHExpUB : UnboundIn ihexp
     IHExpUB = record { unbound-in = unbound-in-e }
     
-  -- the variable name x is fresh in the term e
+  -- the variable name x is fresh in the term e, i.e.,
+  -- it is neither bound nor a free variable
   mutual
     data fresh-r : Nat → rule → Set where
       FRule : ∀{x p e} →
@@ -238,9 +244,8 @@ module freshness where
                 fresh x (⦇⌜ e ⌟⦈⟨ u , σ ⟩)
 
 
-  -- types T where we can determine if a Nat is unbound in T.
-  -- we use this as a type-class so that the disjointness
-  -- judgements can be generic
+  -- types T where we can determine if a Nat is unbound in T,
+  -- considering only those Nats occuring as a pattern hole
   record HoleUnboundIn {a : Level} (T : Set a) : Set (lsuc a) where
     field
       hole-unbound-in : Nat → T → Set
@@ -248,7 +253,8 @@ module freshness where
   open HoleUnboundIn {{...}} public
   
   mutual
-    -- the hole name u is not bound in e
+    -- the hole name u is not bound in e, i.e., it
+    -- is not the name of a pattern hole
     data hole-unbound-in-p : Nat → pattrn → Set where
       HUBPUnit   : ∀{u} →
                    hole-unbound-in-p u unit
@@ -383,7 +389,8 @@ module freshness where
     IHExpHUB = record { hole-unbound-in = hole-unbound-in-e }
     
   mutual
-    -- the hole name u is fresh in e
+    -- the hole name u is fresh in e, i.e., it does not
+    -- occur as either a pattern or expression hole
     data hole-fresh-r : Nat → rule → Set where
       HFRule : ∀{u p e} →
                hole-unbound-in-p u p →

@@ -62,4 +62,3 @@ module contexts where
   (Γ1 ∖ Γ2) x with Γ2 x
   ... | Some _ = None
   ... | None = Γ1 x
-

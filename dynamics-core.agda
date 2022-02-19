@@ -82,13 +82,36 @@ module dynamics-core where
       ⦇⌜ [ d / y ] d' ⌟⦈⟨ u , Subst d y σ ⟩
 
   -- apply a list of substitutions one by one
+  --
   -- in contrast to the paper, rather than actually
-  -- applying each substitution, we expand the given
-  -- expression to a bunch of lambdas and applications.
-  -- this is semantically the same, but allows us to
-  -- assume all binders have been made unique a la
-  -- Barendregt's convention before each susbstitution
-  -- is applied
+  -- applying each substitution immediately, we wrap
+  -- the given expression with appropriate lambdas
+  -- and applications. semantically, this is the same,
+  -- but it breaks the evaluation into multiple steps.
+  --
+  -- to see why this is necessary, consider the
+  -- MNotIntroPair rule. if we match an expression e
+  -- which is notintro against the pattern ⟨ x , y ⟩,
+  -- then we emit the substitutions
+  -- [ fst e / x ] [ snd e / y ]. if we tried to apply
+  -- both of these substitutions immediately, then
+  -- the binders of e will appear multiple times in the
+  -- resulting term, breaking the binders uniqueness
+  -- assumptions required by many of our results a la
+  -- Barendregt's convention. however, preservation
+  -- (the only theorem where this is relevant) only
+  -- requires us to reason about a single evaluation step.
+  -- thus, by separating the substitutions into multiple
+  -- evaluation steps, we can effectively assume that
+  -- we rename all the binders before the actual
+  -- substitution is applied.
+  --
+  -- note that we only have half-annotated lambdas, so
+  -- in order to perform this expansion, the emitted
+  -- substitution lists must also record typing information.
+  -- however, our matching judgements don't actually have
+  -- any typing information, so we make this possible by
+  -- including a type ascription on match scrutinees
   apply-substs : subst-list → ihexp → ihexp
   apply-substs [] e = e
   apply-substs ((d , τ , y) :: θ) e =

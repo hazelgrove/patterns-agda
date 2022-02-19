@@ -56,11 +56,29 @@ module core where
       _/_/_ : rules → rule → rules → zrules
 
     -- substitution environments as used for hole closures
+    -- a la Hazel.
+    --
+    -- note that Peanut does not yet support live
+    -- programming features, so these environments are
+    -- irrelevant for our theory and thus not mentioned
+    -- in the paper. however, we include them here with future
+    -- development in mind
     data subst-env : Set where
       Id    : (Γ : tctx) → subst-env
       Subst : (d : ihexp) → (y : Nat) → subst-env → subst-env
     
     -- internal expressions
+    --
+    -- note that in constrast to the paper, we include
+    -- a type ascription on the scrutinee of a match
+    -- expression. this is fairly innocous, as Peanut
+    -- represents an internal language, and we can always
+    -- insert such ascriptions during elaboration (and
+    -- unicity guarentees the ascription is unique).
+    -- the reason why we need such an ascription is
+    -- fairly subtle, see the comment on the
+    -- apply-substs function in dynamics-core.agda
+    -- for an explanation
     data ihexp : Set where
       unit        : ihexp
       N           : Nat → ihexp

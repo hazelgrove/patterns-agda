@@ -9,12 +9,14 @@ open import lemmas-contexts
 open import patterns-core
 
 module binders-disjoint-symmetric where
-  -- these lemmas build up to proving that the
-  -- binders-disjoint judgement is symmetric.
-  -- essentially, each each lemma one shows that you can
-  -- deconstruct on the second arugment, while the original
-  -- definition only allows deconstructing on the first argument.
-  -- all of these lemmas are entirely mechanical,
+  -- these lemmas build up to proving that the various
+  -- disjointness judgements are symmetric.
+  --
+  -- more specifically, the definitions of the disjointness
+  -- judgements deconstruct on the first argument, while
+  -- leaving the second argument generic. these lemmas
+  -- show that you can instead deconstruct on the second
+  -- arugment. all of these results are entirely mechanical,
   -- but horribly tedious.
   mutual
     lem-bd-lam : {e : ihexp} {x : Nat} {τ1 : htyp} {e1 : ihexp} →
