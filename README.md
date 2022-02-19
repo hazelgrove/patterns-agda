@@ -9,22 +9,6 @@ The only results missing from this mechanization are those regarding decidabilit
 
 These proofs are known to check under `Agda 2.6.2`. The most direct, if not the easiest, option to check the proofs is to install that version of Agda or one compatible with it, download the code in this repo, and run `agda all.agda` at the command line.
 
-Alternatively, we have provided a [Docker file TODO](Dockerfile) to make it easier to build that environment and check the proofs. To use it, first install [Docker](https://www.docker.com/products/docker-desktop), make sure the Docker daemon is running, and clone this repository to your local machine. Then, at a command line inside that clone, run
-
-```
-docker build -t peanut .
-```
-
-This may take a fair amount of time. When it finishes, run
-
-```
-docker run peanut
-```
-
-This should take less than a minute, produce a lot of output as Agda checks each module and function, and end with either the line `Finished all.` or `Loading all (/all.agdai).` to indicate success, depending on Docker-level caching.
-
-Most text editors that support Agda can be configured to use the version instead a Docker container instead of your host machine, so you can experiment with or evolve this code without making too much of a mess. For some example instructions, see the [docker-agda repo](https://github.com/banacorn/docker-agda).
-
 # Where To Find Each Theorem
 
 All of the judgements defined in the paper are given in the various *-core.agda files. The syntax is meant to mirror the on-paper notation as closely as possible, with some small variations because of the limitations of Agda syntax.
