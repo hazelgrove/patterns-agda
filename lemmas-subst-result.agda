@@ -9,7 +9,10 @@ open import lemmas-subst-value
 open import patterns-core
 open import result-judgements
 
+-- substituting a variable preserves
+-- the final and indet judgements
 module lemmas-subst-result where
+  -- substituting can't turn a non-pair into a pair
   subst-not-pair : ∀{x e e'} →
                    e indet →
                    ((e1 e2 : ihexp) →
@@ -24,6 +27,8 @@ module lemmas-subst-result where
     npr _ _ refl
   
   mutual
+    -- substituting a final expression into
+    -- an indet expression produces something still indet
     indet-subst-final : ∀{x e1 e2} →
                         e1 indet →
                         e2 final →
@@ -63,7 +68,9 @@ module lemmas-subst-result where
     indet-subst-final IEHole fin2 = IEHole
     indet-subst-final (INEHole fin1) fin2 =
       INEHole (final-subst-final fin1 fin2)
- 
+
+    -- substituting a final expression into a final expression
+    -- yields something still final
     final-subst-final : ∀{x e1 e2} →
                         e1 final →
                         e2 final →

@@ -10,6 +10,8 @@ open import freshness
 open import freshness-decidable
 open import hole-binders-disjoint-symmetric
 
+-- substituting a variable preserves binder
+-- disjointness conditions
 module lemmas-subst-disjointness where
   mutual
     subst-binders-disjoint : ∀{x e1 e2} {e : ihexp} →

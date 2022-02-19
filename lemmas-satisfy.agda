@@ -10,7 +10,6 @@ open import value-judgements
 open import xrefutable-decidable
 
 module lemmas-satisfy where
-
   maysat-truth-not : ∀{e} →
                      (e ⊧̇? ·⊤ → ⊥)
   maysat-truth-not (CMSNotIntro _ () _)
@@ -299,6 +298,9 @@ module lemmas-satisfy where
                        (POrR pos2))) =
     Inr (CSMSMay (CMSNotIntro ni ref2 pos2))
 
+  -- these two quick lemmas show that if a lambda
+  -- satisfies a constraint, then anything at all must
+  -- match that constraint
   lam-sat-all-sat : ∀{x e τ ξ e'} →
                     (·λ x ·[ τ ] e) ⊧̇ ξ →
                     e' ⊧̇ ξ
@@ -319,7 +321,12 @@ module lemmas-satisfy where
   all-lam-maysat (CMSOrR ¬sat1 msat2) =
     CMSOrR (λ{sat1' → ¬sat1 (lam-sat-all-sat sat1')})
            (all-lam-maysat msat2)
-    
+
+  -- the lemmas below show that constraints behave the
+  -- same for all notintro expressions w.r.t. satisfication 
+  
+  -- if some notintro expression satisfies a constraint,
+  -- then all notintro expressions satisfy a constraint
   all-notintro-sat : ∀{e ξ e'} →
                      e notintro →
                      e ⊧̇ ξ →
@@ -334,6 +341,9 @@ module lemmas-satisfy where
   all-notintro-sat ni (CSOrR sat) ni' =
     CSOrR (all-notintro-sat ni sat ni')
 
+  -- if some notintro expression does not
+  -- satisfy a constraint, then no notintro
+  -- expression can satisfy the constraint
   all-notintro-not-sat : ∀{e ξ e'} →
                          e notintro →
                          (e ⊧̇ ξ → ⊥) →
@@ -350,7 +360,10 @@ module lemmas-satisfy where
     ¬sat (CSOrL (all-notintro-sat ni' sat' ni))
   all-notintro-not-sat ni ¬sat ni' (CSOrR sat') =
     ¬sat (CSOrR (all-notintro-sat ni' sat' ni))
-    
+
+  -- if a constraint may be matched by some notintro
+  -- expression, then it may be matched by any notintro
+  -- expression
   all-notintro-maysat : ∀{e ξ e'} →
                         e notintro →
                         e ⊧̇? ξ →

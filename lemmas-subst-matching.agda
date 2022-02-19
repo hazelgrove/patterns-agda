@@ -12,6 +12,8 @@ open import result-judgements
 open import satisfy-decidable
 open import statics-core
 
+-- a given matching judgement still holds
+-- after substituting a variable in the expression
 module lemmas-subst-matching where
   subst-mat : ∀{x e1 e2 τ p θ1} →
               e1 ·: τ ▹ p ⊣ θ1 →

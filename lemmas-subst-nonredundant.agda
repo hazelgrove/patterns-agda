@@ -10,21 +10,10 @@ open import lemmas-subst-type
 open import patterns-core
 open import statics-core
 
+-- substituting a nonredundant expression
+-- into another nonredundant expression produces
+-- something nonredundant
 module lemmas-subst-nonredundant where
-  subst-type-rs-nonredundant : ∀{Δp rs τ ξpre ξ x e2} →
-                               Δp ⊢ rs ::s τ [ ξpre nr/ ξ ] →
-                               Δp ⊢ [ e2 / x ]rs rs ::s τ [ ξpre nr/ ξ ]
-  subst-type-rs-nonredundant {x = x} (RTOneRule {p = p} pt ¬red)
-    with unbound-in-p-dec x p
-  ... | Inl ub = RTOneRule pt ¬red
-  ... | Inr ¬ub = RTOneRule pt ¬red
-  subst-type-rs-nonredundant {x = x} (RTRules {p = p} pt ¬red rst)
-    with unbound-in-p-dec x p
-  ... | Inl ub =
-    RTRules pt ¬red (subst-type-rs-nonredundant rst)
-  ... | Inr ¬ub =
-    RTRules pt ¬red (subst-type-rs-nonredundant rst)
-
   mutual
     subst-nonredundant : ∀{Δp e1 x e2} →
                          Δp ⊢ e1 nonredundant →
@@ -81,6 +70,8 @@ module lemmas-subst-nonredundant where
     ... | Inr ¬ub =
       NRRules nre (subst-nonredundant-targets nrt nr2)
 
+  -- if each part of a substitution list is nonredundant,
+  -- then so is the whole list
   substs-concat-nonredundant : ∀{Δp θ1 θ2} →
                                Δp ⊢ θ1 nonredundant-θ →
                                Δp ⊢ θ2 nonredundant-θ →
@@ -90,6 +81,8 @@ module lemmas-subst-nonredundant where
     NRθExtend (substs-concat-nonredundant nrθ nr2) nrd
 
 
+  -- if an expression is nonredundant, then each of the
+  -- substitutions it emits consists of nonredundant expressions
   mat-substs-nonredundant : ∀{Δp e τ p θ} →
                             Δp ⊢ e nonredundant →
                             e ·: τ ▹ p ⊣ θ →
@@ -113,6 +106,8 @@ module lemmas-subst-nonredundant where
       (mat-substs-nonredundant (NRSnd nr) mat2)
   mat-substs-nonredundant nr MWild = NRθEmpty
 
+  -- applying a series of substitutions for nonredundant
+  -- expressions produces something nonredundant
   substs-nonredundant : ∀{Δp θ e} →
                         Δp ⊢ θ nonredundant-θ →
                         Δp ⊢ e nonredundant →

@@ -63,7 +63,9 @@ module lemmas-values where
   elem<sucmax {x = x} {xs = x' :: xs} (there x∈xs) =
     <-trans-suc (elem<sucmax x∈xs)
                 (arg2<sucmax x' (max-var xs))
-  
+
+  -- there is an expression e of type τ such that e val,
+  -- and moreover, all the elements of vars are fresh in e
   type-has-val : (τ : htyp) →
                  (vars : List Nat) →
                  (Δ : hctx) →
@@ -98,7 +100,8 @@ module lemmas-values where
       | e2 , val2 , wt2 , frsh2 =
     ⟨ e1 , e2 ⟩ , VPair val1 val2 , TAPair wt1 wt2 ,
     λ x∈vars → FPair (frsh1 x∈vars) (frsh2 x∈vars)
-  
+
+  -- every indet expression has some value
   indet-has-values : ∀{e Δ Δp τ} →
                      e indet →
                      ∅ , Δ , Δp ⊢ e :: τ →
@@ -145,6 +148,8 @@ module lemmas-values where
     with type-has-val τ [] Δ Δp
   ... | e , eval , ewt , _ = e , IVIndet NVNEHole wt eval ewt
 
+  -- if an expression does not satormay a constraint,
+  -- then neither does any of its values
   indet-values-not-satormay : ∀{e Δ Δp τ ξ e'} →
                              e indet →
                              e' ∈[ Δ , Δp ]values e →

@@ -11,7 +11,14 @@ open import satisfy-decidable
 open import statics-core
 open import value-judgements
 
+-- theorems showing that one can determine
+-- entailment and potential entailment of the
+-- incomplete constraints emitted by patterns by
+-- passing to truthify or falsify complete versions
+-- of said constraints
 module complete-relationship where
+  -- substituting ? for ⊤ in ξ does not
+  -- change its type
   truthify-same-type : ∀{ξ τ} →
                        ξ :c: τ →
                        (ξ ◆⊤) :cc: τ
@@ -25,7 +32,7 @@ module complete-relationship where
     CTPair (truthify-same-type ct1) (truthify-same-type ct2)
   truthify-same-type (CTOr ct1 ct2) =
     CTOr (truthify-same-type ct1) (truthify-same-type ct2)
-  
+
   same-type-truthify : ∀{ξ τ} →
                        (ξ ◆⊤) :cc: τ →
                        ξ :c: τ
@@ -40,6 +47,8 @@ module complete-relationship where
   same-type-truthify {ξ = ξ1 ∨ ξ2} (CTOr ctc1 ctc2) =
     CTOr (same-type-truthify ctc1) (same-type-truthify ctc2)
 
+  -- substituting ? for ⊥ in ξ does not
+  -- change its type
   falsify-same-type : ∀{ξ τ} →
                       ξ :c: τ →
                       (ξ ◆⊥) :cc: τ
@@ -67,7 +76,9 @@ module complete-relationship where
     CTPair (same-type-falsify ctc1) (same-type-falsify ctc2)
   same-type-falsify {ξ = ξ1 ∨ ξ2} (CTOr ctc1 ctc2) =
     CTOr (same-type-falsify ctc1) (same-type-falsify ctc2)
-  
+
+  -- possibly satisfying a constraint is the same as satisfying its
+  -- truthified version
   val-satormay-sat-truthify : ∀{e ξ} →
                               e val →
                               e ⊧̇†? ξ →
@@ -107,7 +118,8 @@ module complete-relationship where
     CSOrR (val-satormay-sat-truthify eval (CSMSMay msat2))
   val-satormay-sat-truthify eval (CSMSMay (CMSNotIntro ni ref pos)) =
     abort (val-notintro-not eval ni)
-  
+
+  -- converse of the above
   sat-truthify-satormay : ∀{e ξ} →
                           e ⊧ (ξ ◆⊤) →
                           e ⊧̇†? ξ
@@ -125,6 +137,8 @@ module complete-relationship where
   sat-truthify-satormay {ξ = ξ1 ∨ ξ2} (CSOrR sat2) =
     satormay-or-r (sat-truthify-satormay sat2)
 
+  -- satisfying a constraint is the same as satifying its
+  -- falsified version
   val-sat-sat-falsify : ∀{e ξ} →
                         e val →
                         e ⊧̇ ξ →
@@ -141,7 +155,8 @@ module complete-relationship where
     abort (val-notintro-not eval ni)
   val-sat-sat-falsify eval (CSOrL sat1) = CSOrL (val-sat-sat-falsify eval sat1)
   val-sat-sat-falsify eval (CSOrR sat2) = CSOrR (val-sat-sat-falsify eval sat2)
-  
+
+  -- converse of the above
   sat-falsify-sat : ∀{e ξ} →
                     e ⊧ (ξ ◆⊥) →
                     e ⊧̇ ξ
@@ -154,7 +169,9 @@ module complete-relationship where
   sat-falsify-sat {ξ = ξ1 ∨ ξ2} (CSOrL sat1) = CSOrL (sat-falsify-sat sat1)
   sat-falsify-sat {ξ = ξ1 ∨ ξ2} (CSOrR sat2) = CSOrR (sat-falsify-sat sat2)
 
-  
+  -- if anything final satisfies or may satsfy a  a constraint,
+  -- then so does anything val
+  -- this is trivial since everything which is val is also final
   final-val-satorymay : ∀{ξ τ} →
                         ξ :c: τ →
                         (∀{Δ Δp e} →
@@ -167,6 +184,10 @@ module complete-relationship where
                         e ⊧̇†? ξ)
   final-val-satorymay ct finsat wt eval = finsat wt (FVal eval)                    
 
+  -- converse of the above. if all values satisfy or may satisfy a
+  -- constraint, then in fact so does anything final. essentially,
+  -- possible exhaustiveness on values implies possible exhaustiveness
+  -- in general
   val-final-satormay : ∀{ξ τ} →
                        ξ :c: τ →
                        (∀{Δ Δp e} →
@@ -190,6 +211,8 @@ module complete-relationship where
       ¬msat' satm' =
         indet-values-not-satormay ind vals' wt ct ¬satm satm'
 
+  -- a constraint is possibly exhaustive only if its
+  -- truthified version is exhaustve
   truth-potent-ent-truthify : ∀{ξ τ} →
                              ·⊤ ·: τ c⊧̇†? ξ →
                              ·⊤ ·: τ cc⊧ (ξ ◆⊤)
@@ -197,7 +220,9 @@ module complete-relationship where
     Entails CTTruth (truthify-same-type ct)
             λ wt eval _ →
               val-satormay-sat-truthify eval (pent wt (FVal eval) (CSMSSat CSTruth))
- 
+
+  -- if the truthified version of a constraint is exhaustive,
+  -- then the constraint is possibly exhaustive
   truth-ent-truthify-potent : ∀{ξ τ} →
                              ·⊤ ·: τ cc⊧ (ξ ◆⊤) →
                              ·⊤ ·: τ c⊧̇†? ξ
@@ -214,6 +239,8 @@ module complete-relationship where
                            (λ wt' eval' →
                               sat-truthify-satormay (ent wt' eval' CSTruth))
 
+  -- an incomplete constraint entails another constraint
+  -- only if the truthified version entails the falisfied version
   ent-truthify-ent-falsify : ∀{ξ1 ξ2 τ} →
                              ξ1 ·: τ c⊧̇ ξ2 →
                              (ξ1 ◆⊤) ·: τ cc⊧ (ξ2 ◆⊥)
@@ -222,7 +249,8 @@ module complete-relationship where
             λ wt eval satt →
               val-sat-sat-falsify eval
                                   (ent wt eval (sat-truthify-satormay satt))
-  
+
+  -- converse of the above
   truthify-ent-falsify-ent : ∀{ξ1 ξ2 τ} →
                              (ξ1 ◆⊤) ·: τ cc⊧ (ξ2 ◆⊥) →
                              ξ1 ·: τ c⊧̇ ξ2

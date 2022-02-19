@@ -6,7 +6,12 @@ open import complete-satisfy-exclusive
 open import statics-core
 open import value-judgements
 
+-- theorem showing that material entailment holds,
+-- analogous to the fact that P → Q is equivalent
+-- to ¬P ∨ Q
 module material-entailment where
+  -- entailment of constraint can instead be rephrased in terms
+  -- of exhaustiveness
   entailment-material : ∀{ξ1 ξ2 τ} →
                         ξ1 ·: τ cc⊧ ξ2 →
                         ·⊤ ·: τ cc⊧ ((ξ1 ◆d) ∨ ξ2)

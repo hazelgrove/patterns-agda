@@ -8,6 +8,8 @@ open import patterns-core
 open import result-judgements
 open import statics-core
 
+-- final expressions are actually final, i.e.,
+-- they cannot be evaluated further
 module finality where
   final-step-not : ∀{e e'} →
                    e final →

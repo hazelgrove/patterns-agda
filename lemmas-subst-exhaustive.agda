@@ -10,22 +10,10 @@ open import lemmas-subst-type
 open import patterns-core
 open import statics-core
 
+-- substituting an exhaustive expression
+-- into another exhaustive expression produces
+-- something exhaustive
 module lemmas-subst-exhaustive where
-  subst-type-rs-no-target : ∀{Δp rs τ ξ x e2} →
-                            Δp ⊢ rs ::s τ [ ξ ] →
-                            Δp ⊢ [ e2 / x ]rs rs ::s τ [ ξ ]
-  subst-type-rs-no-target {x = x} (RTOneRule {p = p} pt)
-    with unbound-in-p-dec x p
-  ... | Inl ub = RTOneRule pt
-  ... | Inr ¬ub = RTOneRule pt
-  subst-type-rs-no-target {x = x} (RTRules {p = p} pt rst)
-    with unbound-in-p-dec x p
-  ... | Inl ub =
-    RTRules pt (subst-type-rs-no-target rst)
-  ... | Inr ¬ub =
-    RTRules pt (subst-type-rs-no-target rst)
-  
-
   mutual
     subst-exhaustive : ∀{Δp e1 x e2} →
                        Δp ⊢ e1 exhaustive →
@@ -70,7 +58,6 @@ module lemmas-subst-exhaustive where
     subst-exhaustive (EXNEHole w∈Δ ex1) ex2 =
       EXNEHole (EXσSubst w∈Δ ex2) (subst-exhaustive ex1 ex2)
 
-      
     subst-exhaustive-targets : ∀{Δp rs x e2} →
                                Δp ⊢ rs exhaustive-targets →
                                Δp ⊢ e2 exhaustive →
@@ -84,6 +71,8 @@ module lemmas-subst-exhaustive where
     ... | Inr ¬ub =
       EXRules ex (subst-exhaustive-targets exrs ex2)
 
+  -- if each part of a substitution list is exhaustive,
+  -- then so is the whole list
   substs-concat-exhaustive : ∀{Δp θ1 θ2} →
                              Δp ⊢ θ1 exhaustive-θ →
                              Δp ⊢ θ2 exhaustive-θ →
@@ -91,7 +80,9 @@ module lemmas-subst-exhaustive where
   substs-concat-exhaustive EXθEmpty ex2 = ex2
   substs-concat-exhaustive (EXθExtend ex1 exd) ex2 =
     EXθExtend (substs-concat-exhaustive ex1 ex2) exd
-  
+
+  -- if an expression is exhaustive, then each of the
+  -- substitutions it emits consists of exhaustive expressions
   mat-substs-exhaustive : ∀{Δp e τ p θ} →
                           Δp ⊢ e exhaustive →
                           e ·: τ ▹ p ⊣ θ →
@@ -115,6 +106,8 @@ module lemmas-subst-exhaustive where
       (mat-substs-exhaustive (EXSnd ex) mat2)
   mat-substs-exhaustive ex MWild = EXθEmpty
 
+  -- applying a series of substitutions for exhaustive
+  -- expressions produces something exhaustive
   substs-exhaustive : ∀{Δp θ e} →
                       Δp ⊢ θ exhaustive-θ →
                       Δp ⊢ e exhaustive →

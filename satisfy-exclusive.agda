@@ -11,6 +11,8 @@ open import satisfy-decidable
 open import statics-core
 open import xrefutable-decidable
 
+-- theorem showing that the various satisfaction
+-- judgements capture all cases
 module satisfy-exclusive where
   -- result of the exclusivity theorem
   data ExSat (e : ihexp) (ξ : constr) : Set where
@@ -20,6 +22,9 @@ module satisfy-exclusive where
   
 
   -- exclusivity of satisfaction
+  --
+  -- for a final expression e and a constraint ξ of the same type,
+  -- exactly one of e ⊧̇ ξ, e ⊧̇? ξ, and ¬ (e ⊧̇†? ξ) holds
   satisfy-exclusive : ∀{ξ τ Δ Δp e} →
                       ξ :c: τ →
                       ∅ , Δ , Δp ⊢ e :: τ →

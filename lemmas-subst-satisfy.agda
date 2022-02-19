@@ -9,6 +9,8 @@ open import result-judgements
 open import satisfy-decidable
 open import statics-core
 
+-- a given satisfaction judgement still holds
+-- after substituting a variable in the expression
 module lemmas-subst-satisfy where
   subst-sat : ∀{x e1 e2 ξ} →
               e1 ⊧̇ ξ →

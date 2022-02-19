@@ -8,8 +8,12 @@ open import result-judgements
 open import statics-core
 open import value-judgements
 
+-- theorem showing that duals are indeed duals, i.e.,
+-- an expression satisfies a constraint if and only if
+-- it does not satisfy the dual
 module complete-satisfy-exclusive where
-
+  -- lemma showing that a value is does not satisfy
+  -- a constraint only if its dual does satisfy it
   val-not-sat-sat-dual : ∀{Δ Δp e τ ξ} →
                          e val →
                          ∅ , Δ , Δp ⊢ e :: τ →
@@ -69,6 +73,8 @@ module complete-satisfy-exclusive where
   ... | Inr ¬sat1 | Inl sat2 = CSOrL (val-not-sat-sat-dual eval wt ct1 ¬sat1)
   ... | Inr ¬sat1 | Inr ¬sat2 = CSOrL (val-not-sat-sat-dual eval wt ct1 ¬sat1)
 
+  -- converse of the above, i.e., if the dual satisfies a constraint
+  -- then the original constraint does not
   val-sat-dual-not-sat : ∀{e ξ} →
                          e val →
                          e ⊧ (ξ ◆d) →
@@ -103,6 +109,8 @@ module complete-satisfy-exclusive where
     Satisfy     : (e ⊧ ξ)     → (e ⊧ (ξ ◆d) → ⊥) → ExCompSat e ξ
     SatisfyDual : (e ⊧ ξ → ⊥) → (e ⊧ (ξ ◆d))     → ExCompSat e ξ
 
+  -- for a value e and constraint ξ of the same type,
+  -- e satisfies either ξ or its dual, but not both
   comp-satisfy-exclusive : ∀{ξ τ Δ Δp e} →
                            ξ :cc: τ →
                            ∅ , Δ , Δp ⊢ e :: τ →

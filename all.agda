@@ -65,6 +65,7 @@ open import lemmas-subst-value
 open import lemmas-subst-result
 open import lemmas-subst-matching
 open import lemmas-subst-satisfy
+open import lemmas-subst-list
 open import lemmas-subst-type
 open import lemmas-subst-exhaustive
 open import lemmas-subst-nonredundant

@@ -4,6 +4,8 @@ open import core
 open import dynamics-core
 open import value-judgements
 
+-- substituting a variable preserves the
+-- value and notintro judgements
 module lemmas-subst-value where
   subst-notintro : ∀{x e1 e2} →
                    e1 notintro →

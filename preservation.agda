@@ -12,6 +12,7 @@ open import lemmas-or-append
 open import lemmas-patterns
 open import lemmas-satisfy
 open import lemmas-subst-exhaustive
+open import lemmas-subst-list
 open import lemmas-subst-nonredundant
 open import lemmas-subst-type
 open import matching-coherence
@@ -20,6 +21,7 @@ open import result-judgements
 open import statics-core
 open import type-assignment-unicity
 
+-- evaluating an expression preserves its type
 module preservation where
   preservation : ∀{Δ Δp e1 τ e2} →
                  binders-unique e1 →
@@ -164,7 +166,8 @@ module preservation where
                (TANEHole u∈Δ wst wt) (ITNEHole stp) =
     TANEHole u∈Δ wst (preservation bue hbue wt stp)
   
-
+  -- because we separate exhaustiveness checking from type checking,
+  -- we need a separate preservation theorem just for exhaustiveness
   exhaustive-targets-erase : ∀{Δp rs-pre r rs-post rss} →
                              erase-r (rs-pre / r / rs-post) rss →
                              Δp ⊢ rs-pre exhaustive-targets →
@@ -258,6 +261,8 @@ module preservation where
   exhaustive-preservation (EXNEHole exσ ex1) (ITNEHole stp) =
     EXNEHole exσ (exhaustive-preservation ex1 stp)
 
+  -- because we separate redundancy checking from type checking,
+  -- we need a separate preservation theorem just for nonredundancy
   nonredundant-targets-erase : ∀{Δp rs-pre r rs-post rss} →
                                erase-r (rs-pre / r / rs-post) rss →
                                Δp ⊢ rs-pre nonredundant-targets →

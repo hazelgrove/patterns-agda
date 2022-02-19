@@ -2,8 +2,10 @@ open import Prelude
 open import constraints-core
 open import contexts
 open import core
+open import lemmas-patterns
 open import lemmas-satisfy
 open import patterns-core
+open import result-judgements
 open import statics-core
 
 -- For the ITFailMatch instruction transition, we move the pointer
@@ -23,7 +25,8 @@ open import statics-core
 -- performs that operation.
 --
 -- Most of this module consists of easy lemmas showing that
--- ξ1 ∨+ ξ2 is semantically equivalent to ξ1 ∨ ξ2.
+-- ξ1 ∨+ ξ2 is semantically equivalent to ξ1 ∨ ξ2, then proves
+-- the result mentioned above.
 module lemmas-or-append where
   _∨+_ : constr → constr → constr
   ·⊤ ∨+ ξ = ·⊤ ∨ ξ
@@ -291,3 +294,85 @@ module lemmas-or-append where
   pattern-∨+ (PTEHole w∈Δp) ξ = refl
   pattern-∨+ (PTNEHole w∈Δp pt) ξ = refl
   pattern-∨+ PTWild ξ = refl
+
+  -- appending more rules to the end of a list of rules
+  -- ∨+s the emitted constraints
+  rules-erase-constr : ∀{rs-pre r rs-post rss Γ Δ Δp τ ξpre ξrest τ'} →
+                       erase-r (rs-pre / r / rs-post) rss →
+                       Γ , Δ , Δp ⊢ rs-pre ::s τ [ ξpre ]=> τ' →
+                       Γ , Δ , Δp ⊢ (r / rs-post) ::s τ [ ξrest ]=> τ' →
+                       Γ , Δ , Δp ⊢ rss ::s τ [ ξpre ∨+ ξrest ]=> τ'
+  rules-erase-constr
+    {rs-pre = (p => e) / nil} {r = r} {rs-post = rs-post}
+    {Γ = Γ} {Δ = Δ} {Δp = Δp}
+    {τ = τ} {ξpre = ξpre} {ξrest = ξrest} {τ' = τ'}
+    (ERNZPre ERZPre)
+    (RTOneRule (RTRule pt Γ##Γp wt')) restt =
+    tr (λ qq → Γ , Δ , Δp ⊢ (p => e) / (r / rs-post) ::s τ [ qq ]=> τ')
+       (! (pattern-∨+ pt ξrest))
+       (RTRules (RTRule pt Γ##Γp wt') restt)
+  rules-erase-constr
+    {rs-pre = r' / (_ / _)}
+    (ERNZPre (ERNZPre er))
+    (RTRules (RTRule pt Γ##Γp wt') rst') restt =
+    RTRules (RTRule pt Γ##Γp wt')
+            (rules-erase-constr (ERNZPre er) rst' restt)
+
+
+  -- same as above but for the rule typing judgement
+  -- without the target type
+  rules-erase-constr-no-target : ∀{rs-pre r rs-post rss Δp τ ξpre ξrest} →
+                                 erase-r (rs-pre / r / rs-post) rss →
+                                 Δp ⊢ rs-pre ::s τ [ ξpre ] →
+                                 Δp ⊢ (r / rs-post) ::s τ [ ξrest ] →
+                                 Δp ⊢ rss ::s τ [ ξpre ∨+ ξrest ]
+  rules-erase-constr-no-target
+    {rs-pre = (p => e) / nil} {r = r} {rs-post = rs-post}
+    {Δp = Δp} {τ = τ} {ξpre = ξpre} {ξrest = ξrest}
+    (ERNZPre ERZPre) (RTOneRule pt) restt =
+    tr (λ qq → Δp ⊢ (p => e) / (r / rs-post) ::s τ [ qq ])
+       (! (pattern-∨+ pt ξrest))
+       (RTRules pt restt)
+  rules-erase-constr-no-target
+    {rs-pre = r' / (_ / _)}
+    (ERNZPre (ERNZPre er)) (RTRules rt' rst') restt =
+    RTRules rt' (rules-erase-constr-no-target (ERNZPre er) rst' restt)
+
+  -- same as above but for the rule typing judgement
+  -- keeping track of nonredundancy
+  rules-erase-constr-nonredundant : ∀{rs-pre r rs-post rss Δp τ ξnr ξpre ξrest} →
+                                    ξnr :c: τ →
+                                    erase-r (rs-pre / r / rs-post) rss →
+                                    Δp ⊢ rs-pre ::s τ [ ξnr nr/ ξpre ] →
+                                    Δp ⊢ (r / rs-post) ::s τ [ ξnr ∨ ξpre nr/ ξrest ] →
+                                    Δp ⊢ rss ::s τ [ ξnr nr/ ξpre ∨+ ξrest ]
+  rules-erase-constr-nonredundant
+    {rs-pre = (p => e) / nil} {r = r} {rs-post = rs-post}
+    {Δp = Δp} {τ = τ} {ξnr = ξnr} {ξpre = ξpre} {ξrest = ξrest}
+    ctnr  (ERNZPre ERZPre) (RTOneRule pt ¬red) restt =
+    tr (λ qq → Δp ⊢ (p => e) / (r / rs-post) ::s τ [ ξnr nr/ qq ])
+       (! (pattern-∨+ pt ξrest))
+       (RTRules pt ¬red restt)
+  rules-erase-constr-nonredundant
+    {rs-pre = r' / (_ / _)} {τ = τ} {ξnr = ξnr} {ξpre = ξr ∨ ξrs}
+    ctnr (ERNZPre (ERNZPre er)) (RTRules pt ¬red rst) restt =
+      RTRules pt ¬red
+              (rules-erase-constr-nonredundant
+                (CTOr ctnr (pattern-constr-same-type pt))
+                (ERNZPre er)
+                rst
+                (weaken-nonredundant
+                  (CTOr ctnr
+                        (CTOr (pattern-constr-same-type pt)
+                              (rules-constr-same-type-nonredundant rst)))
+                  restt
+                  ent))
+    where
+      ent : ∀{Δ Δp e} →
+            ∅ , Δ , Δp ⊢ e :: τ →
+            e val →
+            e ⊧̇ ((ξnr ∨ ξr) ∨ ξrs) →
+            e ⊧̇ (ξnr ∨ (ξr ∨ ξrs))
+      ent wt eval (CSOrL (CSOrL sat)) = CSOrL sat
+      ent wt eval (CSOrL (CSOrR sat)) = CSOrR (CSOrL sat)
+      ent wt eval (CSOrR sat) = CSOrR (CSOrR sat)

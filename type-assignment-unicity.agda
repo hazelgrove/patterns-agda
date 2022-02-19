@@ -8,6 +8,10 @@ open import patterns-core
 open import result-judgements
 open import statics-core
 
+-- the type of any expression is unique.
+-- note that full unicity does not hold for patterns
+-- and constraints, but this ends up being
+-- irrelevant for the typing of expressions as a whole
 module type-assignment-unicity where  
   mutual
     expr-type-unicity : ∀{Γ Δ Δp e τ τ'} →

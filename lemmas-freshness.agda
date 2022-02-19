@@ -11,6 +11,8 @@ open import result-judgements
 open import statics-core
 
 module lemmas-freshness where
+  -- the emitted context Γp contains only variables
+  -- occuring in the pattern
   unbound-in-p-apart-Γp : ∀{p τ ξ Γp Δp x} →
                           Δp ⊢ p :: τ [ ξ ]⊣ Γp →
                           unbound-in-p x p →
@@ -35,6 +37,10 @@ module lemmas-freshness where
     unbound-in-p-apart-Γp pt ub
   unbound-in-p-apart-Γp PTWild UBPWild = refl
 
+  -- if a pattern is binders disjoint from a term,
+  -- then anything in the emitted context Γp is
+  -- unbound in said term. that is, every binder in
+  -- the pattern occurs in Γp
   dom-Γp-unbound-in : ∀{p τ ξ Γp Δp x T t} →
                       {{_ : UnboundIn T}} →
                       Δp ⊢ p :: τ [ ξ ]⊣ Γp →
@@ -59,7 +65,7 @@ module lemmas-freshness where
   dom-Γp-unbound-in (PTNEHole w∈Δp pt) x∈Γp (BDPNEHole bd) =
     dom-Γp-unbound-in pt x∈Γp bd
 
-  -- (1, (3, 4))   (x, y)   x -> 1, y -> (3, 4)
+  -- anything apart from the emitted context is not in the pattern
   apart-Γp-unbound-in-p : ∀{p τ ξ Γp Δp x} →
                           Δp ⊢ p :: τ [ ξ ]⊣ Γp →
                           x # Γp →
@@ -84,7 +90,60 @@ module lemmas-freshness where
   apart-Γp-unbound-in-p (PTNEHole w∈Δp pt) x#Γp =
     UBPNEHole (apart-Γp-unbound-in-p pt x#Γp)
   apart-Γp-unbound-in-p PTWild x#Γp = UBPWild
-  
+
+  -- a variable is unbound in a combined list of
+  -- substitutions if its unbound in each part
+  substs-concat-unbound-in : ∀{x θ1 θ2} →
+                             unbound-in-θ x θ1 →
+                             unbound-in-θ x θ2 →
+                             unbound-in-θ x (θ1 ++ θ2)
+  substs-concat-unbound-in UBθEmpty ub2 = ub2
+  substs-concat-unbound-in (UBθExtend xubd x≠y ub1) ub2 =
+    UBθExtend xubd x≠y (substs-concat-unbound-in ub1 ub2)
+
+  -- for a well-typed list of substitutions, anything
+  -- unbound in the list is unbound in the type Γθ
+  -- recording all substitutions
+  unbound-in-θ-apart-Γθ : ∀{Γ Δ Δp θ Γθ x} →
+                          Γ , Δ , Δp ⊢ θ :sl: Γθ →
+                          unbound-in-θ x θ →
+                          x # Γθ
+  unbound-in-θ-apart-Γθ STAEmpty UBθEmpty = refl
+  unbound-in-θ-apart-Γθ {x = x}
+                        (STAExtend {Γθ = Γθ} y#Γ wst wt)
+                        (UBθExtend xubd x≠y xubθ) =
+    neq-apart-extend Γθ x≠y
+                     (unbound-in-θ-apart-Γθ wst xubθ)
+                     
+  -- a match expression only emits substitutions involing
+  -- variables bound in the pattern
+  unbound-in-mat-substs : ∀{x e τ p θ} →
+                          unbound-in-e x e →
+                          unbound-in-p x p →
+                          e ·: τ ▹ p ⊣ θ →
+                          unbound-in-θ x θ
+  unbound-in-mat-substs ube UBPUnit MUnit = UBθEmpty
+  unbound-in-mat-substs ube UBPNum MNum = UBθEmpty
+  unbound-in-mat-substs ube (UBPVar x≠y) MVar =
+    UBθExtend ube x≠y UBθEmpty
+  unbound-in-mat-substs (UBInl ube) (UBPInl ubp) (MInl mat) =
+    unbound-in-mat-substs ube ubp mat
+  unbound-in-mat-substs (UBInr ube) (UBPInr ubp) (MInr mat) =
+    unbound-in-mat-substs ube ubp mat
+  unbound-in-mat-substs ube (UBPPair ubp1 ubp2) (MPair mat1 mat2)
+    with ube
+  ... | UBPair ube1 ube2 =
+    substs-concat-unbound-in
+      (unbound-in-mat-substs ube1 ubp1 mat1)
+      (unbound-in-mat-substs ube2 ubp2 mat2)
+  unbound-in-mat-substs ube (UBPPair ubp1 ubp2)
+                        (MNotIntroPair ni mat1 mat2) =
+    substs-concat-unbound-in
+      (unbound-in-mat-substs (UBFst ube) ubp1 mat1)
+      (unbound-in-mat-substs (UBSnd ube) ubp2 mat2)
+  unbound-in-mat-substs ube UBPWild MWild = UBθEmpty
+
+  -- analogues of the above results, but for pattern holes
   apart-Δp-hole-unbound-in-p : ∀{u p τ ξ Γp Δp} →
                                Δp ⊢ p :: τ [ ξ ]⊣ Γp →
                                u # Δp →
@@ -113,6 +172,10 @@ module lemmas-freshness where
               (apart-Δp-hole-unbound-in-p pt u#Δp)
   apart-Δp-hole-unbound-in-p PTWild u#Δp = HUBPWild
 
+  -- if a term is well-typed, then any free variable must
+  -- appear in the context. thus, if something is both
+  -- apart from the typing context and unbound in the expression,
+  -- it must be fresh in the expression
   mutual
     binders-fresh-r : ∀{Γ Δ Δp r τ1 ξ τ2 x} →
                       Γ , Δ , Δp ⊢ r :: τ1 [ ξ ]=> τ2 →

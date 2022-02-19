@@ -8,7 +8,10 @@ open import patterns-core
 open import result-judgements
 open import statics-core
 
-module matching-determinism where       
+-- theorems showing that the three matching
+-- judgements encompass all cases
+module matching-determinism where
+  -- result of the exhaustiveness theorem
   data ExhaustMatch (e : ihexp) (τ : htyp) (p : pattrn) : Set where
        Match    : Σ[ θ ∈ subst-list ] e ·: τ ▹ p ⊣ θ →
                   ExhaustMatch e τ p
@@ -16,7 +19,9 @@ module matching-determinism where
                   ExhaustMatch e τ p
        NotMatch : e ⊥▹ p →
                   ExhaustMatch e τ p
-                  
+
+  -- for a final expression and pattern of the same type,
+  -- at least one of the matching judgements hold
   matching-exhaust : ∀{Δ Δpe e τ Δp p ξ Γ} →
                      e final →
                      ∅ , Δ , Δpe ⊢ e :: τ →
@@ -180,6 +185,7 @@ module matching-determinism where
     mat-maymat-not mat2 (MMNotIntro NVSnd ref2)
   mat-maymat-not MWild (MMNotIntro ni ())
 
+  -- may matching and not matching are exclusive
   mat-notmat-not : ∀{e τ p θ} →
                    e ·: τ ▹ p ⊣ θ →
                    e ⊥▹ p →
@@ -194,6 +200,7 @@ module matching-determinism where
   mat-notmat-not (MPair mat mat₁) (NMPairR nmat) =
     mat-notmat-not mat₁ nmat
 
+  -- matching and not matching are exclusive
   maymat-notmat-not : ∀{e τ p} →
                       e ·: τ ?▹ p →
                       e ⊥▹ p →
@@ -221,7 +228,8 @@ module matching-determinism where
   maymat-notmat-not (MMNotIntro () ref) (NMInr nmat)
   maymat-notmat-not (MMNotIntro () ref) (NMPairL nmat1)
   maymat-notmat-not (MMNotIntro () ref) (NMPairR nmat2)
-  
+
+  -- result of the determinism theorem
   data DetMatch (e : ihexp) (τ : htyp) (p : pattrn) : Set where
        Match    : (Σ[ θ ∈ subst-list ] e ·: τ ▹ p ⊣ θ) →
                   (e ·: τ ?▹ p → ⊥) →
@@ -235,7 +243,9 @@ module matching-determinism where
                   (e ·: τ ?▹ p → ⊥) →
                   (e ⊥▹ p) →
                   DetMatch e τ p
-                  
+
+  --- for a final expression and pattern of the same type,
+  -- exactly one of the matching judgements holds
   matching-det : ∀{Δ Δpe e τ Δp p ξ Γ} →
                  e final →
                  ∅ , Δ , Δpe ⊢ e :: τ →

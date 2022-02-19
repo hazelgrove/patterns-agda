@@ -16,7 +16,8 @@ open import statics-core
 open import type-assignment-unicity
 
 module progress where
-  -- every expression is either final or takes a step
+  -- every expression is either final or takes a step, i.e.,
+  -- evaluation never gets stuck
   progress : ∀{Δ Δp e τ} →
              ∅ , Δ , Δp ⊢ e :: τ →
              Δp ⊢ e exhaustive →
