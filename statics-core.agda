@@ -94,7 +94,7 @@ module statics-core where
 
     -- substitution environment typing
     -- 
-    -- typing for hole closures a la Hazel
+    -- typing for hole closures à la Hazel
     data _,_,_⊢_:se:_ : (Γ : tctx) → (Δ : hctx) → (Δp : phctx) →
                        (σ : subst-env) → (Γ' : tctx) → Set where
       STAId    : ∀{Γ Δ Δp Γ'} →

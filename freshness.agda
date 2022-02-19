@@ -17,7 +17,7 @@ module freshness where
   open UnboundIn {{...}} public
   
   -- the variable name x is not bound in e, i.e., it occurs
-  -- as neither the binder in a lambda expression,
+  -- as neither the binder in à lambda expression,
   -- any var in a pattern, or any substituted var in a
   -- substitution environment. note that this does not
   -- include hole names

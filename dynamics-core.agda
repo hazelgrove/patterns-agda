@@ -97,7 +97,7 @@ module dynamics-core where
   -- both of these substitutions immediately, then
   -- the binders of e will appear multiple times in the
   -- resulting term, breaking the binders uniqueness
-  -- assumptions required by many of our results a la
+  -- assumptions required by many of our results à la
   -- Barendregt's convention. however, preservation
   -- (the only theorem where this is relevant) only
   -- requires us to reason about a single evaluation step.

@@ -56,7 +56,7 @@ module core where
       _/_/_ : rules → rule → rules → zrules
 
     -- substitution environments as used for hole closures
-    -- a la Hazel.
+    -- à la Hazel.
     --
     -- note that Peanut does not yet support live
     -- programming features, so these environments are

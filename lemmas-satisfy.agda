@@ -298,7 +298,7 @@ module lemmas-satisfy where
                        (POrR pos2))) =
     Inr (CSMSMay (CMSNotIntro ni ref2 pos2))
 
-  -- these two quick lemmas show that if a lambda
+  -- these two quick lemmas show that if à lambda
   -- satisfies a constraint, then anything at all must
   -- match that constraint
   lam-sat-all-sat : ∀{x e τ ξ e'} →
