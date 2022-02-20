@@ -35,12 +35,14 @@ module lemmas-values where
   ... | refl
     with values-same-type vals wt₁
   ... | wt₁' = TAInr wt₁'
-  values-same-type (IVPair ind (TAPair wt1₁ wt2₁) vals1 vals2) (TAPair wt1 wt2)
+  values-same-type (IVPair ind (TAPair wt1₁ wt2₁) vals1 vals2)
+                   (TAPair wt1 wt2)
     with expr-type-unicity wt1 wt1₁ | expr-type-unicity wt2 wt2₁
   ... | refl | refl
     with values-same-type vals1 wt1₁ | values-same-type vals2 wt2₁
   ... | wt1₁' | wt2₁' = TAPair wt1₁' wt2₁'
 
+  -- every value is val
   values-val : ∀{e e' Δ Δp} →
                e' ∈[ Δ , Δp ]values e →
                e' val
@@ -51,6 +53,21 @@ module lemmas-values where
   values-val (IVPair ind wt vals1 vals2) =
     VPair (values-val vals1) (values-val vals2)
 
+  -- the only value of something which is val is itself
+  val-values-self : ∀{e e' Δ Δp} →
+                    e val →
+                    e' ∈[ Δ , Δp ]values e →
+                    e' == e
+  val-values-self eval (IVVal eval₁ wt) = refl
+  val-values-self eval (IVIndet ni wt e'val wt') =
+    abort (val-notintro-not eval ni)
+  val-values-self eval (IVInl ind wt vals) =
+    abort (val-indet-not eval ind)
+  val-values-self eval (IVInr ind wt vals) =
+    abort (val-indet-not eval ind)
+  val-values-self eval (IVPair ind wt vals1 vals2) =
+    abort (val-indet-not eval ind)
+  
   max-var : List Nat → Nat
   max-var [] = 0
   max-var (x :: xs) = max x (max-var xs)
@@ -151,13 +168,13 @@ module lemmas-values where
   -- if an expression does not satormay a constraint,
   -- then neither does any of its values
   indet-values-not-satormay : ∀{e Δ Δp τ ξ e'} →
-                             e indet →
-                             e' ∈[ Δ , Δp ]values e →
-                             ∅ , Δ , Δp ⊢ e :: τ →
-                             ξ :c: τ →
-                             (e ⊧̇†? ξ → ⊥) →
-                             e' ⊧̇†? ξ →
-                             ⊥
+                              e indet →
+                              e' ∈[ Δ , Δp ]values e →
+                              ∅ , Δ , Δp ⊢ e :: τ →
+                              ξ :c: τ →
+                              (e ⊧̇†? ξ → ⊥) →
+                              e' ⊧̇†? ξ →
+                              ⊥
   indet-values-not-satormay ind vals wt CTTruth ¬satm satm' =
     ¬satm (CSMSSat CSTruth)
   indet-values-not-satormay ind vals wt CTFalsity ¬satm

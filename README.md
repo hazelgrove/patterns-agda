@@ -141,4 +141,4 @@ The following files prove the main theorem from the paper.
 - [material-entailment.agda](material-entailment.agda) proves that ξ1 entailing ξ2 is equivalent to ⊤ entailing (dual ξ1) ∨  ξ2
 - [preservation.agda](preservation.agda) proves that evaluating an expression one step does not change its type.
 - [finality.agda](finality.agda) proves that any final expression is actually final, i.e., it cannot be evaluated further.
-- [progress.agda](progress.agda) proves that every well-typed expression is either final or may be evaluated another step.
+- [determinism.agda](determinism.agda) proves that every well-typed expression is either val, indet, or steps to a unique expression.

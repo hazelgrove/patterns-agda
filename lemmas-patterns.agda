@@ -19,6 +19,16 @@ module lemmas-patterns where
   rel◆er (nil / r / rs) = ERZPre
   rel◆er ((r' / rs') / r / rs) = ERNZPre (rel◆er (rs' / r / rs))
 
+  -- rule erasure is unique
+  erase-unicity : ∀{zrs rss rss'} →
+                  erase-r zrs rss →
+                  erase-r zrs rss' →
+                  rss == rss'
+  erase-unicity ERZPre ERZPre = refl
+  erase-unicity (ERNZPre er) (ERNZPre er')
+    with erase-unicity er er'
+  ... | refl = refl
+  
   -- the constraint emitted by a pattern has the same type
   pattern-constr-same-type : ∀{Δp p τ ξ Γ} →
                              Δp ⊢ p :: τ [ ξ ]⊣ Γ →

@@ -73,4 +73,4 @@ open import lemmas-subst-nonredundant
 -- type safety theorems
 open import preservation
 open import finality
-open import progress
+open import determinism
