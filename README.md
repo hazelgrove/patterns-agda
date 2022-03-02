@@ -115,10 +115,10 @@ These files each establish smaller claims that are either not mentioned in the p
 - [hole-binders-disjoint-symmetric.agda](hole-binders-disjoint-symmetric) argues that the hole-binders-disjoint judgements are symmetric in their two arguments.
 - [lemmas-contexts.agda](lemmas-contexts.agda) provides various lemmas for reasoning about contexts.
 - [lemmas-freshness.agda](lemmas-freshness.agda) establishes various lemmas regarding freshness and binders. For example, we show that the type Γp of a pattern only records binders occuring in the pattern. As well, it proves that any unbound variable disjoint from a typing context is fresh in the typed term.
-- [lemmas-or-append.agda](lemmas-or-append.agda) defines a function ξ1 ∨+ ξ2 which is similar to ξ1 ∨ ξ2, but appending ξ2 at the inner most level if ξ1 itself is a series of constraints combined with ∨. This is supressed on paper, but needed when we compute the constraint emitted by the cursor erasure of a list of rules. See the comments in the file for more information.
+- [lemmas-or-append.agda](lemmas-or-append.agda) defines a function ξ1 ∨+ ξ2 which is similar to ξ1 ∨ ξ2, but if ξ1 itself is a series of constraints combined with ∨, then ξ2 is appended at the deepest level. This is supressed on paper, but needed when we compute the constraint emitted by the cursor erasure of a list of rules. See the comments in the file for more information.
 - [lemmas-patterns.agda](lemmas-patterns.agda) gives miscellaneous easy lemmas about patterns, rules, and their typing judgements.
-- [lemmas-values.agda](lemmas-values.agda) argues that the values judgement behaves as expected, showing that every indet expression has a value, and that if an expression does not satisfy or may satisfy a constraint then neither do its values.
-- [lemmas-satisfy.agda](lemmas-satisfy.agda) establishes various results about satisfaction judgements, as well as their relation to the refutable and possible judgements.
+- [lemmas-values.agda](lemmas-values.agda) argues that the values judgement behaves as expected, showing that every indet expression has a value, and that if an expression neither satisfies nor may satisfy a constraint then neither do its values.
+- [lemmas-satisfy.agda](lemmas-satisfy.agda) establishes various small results about satisfaction judgements, as well as their relation to the refutable and possible judgements.
 
 There is also a collection of files which shows that all of our judgements are well-behaved with respect to substituting an expression for a variable. These are only needed by preservation.
 - [lemmas-subst-disjointness.agda](lemmas-subst-disjointness.agda)
@@ -133,12 +133,14 @@ There is also a collection of files which shows that all of our judgements are w
 
 ## Theorems
 The following files prove the main theorem from the paper.
-- [satisfy-exclusive.agda](satisfy-exclusive.agda) argues that for an expression e and an incomplete constraint ξ of the same type, exactly one of the following holds: e satisfies ξ, e may satify ξ, or e does not satisfy or may satisfy ξ. 
+- [satisfy-exclusive.agda](satisfy-exclusive.agda) argues that for an expression e and an incomplete constraint ξ of the same type, exactly one of the following holds: e satisfies ξ, e may satify ξ, or neither. 
 - [complete-satisfy-exclusive.agda](complete-satisfy-exclusive.agda) argues that for an expression e and a constraint ξ of the same type, either e satisfies ξ or e satisfies the dual of ξ, but not both.
 - [matching-determinism.agda](matching-determinism.agda) argues that for an expression e and a pattern p of the same type, exactly one of the following holds: e matches p, e may match p, or e does not match p.
 - [matching-coherence.agda](matching-coherence.agda) shows that patterns and their constraints behave as expected, e.g., an expression matches the pattern if and only if it satisfies the emitted constraint.
-- [complete-relationship.agda](complete-relationship.agda) establishes the relationship between the incomplete and complete constraint languages via the falsify and truthify functions
-- [material-entailment.agda](material-entailment.agda) proves that ξ1 entailing ξ2 is equivalent to ⊤ entailing (dual ξ1) ∨  ξ2
+- [complete-relationship.agda](complete-relationship.agda) establishes the relationship between the incomplete and complete constraint languages via the falsify and truthify functions.
+- [material-entailment.agda](material-entailment.agda) proves that ξ1 entailing ξ2 is equivalent to ⊤ entailing (dual ξ1) ∨ ξ2.
+
+Together, the following files prove type safety:
 - [preservation.agda](preservation.agda) proves that evaluating an expression one step does not change its type.
 - [finality.agda](finality.agda) proves that any final expression is actually final, i.e., it cannot be evaluated further.
-- [determinism.agda](determinism.agda) proves that every well-typed expression is either val, indet, or steps to a unique expression.
+- [determinism.agda](determinism.agda) proves that for every well-typed expression e, exactly one of the following holds: e val, e indet, or e ↦ e' for a unique e'.
