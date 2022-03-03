@@ -11,14 +11,6 @@ These proofs are known to check under `Agda 2.6.2`. The most direct, if not the 
 
 In the future, we plan to include a Docker file hosting this mechanization and an appropriate Agda version. Unfortunately, however, the latest version of Agda causes Docker to frequently exceed memory constraints, so we do not do so at this time.
 
-# Where To Find Each Theorem
-
-All of the judgements defined in the paper are given in the various *-core.agda files. The syntax is meant to mirror the on-paper notation as closely as possible, with some small variations because of the limitations of Agda syntax.
-
-For easy reference, the proofs of the theorems from the paper can be found as follows, using the numbering from the supplemental appendix:
-
-- TODO
-
 # Description of Agda Files
 
 The theorem statements rely on a variety of lemmas and smaller claims or observations that aren't explicitly mentioned in the paper text. What follows is a rough description of what to expect from each source file; more detail is provided in the comments inside each.
@@ -69,6 +61,7 @@ These files give definitions and syntactic sugar for common elements of type the
 - [Prelude.agda](Prelude.agda)
 
 ## Core Definitions
+These files define the basic judgements and functions from the paper. The syntax is meant to mirror the on-paper notation as closely as possible, with some small variations because of the limitations of Agda syntax.
 
 - [core.agda](core.agda) gives the syntax for expressions in Peanut.
 - [value-judgements.agda](value-judgements.agda) defines the the e val and e notintro judgements and proves a few quick lemmas.
