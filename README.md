@@ -1,23 +1,21 @@
 
 # patterns-agda
 
-This repository is a mechanization of the work described in our [paper link TODO](TODO) on pattern matching with holes. It includes almost all of the definitions and proofs from the paper.
+This repository is a mechanization of the work described in our paper "Pattern Matching with Typed Holes". It includes almost all of the definitions and proofs from the paper. The overall approach and encoding decisions we make here are heavily inspired by the [Hazelnut Live mechanization](https://github.com/hazelgrove/hazelnut-dynamics-agda). As a result, some of the documentation here is also borrowed with permission from the Hazelnut Live documentation.
 
-The only results missing from this mechanization are those regarding decidability of entailment and the constraint incon judgement. These proofs involve finite sets and algorithms which are not structurally recursive, making it inordinately difficult to verify them in Agda, so we do not attempt to do so here. Decidability of the incon judgement, however, has been verified using the Z3 Theorem Prover.
+The only results missing from this mechanization are those regarding decidability of entailment and the constraint incon judgement. These proofs involve finite sets and algorithms which are not structurally recursive, making it inordinately difficult to verify them in Agda, so we do not attempt to do so here. As discussed on paper, however, decidability of entailment has been shown using the Z3 Theorem Prover.
 
-# How To Check These Proofs - 	TODO
+# How To Check These Proofs
 
 These proofs are known to check under `Agda 2.6.2`. The most direct, if not the easiest, option to check the proofs is to install that version of Agda or one compatible with it, download the code in this repo, and run `agda all.agda` at the command line.
+
+In the future, we plan to include a Docker file hosting this mechanization and an appropriate Agda version. Unfortunately, however, the latest version of Agda causes Docker to frequently exceed memory constraints, so we do not do so at this time.
 
 # Where To Find Each Theorem
 
 All of the judgements defined in the paper are given in the various *-core.agda files. The syntax is meant to mirror the on-paper notation as closely as possible, with some small variations because of the limitations of Agda syntax.
 
-For easy reference, the proofs for the theorems in order of appearance in the paper text can be found as follows:
-
-- TODO
-
-The extended paper with an appendix goes into more detail for some lemmas and definitions omitted from the main paper, some of which have been mechanized as well. Those can be found as follows:
+For easy reference, the proofs of the theorems from the paper can be found as follows, using the numbering from the supplemental appendix:
 
 - TODO
 
@@ -36,9 +34,10 @@ Both hole and type contexts are encoded as Agda functions from natural numbers t
 ## Deviations from the Paper
 
 To avoid obsfucating the core idea of our approach, a few benign technical details are supressed on paper, but must be explicitly handled in the mechanization here. We also require a few small changes to support Barendregt's convention. Explicitly, these deviations are as follows:
-- Exhaustiveness and redundancy checking are given as separate judgements, rather than included as part of type assignment. While this is useful in its own right, it is in fact required to avoid positivity issues. See the comments in [statics-core.agda](statics-core.agda) for a more extensive explanation.
+- Exhaustiveness and redundancy checking are given as separate judgements, rather than included as part of type assignment. While this is useful in its own right, we require it here to avoid some (morally-irrelevant) positivity issues. See the comments in [statics-core.agda](statics-core.agda) for a more extensive explanation.
+- To support the separate exhaustiveness and redundancy checking, the rule typing judgement is split into three distinct judgements, each of which tracks a subset of the information in the on-paper rule typing judgement. Specifically, type assignment uses a variant which does not check non-redundancy, exhaustivness checking uses a variant which checks neither non-redundancy nor the types of branch targets, and redundancy checking uses a variant which does not check the type of branch targets. Again, see [statics-core.agda](statics-core.agda).
 - Rather than simply tracking the type of each expression hole, we also include substitution environments and hole-closures à la [Hazelnut Live](https://arxiv.org/pdf/1805.00155.pdf). This does not affect the theory, but will eventually be required to support live programming, so we include it here with future development in mind.
-- Each hole typing context Δ is separated into a pair Δ , Δp where Δ is used for expression holes (tracking types and hole closures) and Δp is used for pattern holes (tracking types).
+- Each hole typing context Δ is separated into a pair Δ , Δp where Δ is used for expression holes (tracking types and hole closures) and Δp is used for pattern holes (tracking only types).
 - To avoid an issue related to Barendregt's convention, the ITSuccMatch transition rule does not immediately apply substitutions. Instead, it wraps the target of the match with appropriate lambdas and applications, separating these substitutions into multiple evaluation steps.
 - Match expressions require a type ascription on the scrutinee.
 - The match judgement e ▹ p ⊣ θ and may-match judgement e ? p require a type ascription on e, as well as on each substituted expression emitted in θ. 
@@ -71,13 +70,13 @@ These files give definitions and syntactic sugar for common elements of type the
 
 ## Core Definitions
 
-- [core.agda](core.agda) gives the syntax for expressions in Peanut
-- [value-judgements.agda](value-judgements.agda) defines the the e val and e notintro judgements and a few quick lemmas.
-- [result-judgements.agda](result-judgements.agda) defines the e indet and e final judgements and a few quick lemmas.
+- [core.agda](core.agda) gives the syntax for expressions in Peanut.
+- [value-judgements.agda](value-judgements.agda) defines the the e val and e notintro judgements and proves a few quick lemmas.
+- [result-judgements.agda](result-judgements.agda) defines the e indet and e final judgements and proves a few quick lemmas.
 - [constraints-core.agda](constraint-core.agda) defines the syntax of the incomplete constraint language. As well, it defines constraint typing, ξ refutable, ξ possible, and the satisfaction judgements.
 - [complete-constrants-core.agda](complete-constraints-core.agda) defines the syntax of the complete constraint language. As well, it defines complete contraint typing, satisfaction judgements, and the dual, truthify, and falsify functions.
 - [patterns-core.agda](patterns-core.agda) defines the various matching judgements, pattern typing, and the p refutable judgement.
-- [dynamics-core.agda](dynamics-core.agda) defines substitution, instruction transitions, and the values judgement.
+- [dynamics-core.agda](dynamics-core.agda) defines substitution, instruction transitions, and the "e' is a value of e" judgement.
 - [statics-core.agda](statics-core.agda) defines type assignment, constraint entailment, exhaustiveness, and nonredundancy.
 
 ## Contexts and Binders
@@ -99,7 +98,7 @@ These lemmas pove the expected structural properties for contexts in the various
 ## Decidability 
 
 These files establish the decidability of various judgements. Most of these results are fairly obvious.
-- [freshness-decidable.agda](freshness-decidable.agda) proves that the various freshness and unbound-in judgements are decidable.
+- [freshness-decidable.agda](freshness-decidable.agda) proves that the various freshness and binder judgements are decidable.
 - [htyp-decidable.agda](htyp-decidable.agda) proves that equality of types is decidable.
 - [satisfy-decidable.agda](satisfy-decidable.agda) proves that the satisfy, maysatisfy, and satisfyormay functions given in the paper correctly decide whether an expression satisfies an incomplete constraint.
 - [complete-satisfy-decidable.agda](complete-satisfy-decidable.agda) proves decidability of satisfaction for complete constraints.
@@ -107,7 +106,7 @@ These files establish the decidability of various judgements. Most of these resu
 - [possible-decidable.agda](possible-decidable.agda) proves that the ξ possible judgement is decidable.
 - [xrefutable-decidable.agda](xrefutable-decidable.agda) proves that ξ refutable judgement is decidable.
 
-## Lemmas and Smaller Claims
+## Smaller Lemmas and Claims
 
 These files each establish smaller claims that are either not mentioned in the paper, mentioned only in passing, or related to technical details about the mechanization.
 
@@ -131,8 +130,8 @@ There is also a collection of files which shows that all of our judgements are w
 - [lemmas-subst-exhaustive.agda](lemmas-subst-exhaustive.agda)
 - [lemmas-subst-nonredundant.agda](lemmas-subst-nonredundant.agda)
 
-## Theorems
-The following files prove the main theorem from the paper.
+## Theorems / Important Lemmas
+The following files prove the main results from the paper.
 - [satisfy-exclusive.agda](satisfy-exclusive.agda) argues that for an expression e and an incomplete constraint ξ of the same type, exactly one of the following holds: e satisfies ξ, e may satify ξ, or neither. 
 - [complete-satisfy-exclusive.agda](complete-satisfy-exclusive.agda) argues that for an expression e and a constraint ξ of the same type, either e satisfies ξ or e satisfies the dual of ξ, but not both.
 - [matching-determinism.agda](matching-determinism.agda) argues that for an expression e and a pattern p of the same type, exactly one of the following holds: e matches p, e may match p, or e does not match p.
