@@ -24,30 +24,30 @@ module determinism where
              Δp ⊢ e exhaustive →
              (e final) +
                Σ[ e' ∈ ihexp ](e ↦ e')
-  progress TAUnit ex = Inl (FVal VUnit)
-  progress TANum ex = Inl (FVal VNum)
-  progress (TAVar ()) ex
-  progress (TALam x#Γ wt) ex = Inl (FVal VLam)
-  progress (TAAp wt1 wt2) (EXAp ex1 ex2)
+  progress TUnit ex = Inl (FVal VUnit)
+  progress TNum ex = Inl (FVal VNum)
+  progress (TVar ()) ex
+  progress (TLam x#Γ wt) ex = Inl (FVal VLam)
+  progress (TAp wt1 wt2) (EXAp ex1 ex2)
    with progress wt1 ex1 | progress wt2 ex2
-  ... | Inr (_ , stp1) | p2 = Inr (_ , ITApFun stp1)
+  ... | Inr (_ , stp1) | p2 = Inr (_ , ITpFun stp1)
   ... | Inl (FIndet ind1) | Inl fin2 =
     Inl (FIndet (IAp ind1 fin2))
   ... | Inl (FIndet ind1) | Inr (_ , stp2) =
-    Inr (_ , ITApArg (FIndet ind1) stp2 )
+    Inr (_ , ITpArg (FIndet ind1) stp2 )
   ... | Inl (FVal VLam) | Inl fin2 =
-    Inr (_ , ITAp fin2)
+    Inr (_ , ITp fin2)
   ... | Inl (FVal VLam) | Inr (_ , stp2) =
-    Inr (_ , ITApArg (FVal VLam) stp2)
-  progress (TAInl wt) (EXInl ex)
+    Inr (_ , ITpArg (FVal VLam) stp2)
+  progress (TInl wt) (EXInl ex)
     with progress wt ex
   ... | Inl fin = Inl (final-inl fin)
   ... | Inr (_ , stp) = Inr (_ , ITInl stp)
-  progress (TAInr wt) (EXInr ex)
+  progress (TInr wt) (EXInr ex)
     with progress wt ex
   ... | Inl fin = Inl (final-inr fin)
   ... | Inr (_ , stp) = Inr (_ , ITInr stp)
-  progress (TAMatchZPre wt (RTOneRule (RTRule pt Γ##Γp wt')))
+  progress (TMatchZPre wt (RTOneRule (RTRule pt Γ##Γp wt')))
            (EXMatchZPre exe (RTOneRule pt')
                         (PotEntails CTTruth ct ent)
                         ext)
@@ -65,7 +65,7 @@ module determinism where
     with ent wt fin (CSMSSat CSTruth)
   ... | satm =
     abort (notmat-not-satormay fin wt pt nmat satm)
-  progress (TAMatchZPre wt
+  progress (TMatchZPre wt
                         (RTRules {rs = r' / rs'}
                                  (RTRule pt Γ##Γp wt')
                                  rst))
@@ -88,7 +88,7 @@ module determinism where
     abort (notmat-not-satormay fin wt pt nmat satmr)
   ... | Inr satmrs =
     Inr (_ , ITFailMatch fin nmat ERZPre)
-  progress (TAMatchNZPre wt fin pret
+  progress (TMatchNZPre wt fin pret
                          (RTOneRule (RTRule pt Γ##Γp wt'))
                          ¬red)
            (EXMatchNZPre exe pret' (RTOneRule pt')
@@ -112,7 +112,7 @@ module determinism where
     abort (¬red satmpre)
   ... | Inr satmrest =
     abort (notmat-not-satormay fin wt pt nmat satmrest)
-  progress (TAMatchNZPre wt fin pret
+  progress (TMatchNZPre wt fin pret
                          (RTRules {rs = r' / rs'}
                                   (RTRule pt Γ##Γp wt') rst)
                          ¬red)
@@ -129,14 +129,14 @@ module determinism where
     Inl (FIndet (IMatch fin mmat))
   ... | NotMatch nmat =
     Inr (_ , ITFailMatch fin nmat (rel◆er _))
-  progress (TAPair wt1 wt2) (EXPair ex1 ex2)
+  progress (TPair wt1 wt2) (EXPair ex1 ex2)
     with progress wt1 ex1
   ... | Inr (_ , stp1) = Inr (_ , ITPairL stp1)
   ... | Inl fin1
     with progress wt2 ex2
   ... | Inr (_ , stp2) = Inr (_ , ITPairR fin1 stp2)
   ... | Inl fin2 = Inl (final-pair fin1 fin2)
-  progress (TAFst wt) (EXFst ex)
+  progress (TFst wt) (EXFst ex)
     with progress wt ex
   ... | Inr (_ , stp) = Inr (_ , ITFst stp)
   ... | Inl (FVal (VPair val1 val2)) =
@@ -157,9 +157,9 @@ module determinism where
     Inl (FIndet (IFst (λ e1 e2 ()) (ISnd np ind)))
   ... | Inl (FIndet IEHole) =
     Inl (FIndet (IFst (λ e1 e2 ()) IEHole))
-  ... | Inl (FIndet (INEHole fin)) =
-    Inl (FIndet (IFst (λ e1 e2 ()) (INEHole fin)))
-  progress (TASnd wt) (EXSnd ex)
+  ... | Inl (FIndet (IHole fin)) =
+    Inl (FIndet (IFst (λ e1 e2 ()) (IHole fin)))
+  progress (TSnd wt) (EXSnd ex)
     with progress wt ex
   ... | Inr (_ , stp) = Inr (_ , ITSnd stp)
   ... | Inl (FVal (VPair val1 val2)) =
@@ -180,14 +180,14 @@ module determinism where
     Inl (FIndet (ISnd (λ e1 e2 ()) (ISnd np ind)))
   ... | Inl (FIndet IEHole) =
     Inl (FIndet (ISnd (λ e1 e2 ()) IEHole))
-  ... | Inl (FIndet (INEHole fin)) =
-    Inl (FIndet (ISnd (λ e1 e2 ()) (INEHole fin)))
-  progress (TAEHole u∈Δ wst) (EXEHole exσ) =
+  ... | Inl (FIndet (IHole fin)) =
+    Inl (FIndet (ISnd (λ e1 e2 ()) (IHole fin)))
+  progress (TEHole u∈Δ wst) (EXEHole exσ) =
     Inl (FIndet IEHole)
-  progress (TANEHole u∈Δ wst wt) (EXNEHole exσ ex)
+  progress (THole u∈Δ wst wt) (EXHole exσ ex)
     with progress wt ex
-  ... | Inl fin = Inl (FIndet (INEHole fin))
-  ... | Inr (_ , stp) = Inr (_ , ITNEHole stp)
+  ... | Inl fin = Inl (FIndet (IHole fin))
+  ... | Inr (_ , stp) = Inr (_ , ITHole stp)
 
   -- emitted substitutions are unique, needed to show
   -- that evaluation produces a unique result
@@ -218,21 +218,21 @@ module determinism where
                 e1 ↦ e2 →
                 e1 ↦ e2' →
                 e2 == e2'
-  step-unique (ITApFun stp) (ITApFun stp')
+  step-unique (ITpFun stp) (ITpFun stp')
     with step-unique stp stp'
   ... | refl = refl
-  step-unique (ITApFun stp) (ITApArg fin' stp') =
+  step-unique (ITpFun stp) (ITpArg fin' stp') =
     abort (final-step-not fin' stp)
-  step-unique (ITApArg fin stp) (ITApFun stp') =
+  step-unique (ITpArg fin stp) (ITpFun stp') =
     abort (final-step-not fin stp')
-  step-unique (ITApArg fin stp) (ITApArg fin' stp')
+  step-unique (ITpArg fin stp) (ITpArg fin' stp')
     with step-unique stp stp'
   ... | refl = refl
-  step-unique (ITApArg fin stp) (ITAp fin') =
+  step-unique (ITpArg fin stp) (ITp fin') =
     abort (final-step-not fin' stp)
-  step-unique (ITAp fin) (ITApArg fin' stp') =
+  step-unique (ITp fin) (ITpArg fin' stp') =
     abort (final-step-not fin stp')
-  step-unique (ITAp fin) (ITAp fin') = refl
+  step-unique (ITp fin) (ITp fin') = refl
   step-unique (ITPairL stp) (ITPairL stp')
     with step-unique stp stp'
   ... | refl = refl
@@ -286,7 +286,7 @@ module determinism where
   step-unique (ITFailMatch fin nmat er) (ITFailMatch fin' nmat' er')
     with erase-unicity er er'
   ... | refl = refl
-  step-unique (ITNEHole stp) (ITNEHole stp')
+  step-unique (ITHole stp) (ITHole stp')
     with step-unique stp stp'
   ... | refl = refl
 

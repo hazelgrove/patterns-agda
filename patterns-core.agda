@@ -37,7 +37,7 @@ module patterns-core where
               ⟨ p1 , p2 ⟩ refutable
     REHole  : ∀{w} →
               ⦇-⦈[ w ] refutable
-    RNEHole : ∀{p w τ} →
+    RHole : ∀{p w τ} →
               ⦇⌜ p ⌟⦈[ w , τ ] refutable
 
   -- lists of substitutions as emitted by pattern matches
@@ -110,7 +110,7 @@ module patterns-core where
                  ⟨ e1 , e2 ⟩ ·: τ1 ⊠ τ2 ?▹ ⟨ p1 , p2 ⟩
     MMEHole    : ∀{e τ w} →
                  e ·: τ ?▹ ⦇-⦈[ w ]
-    MMNEHole   : ∀{e τ p w τ'} →
+    MMHole   : ∀{e τ p w τ'} →
                  e ·: τ ?▹ ⦇⌜ p ⌟⦈[ w , τ' ]
     
   -- e does not match p
@@ -161,7 +161,7 @@ module patterns-core where
     PTEHole  : ∀{Δp w τ} →
                (w , τ) ∈ Δp →
                Δp ⊢ ⦇-⦈[ w ] :: τ [ ·? ]⊣ ∅
-    PTNEHole : ∀{Δp p w τ τ' ξ Γ} →
+    PTHole : ∀{Δp p w τ τ' ξ Γ} →
                (w , τ') ∈ Δp →
                Δp ⊢ p :: τ [ ξ ]⊣ Γ →
                Δp ⊢ ⦇⌜ p ⌟⦈[ w , τ ] :: τ' [ ·? ]⊣ Γ

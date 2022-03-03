@@ -33,7 +33,7 @@ module lemmas-freshness where
                 (unbound-in-p-apart-Γp pt1 ub1)
                 (unbound-in-p-apart-Γp pt2 ub2)
   unbound-in-p-apart-Γp (PTEHole w∈Δp) UBPEHole = refl
-  unbound-in-p-apart-Γp (PTNEHole w∈Δp pt) (UBPNEHole ub) =
+  unbound-in-p-apart-Γp (PTHole w∈Δp pt) (UBPHole ub) =
     unbound-in-p-apart-Γp pt ub
   unbound-in-p-apart-Γp PTWild UBPWild = refl
 
@@ -62,7 +62,7 @@ module lemmas-freshness where
   ... | Inl x∈Γ1 = dom-Γp-unbound-in pt1 (τ , x∈Γ1) bd1
   ... | Inr x∈Γ2 = dom-Γp-unbound-in pt2 (τ , x∈Γ2) bd2
   dom-Γp-unbound-in (PTEHole w∈Δp) () BDPEHole
-  dom-Γp-unbound-in (PTNEHole w∈Δp pt) x∈Γp (BDPNEHole bd) =
+  dom-Γp-unbound-in (PTHole w∈Δp pt) x∈Γp (BDPHole bd) =
     dom-Γp-unbound-in pt x∈Γp bd
 
   -- anything apart from the emitted context is not in the pattern
@@ -87,8 +87,8 @@ module lemmas-freshness where
             (apart-Γp-unbound-in-p pt2
                                    (apart-union-r Γ1 Γ2 x x#Γp))
   apart-Γp-unbound-in-p (PTEHole w∈Δp) x#Γp = UBPEHole
-  apart-Γp-unbound-in-p (PTNEHole w∈Δp pt) x#Γp =
-    UBPNEHole (apart-Γp-unbound-in-p pt x#Γp)
+  apart-Γp-unbound-in-p (PTHole w∈Δp pt) x#Γp =
+    UBPHole (apart-Γp-unbound-in-p pt x#Γp)
   apart-Γp-unbound-in-p PTWild x#Γp = UBPWild
 
   -- a variable is unbound in a combined list of
@@ -108,9 +108,9 @@ module lemmas-freshness where
                           Γ , Δ , Δp ⊢ θ :sl: Γθ →
                           unbound-in-θ x θ →
                           x # Γθ
-  unbound-in-θ-apart-Γθ STAEmpty UBθEmpty = refl
+  unbound-in-θ-apart-Γθ STEmpty UBθEmpty = refl
   unbound-in-θ-apart-Γθ {x = x}
-                        (STAExtend {Γθ = Γθ} y#Γ wst wt)
+                        (STExtend {Γθ = Γθ} y#Γ wst wt)
                         (UBθExtend xubd x≠y xubθ) =
     neq-apart-extend Γθ x≠y
                      (unbound-in-θ-apart-Γθ wst xubθ)
@@ -165,10 +165,10 @@ module lemmas-freshness where
                              u#Δp =
     HUBPEHole λ{refl → abort (some-not-none (! w∈Δp · u#Δp))}
   apart-Δp-hole-unbound-in-p {u = u}
-                             (PTNEHole {w = w} {τ = τ} 
+                             (PTHole {w = w} {τ = τ} 
                                        w∈Δp pt)
                              u#Δp =
-   HUBPNEHole (λ{refl → abort (some-not-none (! w∈Δp · u#Δp))})
+   HUBPHole (λ{refl → abort (some-not-none (! w∈Δp · u#Δp))})
               (apart-Δp-hole-unbound-in-p pt u#Δp)
   apart-Δp-hole-unbound-in-p PTWild u#Δp = HUBPWild
 
@@ -207,7 +207,7 @@ module lemmas-freshness where
                       unbound-in-σ x σ →
                       x # Γ →
                       fresh-σ x σ
-    binders-fresh-σ {Γ' = Γ'} {x = x} (STAId Γ'⊆Γ) UBσId x#Γ =
+    binders-fresh-σ {Γ' = Γ'} {x = x} (STId Γ'⊆Γ) UBσId x#Γ =
       FσId x#Γ'
       where
         x#Γ' : x # Γ'
@@ -215,7 +215,7 @@ module lemmas-freshness where
         ... | Some τ =
           abort (some-not-none (! (Γ'⊆Γ x τ Γ'x) · x#Γ))
         ... | None = refl
-    binders-fresh-σ {Γ = Γ} (STASubst st wt) (UBσSubst ub x≠y ubσ) x#Γ =
+    binders-fresh-σ {Γ = Γ} (STSubst st wt) (UBσSubst ub x≠y ubσ) x#Γ =
       FσSubst (binders-fresh wt ub x#Γ)
               x≠y
               (binders-fresh-σ st ubσ (neq-apart-extend Γ x≠y x#Γ))
@@ -225,8 +225,8 @@ module lemmas-freshness where
                       unbound-in-θ x θ →
                       x # Γ →
                       fresh-θ x θ
-    binders-fresh-θ STAEmpty ub x#Γ = FθEmpty
-    binders-fresh-θ (STAExtend y#Γ wst wt)
+    binders-fresh-θ STEmpty ub x#Γ = FθEmpty
+    binders-fresh-θ (STExtend y#Γ wst wt)
                     (UBθExtend ubd x≠y ubθ) x#Γ =
       FθExtend (binders-fresh wt ubd x#Γ)
                x≠y
@@ -237,33 +237,33 @@ module lemmas-freshness where
                     unbound-in x e →
                     x # Γ →
                     fresh x e
-    binders-fresh TAUnit UBUnit x#Γ = FUnit
-    binders-fresh TANum UBNum x#Γ = FNum
-    binders-fresh (TAVar {x = y} y∈Γ) UBVar x#Γ =
+    binders-fresh TUnit UBUnit x#Γ = FUnit
+    binders-fresh TNum UBNum x#Γ = FNum
+    binders-fresh (TVar {x = y} y∈Γ) UBVar x#Γ =
       FVar (λ{ refl → some-not-none ((! y∈Γ) · x#Γ) })
-    binders-fresh {Γ = Γ} (TALam {x = y} y#Γ wt)
+    binders-fresh {Γ = Γ} (TLam {x = y} y#Γ wt)
                   (UBLam x≠y xub) x#Γ =
       FLam x≠y (binders-fresh wt xub (neq-apart-extend Γ x≠y x#Γ))
-    binders-fresh (TAAp wt1 wt2) (UBAp ub1 ub2) x#Γ =
+    binders-fresh (TAp wt1 wt2) (UBAp ub1 ub2) x#Γ =
       FAp (binders-fresh wt1 ub1 x#Γ) (binders-fresh wt2 ub2 x#Γ)
-    binders-fresh (TAInl wt) (UBInl ub) x#Γ =
+    binders-fresh (TInl wt) (UBInl ub) x#Γ =
       FInl (binders-fresh wt ub x#Γ)
-    binders-fresh (TAInr wt) (UBInr ub) x#Γ =
+    binders-fresh (TInr wt) (UBInr ub) x#Γ =
       FInr (binders-fresh wt ub x#Γ)
-    binders-fresh (TAMatchZPre {r = p => d} wt (RTOneRule rt))
+    binders-fresh (TMatchZPre {r = p => d} wt (RTOneRule rt))
                   (UBMatch xube (UBZRules UBNoRules
                                           (UBRules ubr _))) x#Γ =
       FMatch (binders-fresh wt xube x#Γ)
              (FZRules FNoRules
                       (FRules (binders-fresh-r rt ubr x#Γ)
                               FNoRules))
-    binders-fresh (TAMatchZPre {r = p => d} wt (RTRules rt rst))
+    binders-fresh (TMatchZPre {r = p => d} wt (RTRules rt rst))
                   (UBMatch xube (UBZRules _ (UBRules ubr xubrs))) x#Γ =
       FMatch (binders-fresh wt xube x#Γ)
              (FZRules FNoRules
                       (FRules (binders-fresh-r rt ubr x#Γ)
                               (binders-fresh-rs rst xubrs x#Γ)))
-    binders-fresh (TAMatchNZPre wt fin pret (RTOneRule rt) ¬red)
+    binders-fresh (TMatchNZPre wt fin pret (RTOneRule rt) ¬red)
                   (UBMatch xube
                            (UBZRules xubpre
                                      (UBRules xubr xubpost))) x#Γ =
@@ -271,7 +271,7 @@ module lemmas-freshness where
              (FZRules (binders-fresh-rs pret xubpre x#Γ)
                       (FRules (binders-fresh-r rt xubr x#Γ)
                               FNoRules))
-    binders-fresh (TAMatchNZPre wt fin pret
+    binders-fresh (TMatchNZPre wt fin pret
                                 (RTRules rt postt) ¬red)
                   (UBMatch xube
                            (UBZRules xubpre
@@ -280,17 +280,17 @@ module lemmas-freshness where
              (FZRules (binders-fresh-rs pret xubpre x#Γ)
                       (FRules (binders-fresh-r rt xubr x#Γ)
                               (binders-fresh-rs postt xubpost x#Γ)))
-    binders-fresh (TAPair wt1 wt2) (UBPair ub1 ub2) x#Γ =
+    binders-fresh (TPair wt1 wt2) (UBPair ub1 ub2) x#Γ =
       FPair (binders-fresh wt1 ub1 x#Γ)
             (binders-fresh wt2 ub2 x#Γ)
-    binders-fresh (TAFst wt) (UBFst ub) x#Γ =
+    binders-fresh (TFst wt) (UBFst ub) x#Γ =
       FFst (binders-fresh wt ub x#Γ)
-    binders-fresh (TASnd wt) (UBSnd ub) x#Γ =
+    binders-fresh (TSnd wt) (UBSnd ub) x#Γ =
       FSnd (binders-fresh wt ub x#Γ)
-    binders-fresh (TAEHole u∈Δ st) (UBEHole ubσ) x#Γ =
+    binders-fresh (TEHole u∈Δ st) (UBEHole ubσ) x#Γ =
       FEHole (binders-fresh-σ st ubσ x#Γ)
-    binders-fresh (TANEHole u∈Δ st wt) (UBNEHole ubσ ub) x#Γ =
-      FNEHole (binders-fresh-σ st ubσ x#Γ) (binders-fresh wt ub x#Γ)
+    binders-fresh (THole u∈Δ st wt) (UBHole ubσ ub) x#Γ =
+      FHole (binders-fresh-σ st ubσ x#Γ) (binders-fresh wt ub x#Γ)
 
   mutual
     hole-binders-fresh-r : ∀{Γ Δ Δp r τ1 ξ τ2 u} →
@@ -321,8 +321,8 @@ module lemmas-freshness where
                            hole-unbound-in-σ u σ →
                            u # Δ →
                            hole-fresh-σ u σ
-    hole-binders-fresh-σ (STAId Γ⊆Γ') HUBσId u#Δ = HFσId
-    hole-binders-fresh-σ (STASubst st wt) (HUBσSubst ub ubσ) u#Δ =
+    hole-binders-fresh-σ (STId Γ⊆Γ') HUBσId u#Δ = HFσId
+    hole-binders-fresh-σ (STSubst st wt) (HUBσSubst ub ubσ) u#Δ =
       HFσSubst (hole-binders-fresh wt ub u#Δ)
                (hole-binders-fresh-σ st ubσ u#Δ)
               
@@ -331,19 +331,19 @@ module lemmas-freshness where
                          hole-unbound-in u e →
                          u # Δ →
                          hole-fresh u e
-    hole-binders-fresh TAUnit HUBUnit u#Δ = HFUnit
-    hole-binders-fresh TANum HUBNum u#Δ = HFNum
-    hole-binders-fresh (TAVar x∈Γ) HUBVar u#Δ = HFVar
-    hole-binders-fresh (TALam x#Γ wt) (HUBLam ub) u#Δ =
+    hole-binders-fresh TUnit HUBUnit u#Δ = HFUnit
+    hole-binders-fresh TNum HUBNum u#Δ = HFNum
+    hole-binders-fresh (TVar x∈Γ) HUBVar u#Δ = HFVar
+    hole-binders-fresh (TLam x#Γ wt) (HUBLam ub) u#Δ =
       HFLam (hole-binders-fresh wt ub u#Δ)
-    hole-binders-fresh (TAAp wt1 wt2) (HUBAp ub1 ub2) u#Δ =
+    hole-binders-fresh (TAp wt1 wt2) (HUBAp ub1 ub2) u#Δ =
       HFAp (hole-binders-fresh wt1 ub1 u#Δ)
            (hole-binders-fresh wt2 ub2 u#Δ)
-    hole-binders-fresh (TAInl wt) (HUBInl ub) u#Δ =
+    hole-binders-fresh (TInl wt) (HUBInl ub) u#Δ =
       HFInl (hole-binders-fresh wt ub u#Δ)
-    hole-binders-fresh (TAInr wt) (HUBInr ub) u#Δ =
+    hole-binders-fresh (TInr wt) (HUBInr ub) u#Δ =
       HFInr (hole-binders-fresh wt ub u#Δ)
-    hole-binders-fresh (TAMatchZPre {r = p => d} wt (RTOneRule rt))
+    hole-binders-fresh (TMatchZPre {r = p => d} wt (RTOneRule rt))
                        (HUBMatch ube
                                  (HUBZRules HUBNoRules (HUBRules ubr _)))
                        u#Δ =
@@ -351,14 +351,14 @@ module lemmas-freshness where
               (HFZRules HFNoRules
                         (HFRules (hole-binders-fresh-r rt ubr u#Δ)
                                  HFNoRules))
-    hole-binders-fresh (TAMatchZPre {r = p => d} wt
+    hole-binders-fresh (TMatchZPre {r = p => d} wt
                                     (RTRules rt rst))
                        (HUBMatch ube (HUBZRules _ (HUBRules ubr ubrs))) u#Δ =
       HFMatch (hole-binders-fresh wt ube u#Δ)
               (HFZRules HFNoRules
                         (HFRules (hole-binders-fresh-r rt ubr u#Δ)
                                  (hole-binders-fresh-rs rst ubrs u#Δ)))
-    hole-binders-fresh (TAMatchNZPre wt fin pret
+    hole-binders-fresh (TMatchNZPre wt fin pret
                                      (RTOneRule rt) ¬red)
                        (HUBMatch ube (HUBZRules ubpre (HUBRules ubr ubpost)))
                        u#Δ =
@@ -366,7 +366,7 @@ module lemmas-freshness where
               (HFZRules (hole-binders-fresh-rs pret ubpre u#Δ)
                         (HFRules (hole-binders-fresh-r rt ubr u#Δ)
                                  HFNoRules))
-    hole-binders-fresh (TAMatchNZPre wt fin pret
+    hole-binders-fresh (TMatchNZPre wt fin pret
                                      (RTRules rt postt) ¬red)
                        (HUBMatch ube (HUBZRules ubpre (HUBRules ubr ubpost)))
                        u#Δ =
@@ -374,19 +374,19 @@ module lemmas-freshness where
               (HFZRules (hole-binders-fresh-rs pret ubpre u#Δ)
                         (HFRules (hole-binders-fresh-r rt ubr u#Δ)
                                  (hole-binders-fresh-rs postt ubpost u#Δ)))
-    hole-binders-fresh (TAPair wt1 wt2) (HUBPair ub1 ub2) u#Δ =
+    hole-binders-fresh (TPair wt1 wt2) (HUBPair ub1 ub2) u#Δ =
        HFPair (hole-binders-fresh wt1 ub1 u#Δ)
               (hole-binders-fresh wt2 ub2 u#Δ)
-    hole-binders-fresh (TAFst wt) (HUBFst ub) u#Δ =
+    hole-binders-fresh (TFst wt) (HUBFst ub) u#Δ =
        HFFst (hole-binders-fresh wt ub u#Δ)
-    hole-binders-fresh (TASnd wt) (HUBSnd ub) u#Δ =
+    hole-binders-fresh (TSnd wt) (HUBSnd ub) u#Δ =
        HFSnd (hole-binders-fresh wt ub u#Δ)
-    hole-binders-fresh (TAEHole {u = u'} u'∈Δ st) (HUBEHole ubσ) u#Δ =
+    hole-binders-fresh (TEHole {u = u'} u'∈Δ st) (HUBEHole ubσ) u#Δ =
       HFEHole (λ{refl → some-not-none (! u'∈Δ · u#Δ)})
               (hole-binders-fresh-σ st ubσ u#Δ)
-    hole-binders-fresh (TANEHole {u = u'} u'∈Δ st wt)
-                       (HUBNEHole ubσ ub) u#Δ =
-      HFNEHole (λ{refl → some-not-none (! u'∈Δ · u#Δ)})
+    hole-binders-fresh (THole {u = u'} u'∈Δ st wt)
+                       (HUBHole ubσ ub) u#Δ =
+      HFHole (λ{refl → some-not-none (! u'∈Δ · u#Δ)})
                (hole-binders-fresh-σ st ubσ u#Δ)
                (hole-binders-fresh wt ub u#Δ)
                 

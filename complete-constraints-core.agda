@@ -41,7 +41,7 @@ module complete-constraints-core where
                 ξ1 :cc: τ →
                 ξ2 :cc: τ →
                 (ξ1 ∨ ξ2) :cc: τ
-    CTAnd     : ∀{ξ1 ξ2 τ} →
+    CTnd     : ∀{ξ1 ξ2 τ} →
                 ξ1 :cc: τ →
                 ξ2 :cc: τ →
                 (ξ1 ∧ ξ2) :cc: τ
@@ -127,8 +127,8 @@ module complete-constraints-core where
                (CTPair (dual-same-type ct1) ct2))
                (CTPair (dual-same-type ct1) (dual-same-type ct2))
   dual-same-type (CTOr ct1 ct2) =
-    CTAnd (dual-same-type ct1) (dual-same-type ct2)
-  dual-same-type (CTAnd ct1 ct2) =
+    CTnd (dual-same-type ct1) (dual-same-type ct2)
+  dual-same-type (CTnd ct1 ct2) =
     CTOr (dual-same-type ct1) (dual-same-type ct2)
   
   same-type-dual : ∀{ξ τ} →
@@ -145,7 +145,7 @@ module complete-constraints-core where
   same-type-dual {ξ = ⟨ ξ1 , ξ2 ⟩} {τ = τ1 ⊠ τ2}
                  (CTOr (CTOr (CTPair dct1 dct2) (CTPair dct3 dct4)) dct5) =
     CTPair dct1 dct4
-  same-type-dual {ξ = ξ1 ∨ ξ2} (CTAnd dct1 dct2) =
+  same-type-dual {ξ = ξ1 ∨ ξ2} (CTnd dct1 dct2) =
     CTOr (same-type-dual dct1) (same-type-dual dct2)
   same-type-dual {ξ = ξ1 ∧ ξ2} (CTOr dct1 dct2) =
-    CTAnd (same-type-dual dct1) (same-type-dual dct2)
+    CTnd (same-type-dual dct1) (same-type-dual dct2)

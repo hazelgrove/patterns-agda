@@ -47,7 +47,7 @@ module result-judgements where
                 (snd e) indet
       IEHole  : ∀{u σ} →
                 ⦇-⦈⟨ u , σ ⟩ indet
-      INEHole : ∀{e u σ} →
+      IHole : ∀{e u σ} →
                 e final →
                 ⦇⌜ e ⌟⦈⟨ u , σ ⟩ indet
                 
@@ -117,7 +117,7 @@ module result-judgements where
     final-notintro-indet (FVal ()) NVFst
     final-notintro-indet (FVal ()) NVSnd
     final-notintro-indet (FVal ()) NVEHole
-    final-notintro-indet (FVal ()) NVNEHole
+    final-notintro-indet (FVal ()) NVHole
     final-notintro-indet (FIndet ind) ni = ind
 
     val-indet-not : ∀{e} →

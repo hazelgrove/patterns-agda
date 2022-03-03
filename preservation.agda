@@ -30,29 +30,29 @@ module preservation where
                  e1 ↦ e2 →
                  ∅ , Δ , Δp ⊢ e2 :: τ
   preservation (BUAp bu1 bu2 bd) (HBUAp hbu1 hbu2 hbd)
-               (TAAp wt1 wt2) (ITApFun stp) = 
-    TAAp (preservation bu1 hbu1 wt1 stp) wt2
+               (TAp wt1 wt2) (ITpFun stp) = 
+    TAp (preservation bu1 hbu1 wt1 stp) wt2
   preservation (BUAp bu1 bu2 bd) (HBUAp hbu1 hbu2 hbd)
-               (TAAp wt1 wt2) (ITApArg eval stp) =
-    TAAp wt1 (preservation bu2 hbu2 wt2 stp)
+               (TAp wt1 wt2) (ITpArg eval stp) =
+    TAp wt1 (preservation bu2 hbu2 wt2 stp)
   preservation (BUAp bu1 bu2 (BDLam ub bd))
                (HBUAp hbu1 hbu2 (HBDLam hbd))
-               (TAAp (TALam x#Γ wt1) wt2) (ITAp fin) =
+               (TAp (TLam x#Γ wt1) wt2) (ITp fin) =
     subst-type bd hbd fin wt1 wt2
-  preservation (BUInl bu) (HBUInl hbu) (TAInl wt) (ITInl stp) =
-    TAInl (preservation bu hbu wt stp)
-  preservation (BUInr bu) (HBUInr hbu) (TAInr wt) (ITInr stp) =
-    TAInr (preservation bu hbu wt stp)
+  preservation (BUInl bu) (HBUInl hbu) (TInl wt) (ITInl stp) =
+    TInl (preservation bu hbu wt stp)
+  preservation (BUInr bu) (HBUInr hbu) (TInr wt) (ITInr stp) =
+    TInr (preservation bu hbu wt stp)
   preservation (BUMatch bu burs bdrs)
                (HBUMatch hbu hburs hbdrs)
-               (TAMatchZPre wt rst) (ITExpMatch stp) =
-    TAMatchZPre (preservation bu hbu wt stp) rst
+               (TMatchZPre wt rst) (ITExpMatch stp) =
+    TMatchZPre (preservation bu hbu wt stp) rst
   preservation {Δ = Δ} {Δp = Δp} {τ = τ}
                (BUMatch bu
                         (BUZRules _ (BURules (BURule bup _ _) _ _) _)
                         (BDZRules _ (BDRules (BDRule pbde _) _)))
                (HBUMatch hbu hburs hbdrs)
-               (TAMatchZPre wt
+               (TMatchZPre wt
                             (RTOneRule (RTRule {e = e} {Γp = Γp}
                                                pt Γ##Γp wt')))
                (ITSuccMatch fin mat) =
@@ -66,7 +66,7 @@ module preservation where
                         (BUZRules _ (BURules (BURule bup _ _) _ _) _)
                         (BDZRules _ (BDRules (BDRule pbde _) _)))
                (HBUMatch hbu hburs hbdrs)
-               (TAMatchZPre wt
+               (TMatchZPre wt
                             (RTRules (RTRule {e = e} {Γp = Γp}
                                              pt Γ##Γp wt')
                                      rst))
@@ -78,16 +78,16 @@ module preservation where
                     wt')
   preservation (BUMatch bu burs bdrs)
                (HBUMatch hbu hburs hbdrs)
-               (TAMatchZPre wt
+               (TMatchZPre wt
                             (RTRules (RTRule pt Γ##Γp wt')
                                      rst))
                (ITFailMatch fin nmat ERZPre) =
-    TAMatchNZPre wt fin
+    TMatchNZPre wt fin
                  (RTOneRule (RTRule pt Γ##Γp wt')) rst
                  (notmat-not-satormay fin wt pt nmat)
   preservation (BUMatch bu burs bdrs)
                (HBUMatch hbu hburs hbdrs)
-               (TAMatchNZPre wt fin pret postt ¬red)
+               (TMatchNZPre wt fin pret postt ¬red)
                (ITExpMatch stp) =
     abort (final-step-not fin stp)
   preservation {Δ = Δ} {Δp = Δp} {τ = τ}
@@ -95,7 +95,7 @@ module preservation where
                         (BUZRules _ (BURules (BURule bup _ _) _ _) _)
                         (BDZRules _ (BDRules (BDRule pbde _) _)))
                (HBUMatch hbu hburs hbdrs)
-               (TAMatchNZPre wt fin pre
+               (TMatchNZPre wt fin pre
                              (RTOneRule (RTRule {e = e} {Γp = Γp}
                                                 pt Γ##Γp wt'))
                              ¬red)
@@ -110,7 +110,7 @@ module preservation where
                         (BUZRules _ (BURules (BURule bup _ _) _ _) _)
                         (BDZRules _ (BDRules (BDRule pbde _) _)))
                (HBUMatch hbu hburs hbdrs)
-               (TAMatchNZPre wt fin pre
+               (TMatchNZPre wt fin pre
                              (RTRules (RTRule {e = e} {Γp = Γp}
                                               pt Γ##Γp wt')
                                       rst)
@@ -123,14 +123,14 @@ module preservation where
                     wt')
   preservation (BUMatch bu burs bdrs)
                (HBUMatch hbu hburs hbdrs)
-               (TAMatchNZPre {e = e} {ξpre = ξpre} wt fin
+               (TMatchNZPre {e = e} {ξpre = ξpre} wt fin
                              pret
                              (RTRules {ξr = ξr} {ξrs = ξrs}
                                       (RTRule pt Γ##Γp wt')
                                       postt)
                              ¬red)
                (ITFailMatch fin₁ nmat (ERNZPre er)) =
-    TAMatchNZPre wt fin
+    TMatchNZPre wt fin
                  (rules-erase-constr (ERNZPre er)
                                      pret
                                      (RTOneRule (RTRule pt Γ##Γp wt')))
@@ -143,28 +143,28 @@ module preservation where
       ... | Inr satmr =
         notmat-not-satormay fin wt pt nmat satmr
   preservation (BUPair bu1 bu2 bd) (HBUPair hbu1 hbu2 hbd)
-               (TAPair wt1 wt2) (ITPairL stp) =
-    TAPair (preservation bu1 hbu1 wt1 stp) wt2
+               (TPair wt1 wt2) (ITPairL stp) =
+    TPair (preservation bu1 hbu1 wt1 stp) wt2
   preservation (BUPair bu1 bu2 bd) (HBUPair hbu1 hbu2 hbd)
-               (TAPair wt1 wt2) (ITPairR val1 stp) =
-    TAPair wt1 (preservation bu2 hbu2 wt2 stp)
-  preservation (BUFst bu) (HBUFst hbu) (TAFst wt)
+               (TPair wt1 wt2) (ITPairR val1 stp) =
+    TPair wt1 (preservation bu2 hbu2 wt2 stp)
+  preservation (BUFst bu) (HBUFst hbu) (TFst wt)
                (ITFst stp) =
-    TAFst (preservation bu hbu wt stp)
+    TFst (preservation bu hbu wt stp)
   preservation (BUFst bu) (HBUFst hbu)
-               (TAFst wt) (ITFstPair fin)
+               (TFst wt) (ITFstPair fin)
     with wt
-  ... | TAPair wt1 wt2 = wt1
-  preservation (BUSnd bu) (HBUSnd hbu) (TASnd wt)
+  ... | TPair wt1 wt2 = wt1
+  preservation (BUSnd bu) (HBUSnd hbu) (TSnd wt)
                (ITSnd stp) = 
-    TASnd (preservation bu hbu wt stp)
+    TSnd (preservation bu hbu wt stp)
   preservation (BUSnd bu) (HBUSnd hbu)
-               (TASnd wt) (ITSndPair fin)
+               (TSnd wt) (ITSndPair fin)
     with wt
-  ... | TAPair wt1 wt2 = wt2
-  preservation (BUNEHole buσ bue σbde) (HBUNEHole hbuσ hbue σhbde)
-               (TANEHole u∈Δ wst wt) (ITNEHole stp) =
-    TANEHole u∈Δ wst (preservation bue hbue wt stp)
+  ... | TPair wt1 wt2 = wt2
+  preservation (BUHole buσ bue σbde) (HBUHole hbuσ hbue σhbde)
+               (THole u∈Δ wst wt) (ITHole stp) =
+    THole u∈Δ wst (preservation bue hbue wt stp)
   
   -- because we separate exhaustiveness checking from type checking,
   -- we need a separate preservation theorem just for exhaustiveness
@@ -182,11 +182,11 @@ module preservation where
                             Δp ⊢ e1 exhaustive →
                             e1 ↦ e2 →
                             Δp ⊢ e2 exhaustive
-  exhaustive-preservation (EXAp ex1 ex2) (ITApFun stp) =
+  exhaustive-preservation (EXAp ex1 ex2) (ITpFun stp) =
     EXAp (exhaustive-preservation ex1 stp) ex2
-  exhaustive-preservation (EXAp ex1 ex2) (ITApArg fin stp) =
+  exhaustive-preservation (EXAp ex1 ex2) (ITpArg fin stp) =
     EXAp ex1 (exhaustive-preservation ex2 stp)
-  exhaustive-preservation (EXAp (EXLam ex1) ex2) (ITAp fin) =
+  exhaustive-preservation (EXAp (EXLam ex1) ex2) (ITp fin) =
     subst-exhaustive ex1 ex2
   exhaustive-preservation (EXPair ex1 ex2) (ITPairL stp) =
     EXPair (exhaustive-preservation ex1 stp) ex2
@@ -258,8 +258,8 @@ module preservation where
         satormay-or-l (satormay-∨-satormay-∨+ (satormay-or-r satr))
       ... | Inr satrs =
         satormay-or-r satrs
-  exhaustive-preservation (EXNEHole exσ ex1) (ITNEHole stp) =
-    EXNEHole exσ (exhaustive-preservation ex1 stp)
+  exhaustive-preservation (EXHole exσ ex1) (ITHole stp) =
+    EXHole exσ (exhaustive-preservation ex1 stp)
 
   -- because we separate redundancy checking from type checking,
   -- we need a separate preservation theorem just for nonredundancy
@@ -277,11 +277,11 @@ module preservation where
                               Δp ⊢ e1 nonredundant →
                               e1 ↦ e2 →
                               Δp ⊢ e2 nonredundant
-  nonredundant-preservation (NRAp nr1 nr2) (ITApFun stp) =
+  nonredundant-preservation (NRAp nr1 nr2) (ITpFun stp) =
     NRAp (nonredundant-preservation nr1 stp) nr2
-  nonredundant-preservation (NRAp nr1 nr2) (ITApArg fin stp) =
+  nonredundant-preservation (NRAp nr1 nr2) (ITpArg fin stp) =
     NRAp nr1 (nonredundant-preservation nr2 stp)
-  nonredundant-preservation (NRAp (NRLam nr1) nr2) (ITAp fin) =
+  nonredundant-preservation (NRAp (NRLam nr1) nr2) (ITp fin) =
     subst-nonredundant nr1 nr2
   nonredundant-preservation (NRPair nr1 nr2) (ITPairL stp) =
     NRPair (nonredundant-preservation nr1 stp) nr2
@@ -352,6 +352,6 @@ module preservation where
         with sat-∨+-sat-∨ sat
       ... | CSOrL satpre = CSOrL (CSOrR satpre)
       ... | CSOrR satr = CSOrR satr 
-  nonredundant-preservation (NRNEHole nr) (ITNEHole stp) =
-    NRNEHole (nonredundant-preservation nr stp)
+  nonredundant-preservation (NRHole nr) (ITHole stp) =
+    NRHole (nonredundant-preservation nr stp)
 

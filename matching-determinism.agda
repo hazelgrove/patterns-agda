@@ -35,14 +35,14 @@ module matching-determinism where
     MayMatch (MMNotIntro ni RNum) 
   ... | Inr ¬ni
     with wt
-  ... | TAAp _ _ = abort (¬ni NVAp)
-  ... | TAMatchZPre _ _ = abort (¬ni NVMatch)
-  ... | TAMatchNZPre _ _ _ _ _ = abort (¬ni NVMatch)
-  ... | TAFst _ = abort (¬ni NVFst)
-  ... | TASnd _ = abort (¬ni NVSnd)
-  ... | TAEHole _ _ = abort (¬ni NVEHole)
-  ... | TANEHole _ _ _ = abort (¬ni NVNEHole)
-  ... | TANum {n = m}
+  ... | TAp _ _ = abort (¬ni NVAp)
+  ... | TMatchZPre _ _ = abort (¬ni NVMatch)
+  ... | TMatchNZPre _ _ _ _ _ = abort (¬ni NVMatch)
+  ... | TFst _ = abort (¬ni NVFst)
+  ... | TSnd _ = abort (¬ni NVSnd)
+  ... | TEHole _ _ = abort (¬ni NVEHole)
+  ... | THole _ _ _ = abort (¬ni NVHole)
+  ... | TNum {n = m}
     with nat-dec m n
   ... | Inl refl =
     Match ([] , MNum)
@@ -57,16 +57,16 @@ module matching-determinism where
     MayMatch (MMNotIntro ni RInl) 
   ... | Inr ¬ni
     with wt
-  ... | TAAp _ _ = abort (¬ni NVAp)
-  ... | TAMatchZPre _ _ = abort (¬ni NVMatch)
-  ... | TAMatchNZPre _ _ _ _ _ = abort (¬ni NVMatch)
-  ... | TAFst _ = abort (¬ni NVFst)
-  ... | TASnd _ = abort (¬ni NVSnd)
-  ... | TAEHole _ _ = abort (¬ni NVEHole)
-  ... | TANEHole _ _ _ = abort (¬ni NVNEHole)
-  ... | TAInr wt₁ =
+  ... | TAp _ _ = abort (¬ni NVAp)
+  ... | TMatchZPre _ _ = abort (¬ni NVMatch)
+  ... | TMatchNZPre _ _ _ _ _ = abort (¬ni NVMatch)
+  ... | TFst _ = abort (¬ni NVFst)
+  ... | TSnd _ = abort (¬ni NVSnd)
+  ... | TEHole _ _ = abort (¬ni NVEHole)
+  ... | THole _ _ _ = abort (¬ni NVHole)
+  ... | TInr wt₁ =
     NotMatch NMConfL
-  ... | TAInl wt₁
+  ... | TInl wt₁
     with matching-exhaust (inl-final fin) wt₁ pt
   ... | Match (θ , mat) =
     Match (θ , (MInl mat))
@@ -80,16 +80,16 @@ module matching-determinism where
     MayMatch (MMNotIntro ni RInr) 
   ... | Inr ¬ni
     with wt
-  ... | TAAp _ _ = abort (¬ni NVAp)
-  ... | TAMatchZPre _ _ = abort (¬ni NVMatch)
-  ... | TAMatchNZPre _ _ _ _ _ = abort (¬ni NVMatch)
-  ... | TAFst _ = abort (¬ni NVFst)
-  ... | TASnd _ = abort (¬ni NVSnd)
-  ... | TAEHole _ _ = abort (¬ni NVEHole)
-  ... | TANEHole _ _ _ = abort (¬ni NVNEHole)
-  ... | TAInl wt₁ =
+  ... | TAp _ _ = abort (¬ni NVAp)
+  ... | TMatchZPre _ _ = abort (¬ni NVMatch)
+  ... | TMatchNZPre _ _ _ _ _ = abort (¬ni NVMatch)
+  ... | TFst _ = abort (¬ni NVFst)
+  ... | TSnd _ = abort (¬ni NVSnd)
+  ... | TEHole _ _ = abort (¬ni NVEHole)
+  ... | THole _ _ _ = abort (¬ni NVHole)
+  ... | TInl wt₁ =
     NotMatch NMConfR
-  ... | TAInr wt₁
+  ... | TInr wt₁
     with matching-exhaust (inr-final fin) wt₁ pt
   ... | Match (θ , mat) =
     Match (θ , MInr mat)
@@ -103,41 +103,41 @@ module matching-determinism where
     with matching-exhaust
            (FIndet (IFst (λ{e1 e2 refl → contra ni (λ ())})
                          (final-notintro-indet fin ni)))
-           (TAFst wt) pt1 |
+           (TFst wt) pt1 |
          matching-exhaust
            (FIndet (ISnd (λ{e1 e2 refl → contra ni λ ()})
                          (final-notintro-indet fin ni)))
-           (TASnd wt) pt2
+           (TSnd wt) pt2
   ... | Match (θ1 , mat1) | Match (θ2 , mat2) =
     Match (θ1 ++ θ2 , MNotIntroPair ni mat1 mat2)
   ... | Match mat1 | MayMatch (MMNotIntro ni2 ref2) =
     MayMatch (MMNotIntro ni (RPairR ref2))
   ... | Match mat1 | MayMatch MMEHole =
     MayMatch (MMNotIntro ni (RPairR REHole))
-  ... | Match mat1 | MayMatch MMNEHole =
-    MayMatch (MMNotIntro ni (RPairR RNEHole)) 
+  ... | Match mat1 | MayMatch MMHole =
+    MayMatch (MMNotIntro ni (RPairR RHole)) 
   ... | MayMatch (MMNotIntro ni1 ref1) | Match mat2 =
     MayMatch (MMNotIntro ni (RPairL ref1))  
   ... | MayMatch MMEHole | Match mat2 =
     MayMatch (MMNotIntro ni (RPairL REHole))
-  ... | MayMatch MMNEHole | Match mat2 =
-    MayMatch (MMNotIntro ni (RPairL RNEHole))
+  ... | MayMatch MMHole | Match mat2 =
+    MayMatch (MMNotIntro ni (RPairL RHole))
   ... | MayMatch (MMNotIntro ni1 ref1) | MayMatch mmat2 =
     MayMatch (MMNotIntro ni (RPairL ref1))   
   ... | MayMatch MMEHole | MayMatch mmat2 =
     MayMatch (MMNotIntro ni (RPairL REHole))
-  ... | MayMatch MMNEHole | MayMatch mmat2 =
-    MayMatch (MMNotIntro ni (RPairL RNEHole))       
+  ... | MayMatch MMHole | MayMatch mmat2 =
+    MayMatch (MMNotIntro ni (RPairL RHole))       
   matching-exhaust {e = e} fin wt (PTPair disj pt1 pt2) | Inr ¬ni
     with wt
-  ... | TAAp _ _ = abort (¬ni NVAp)
-  ... | TAMatchZPre _ _ = abort (¬ni NVMatch)
-  ... | TAMatchNZPre _ _ _ _ _ = abort (¬ni NVMatch)
-  ... | TAFst _ = abort (¬ni NVFst)
-  ... | TASnd _ = abort (¬ni NVSnd)
-  ... | TAEHole _ _ = abort (¬ni NVEHole)
-  ... | TANEHole _ _ _ = abort (¬ni NVNEHole)
-  ... | TAPair wt1 wt2
+  ... | TAp _ _ = abort (¬ni NVAp)
+  ... | TMatchZPre _ _ = abort (¬ni NVMatch)
+  ... | TMatchNZPre _ _ _ _ _ = abort (¬ni NVMatch)
+  ... | TFst _ = abort (¬ni NVFst)
+  ... | TSnd _ = abort (¬ni NVSnd)
+  ... | TEHole _ _ = abort (¬ni NVEHole)
+  ... | THole _ _ _ = abort (¬ni NVHole)
+  ... | TPair wt1 wt2
     with matching-exhaust (π1 (pair-final fin)) wt1 pt1 |
          matching-exhaust (π2 (pair-final fin)) wt2 pt2
   ... | Match (θ1 , mat1) | Match (θ2 , mat2) =
@@ -156,8 +156,8 @@ module matching-determinism where
     NotMatch (NMPairL nmat1)
   matching-exhaust {e = e} {p = p} fin wt (PTEHole w∈Δp) =
     MayMatch MMEHole
-  matching-exhaust {e = e} {p = p} fin wt (PTNEHole w∈Δp pt) =
-    MayMatch MMNEHole
+  matching-exhaust {e = e} {p = p} fin wt (PTHole w∈Δp pt) =
+    MayMatch MMHole
   matching-exhaust {e = e} {p = p} fin wt PTWild =
     Match ([] , MWild)
 

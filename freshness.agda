@@ -44,7 +44,7 @@ module freshness where
                   unbound-in-p x wild
       UBPEHole  : ∀{x u} →
                   unbound-in-p x ⦇-⦈[ u ]
-      UBPNEHole : ∀{x p w τ} →
+      UBPHole : ∀{x p w τ} →
                   unbound-in-p x p →
                   unbound-in-p x ⦇⌜ p ⌟⦈[ w , τ ]
 
@@ -124,7 +124,7 @@ module freshness where
       UBEHole  : ∀{x u σ} →
                  unbound-in-σ x σ →
                  unbound-in-e x (⦇-⦈⟨ u , σ ⟩)
-      UBNEHole : ∀{x e u σ} →
+      UBHole : ∀{x e u σ} →
                  unbound-in-σ x σ →
                  unbound-in-e x e →
                  unbound-in-e x (⦇⌜ e ⌟⦈⟨ u , σ ⟩)
@@ -238,7 +238,7 @@ module freshness where
       FEHole  : ∀{x u σ} →
                 fresh-σ x σ →
                 fresh x (⦇-⦈⟨ u , σ ⟩)
-      FNEHole : ∀{x e u σ} →
+      FHole : ∀{x e u σ} →
                 fresh-σ x σ →
                 fresh x e →
                 fresh x (⦇⌜ e ⌟⦈⟨ u , σ ⟩)
@@ -277,7 +277,7 @@ module freshness where
       HUBPEHole  : ∀{u u'} →
                    u ≠ u' →
                    hole-unbound-in-p u ⦇-⦈[ u' ]
-      HUBPNEHole : ∀{u p u' τ} →
+      HUBPHole : ∀{u p u' τ} →
                    u ≠ u' →
                    hole-unbound-in-p u p →
                    hole-unbound-in-p u ⦇⌜ p ⌟⦈[ u' , τ ]
@@ -355,7 +355,7 @@ module freshness where
       HUBEHole  : ∀{u u' σ} →
                   hole-unbound-in-σ u σ →
                   hole-unbound-in-e u (⦇-⦈⟨ u' , σ ⟩)
-      HUBNEHole : ∀{u e u' σ} →
+      HUBHole : ∀{u e u' σ} →
                   hole-unbound-in-σ u σ →
                   hole-unbound-in-e u e →
                   hole-unbound-in-e u (⦇⌜ e ⌟⦈⟨ u' , σ ⟩)
@@ -465,7 +465,7 @@ module freshness where
                  u ≠ u' →
                  hole-fresh-σ u σ →
                  hole-fresh u (⦇-⦈⟨ u' , σ ⟩)
-      HFNEHole : ∀{u e u' σ} →
+      HFHole : ∀{u e u' σ} →
                  u ≠ u' →
                  hole-fresh-σ u σ →
                  hole-fresh u e →

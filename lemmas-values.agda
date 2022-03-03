@@ -25,22 +25,22 @@ module lemmas-values where
   values-same-type (IVIndet ni wt₁ eval' wt₁') wt
     with expr-type-unicity wt wt₁
   ... | refl = wt₁'
-  values-same-type (IVInl ind (TAInl wt₁) vals) (TAInl wt)
+  values-same-type (IVInl ind (TInl wt₁) vals) (TInl wt)
     with expr-type-unicity wt wt₁
   ... | refl
     with values-same-type vals wt₁
-  ... | wt₁' = TAInl wt₁'
-  values-same-type (IVInr ind (TAInr wt₁) vals) (TAInr wt)
+  ... | wt₁' = TInl wt₁'
+  values-same-type (IVInr ind (TInr wt₁) vals) (TInr wt)
     with expr-type-unicity wt wt₁
   ... | refl
     with values-same-type vals wt₁
-  ... | wt₁' = TAInr wt₁'
-  values-same-type (IVPair ind (TAPair wt1₁ wt2₁) vals1 vals2)
-                   (TAPair wt1 wt2)
+  ... | wt₁' = TInr wt₁'
+  values-same-type (IVPair ind (TPair wt1₁ wt2₁) vals1 vals2)
+                   (TPair wt1 wt2)
     with expr-type-unicity wt1 wt1₁ | expr-type-unicity wt2 wt2₁
   ... | refl | refl
     with values-same-type vals1 wt1₁ | values-same-type vals2 wt2₁
-  ... | wt1₁' | wt2₁' = TAPair wt1₁' wt2₁'
+  ... | wt1₁' | wt2₁' = TPair wt1₁' wt2₁'
 
   -- every value is val
   values-val : ∀{e e' Δ Δp} →
@@ -92,30 +92,30 @@ module lemmas-values where
                    (∅ , Δ , Δp ⊢ e :: τ) ×
                    (∀{x} → x ∈l vars → fresh x e)
   type-has-val unit vars Δ Δp =
-    unit , VUnit , TAUnit , λ _ → FUnit
+    unit , VUnit , TUnit , λ _ → FUnit
   type-has-val num vars Δ Δp =
-    N 0 , VNum , TANum , λ _ → FNum
+    N 0 , VNum , TNum , λ _ → FNum
   type-has-val (τ1 ==> τ2) vars Δ Δp
     with type-has-val τ2
                       (suc (max-var vars) :: vars)
                       Δ Δp
   ... | e2 , val2 , wt2 , frsh2 =
     (·λ (suc (max-var vars)) ·[ τ1 ] e2) , VLam ,
-    TALam refl (weaken-ta-Γ (frsh2 here) wt2) ,
+    TLam refl (weaken-ta-Γ (frsh2 here) wt2) ,
     λ x∈vars →
       FLam (<-≠ (elem<sucmax x∈vars))
            (frsh2 (there x∈vars))
   type-has-val (τ1 ⊕ τ2) vars Δ Δp
     with type-has-val τ1 vars Δ Δp
   ... | e1 , val1 , wt1 , frsh1 =
-    inl τ2 e1 , VInl val1 , TAInl wt1 ,
+    inl τ2 e1 , VInl val1 , TInl wt1 ,
       λ x∈vars → FInl (frsh1 x∈vars)
   type-has-val (τ1 ⊠ τ2) vars Δ Δp
     with type-has-val τ1 vars Δ Δp |
          type-has-val τ2 vars Δ Δp
   ... | e1 , val1 , wt1 , frsh1
       | e2 , val2 , wt2 , frsh2 =
-    ⟨ e1 , e2 ⟩ , VPair val1 val2 , TAPair wt1 wt2 ,
+    ⟨ e1 , e2 ⟩ , VPair val1 val2 , TPair wt1 wt2 ,
     λ x∈vars → FPair (frsh1 x∈vars) (frsh2 x∈vars)
 
   -- every indet expression has some value
@@ -124,34 +124,34 @@ module lemmas-values where
                      ∅ , Δ , Δp ⊢ e :: τ →
                      Σ[ e' ∈ ihexp ] (e' ∈[ Δ , Δp ]values e)
   indet-has-values {Δ = Δ} {Δp = Δp} {τ = τ}
-                   (IAp ind1 fin2) (TAAp wt1 wt2)
+                   (IAp ind1 fin2) (TAp wt1 wt2)
     with type-has-val τ [] Δ Δp
-  ... | e , eval , ewt , _ = e , IVIndet NVAp (TAAp wt1 wt2) eval ewt
-  indet-has-values (IInl ind) (TAInl wt)
+  ... | e , eval , ewt , _ = e , IVIndet NVAp (TAp wt1 wt2) eval ewt
+  indet-has-values (IInl ind) (TInl wt)
     with indet-has-values ind wt
-  ... | e' , evals = inl _ e' , IVInl (IInl ind) (TAInl wt) evals
-  indet-has-values (IInr ind) (TAInr wt)
+  ... | e' , evals = inl _ e' , IVInl (IInl ind) (TInl wt) evals
+  indet-has-values (IInr ind) (TInr wt)
     with indet-has-values ind wt
-  ... | e' , evals = inr _ e' , IVInr (IInr ind) (TAInr wt) evals
+  ... | e' , evals = inr _ e' , IVInr (IInr ind) (TInr wt) evals
   indet-has-values {Δ = Δ} {Δp = Δp} {τ = τ}
                    (IMatch fin mp) wt
     with type-has-val τ [] Δ Δp
   ... | e , eval , ewt , _ = e , IVIndet NVMatch wt eval ewt
-  indet-has-values {e = ⟨ e1 , e2 ⟩} (IPairL ind1 val2) (TAPair wt1 wt2)
+  indet-has-values {e = ⟨ e1 , e2 ⟩} (IPairL ind1 val2) (TPair wt1 wt2)
     with indet-has-values ind1 wt1
   ... | e1' , e1vals =
     ⟨ e1' , e2 ⟩ ,
-    IVPair (IPairL ind1 val2) (TAPair wt1 wt2) e1vals (IVVal val2 wt2)
-  indet-has-values {e = ⟨ e1 , e2 ⟩} (IPairR val1 ind2) (TAPair wt1 wt2)
+    IVPair (IPairL ind1 val2) (TPair wt1 wt2) e1vals (IVVal val2 wt2)
+  indet-has-values {e = ⟨ e1 , e2 ⟩} (IPairR val1 ind2) (TPair wt1 wt2)
     with indet-has-values ind2 wt2
   ... | e2' , e2vals = 
     ⟨ e1 , e2' ⟩ ,
-    IVPair (IPairR val1 ind2) (TAPair wt1 wt2) (IVVal val1 wt1) e2vals
-  indet-has-values {e = ⟨ e1 , e2 ⟩} (IPair ind1 ind2) (TAPair wt1 wt2)
+    IVPair (IPairR val1 ind2) (TPair wt1 wt2) (IVVal val1 wt1) e2vals
+  indet-has-values {e = ⟨ e1 , e2 ⟩} (IPair ind1 ind2) (TPair wt1 wt2)
     with indet-has-values ind1 wt1 | indet-has-values ind2 wt2
   ... | e1' , e1vals | e2' , e2vals =
     ⟨ e1' , e2' ⟩ ,
-    IVPair (IPair ind1 ind2) (TAPair wt1 wt2) e1vals e2vals
+    IVPair (IPair ind1 ind2) (TPair wt1 wt2) e1vals e2vals
   indet-has-values {Δ = Δ} {Δp = Δp} {τ = τ} (IFst npr ind1) wt
     with type-has-val τ [] Δ Δp
   ... | e , eval , ewt , _ = e , IVIndet NVFst wt eval ewt
@@ -161,9 +161,9 @@ module lemmas-values where
   indet-has-values {Δ = Δ} {Δp = Δp} {τ = τ} IEHole wt
     with type-has-val τ [] Δ Δp
   ... | e , eval , ewt , _ = e , IVIndet NVEHole wt eval ewt
-  indet-has-values {Δ = Δ} {Δp = Δp} {τ = τ} (INEHole x) wt
+  indet-has-values {Δ = Δ} {Δp = Δp} {τ = τ} (IHole x) wt
     with type-has-val τ [] Δ Δp
-  ... | e , eval , ewt , _ = e , IVIndet NVNEHole wt eval ewt
+  ... | e , eval , ewt , _ = e , IVIndet NVHole wt eval ewt
 
   -- if an expression does not satormay a constraint,
   -- then neither does any of its values
@@ -191,20 +191,20 @@ module lemmas-values where
     ¬satm (CSMSMay (CMSNotIntro NVSnd RXNum PNum))
   indet-values-not-satormay IEHole vals wt CTNum ¬satm satm' =
     ¬satm (CSMSMay (CMSNotIntro NVEHole RXNum PNum))
-  indet-values-not-satormay (INEHole fin) vals wt CTNum ¬satm satm' =
-    ¬satm (CSMSMay (CMSNotIntro NVNEHole RXNum PNum))
+  indet-values-not-satormay (IHole fin) vals wt CTNum ¬satm satm' =
+    ¬satm (CSMSMay (CMSNotIntro NVHole RXNum PNum))
   indet-values-not-satormay (IAp ind1 fin2) vals wt (CTInl ct) ¬satm satm' =
     ¬satm (CSMSMay (CMSNotIntro NVAp RXInl (satormay-pos satm')))
-  indet-values-not-satormay (IInl ind) (IVVal eval wt₁) (TAInl wt)
+  indet-values-not-satormay (IInl ind) (IVVal eval wt₁) (TInl wt)
                             (CTInl ct) ¬satm satm' = ¬satm satm'
-  indet-values-not-satormay (IInl ind) (IVInl ind₁ wt₁ vals) (TAInl wt)
+  indet-values-not-satormay (IInl ind) (IVInl ind₁ wt₁ vals) (TInl wt)
                             (CTInl ct) ¬satm satm' =
     indet-values-not-satormay ind vals wt ct
                               (λ satm → ¬satm (satormay-inl satm))
                               (inl-satormay satm')
-  indet-values-not-satormay (IInr ind) (IVVal eval wt₁) (TAInr wt)
+  indet-values-not-satormay (IInr ind) (IVVal eval wt₁) (TInr wt)
                             (CTInl ct) ¬satm (CSMSMay (CMSNotIntro () _ _))
-  indet-values-not-satormay (IInr ind) (IVInr ind₁ wt₁ vals) (TAInr wt)
+  indet-values-not-satormay (IInr ind) (IVInr ind₁ wt₁ vals) (TInr wt)
                             (CTInl ct) ¬satm (CSMSMay (CMSNotIntro () _ _))
   indet-values-not-satormay (IMatch fin mp) vals wt (CTInl ct) ¬satm satm' =
     ¬satm (CSMSMay (CMSNotIntro NVMatch RXInl (satormay-pos satm')))
@@ -214,17 +214,17 @@ module lemmas-values where
     ¬satm (CSMSMay (CMSNotIntro NVSnd RXInl (satormay-pos satm')))
   indet-values-not-satormay IEHole vals wt (CTInl ct) ¬satm satm' =
     ¬satm (CSMSMay (CMSNotIntro NVEHole RXInl (satormay-pos satm')))
-  indet-values-not-satormay (INEHole x) vals wt (CTInl ct) ¬satm satm' =
-    ¬satm (CSMSMay (CMSNotIntro NVNEHole RXInl (satormay-pos satm')))
+  indet-values-not-satormay (IHole x) vals wt (CTInl ct) ¬satm satm' =
+    ¬satm (CSMSMay (CMSNotIntro NVHole RXInl (satormay-pos satm')))
   indet-values-not-satormay (IAp ind x) vals wt (CTInr ct) ¬satm satm' =
     ¬satm (CSMSMay (CMSNotIntro NVAp RXInr (satormay-pos satm')))
-  indet-values-not-satormay (IInl ind) (IVVal eval wt₁) (TAInl wt)
+  indet-values-not-satormay (IInl ind) (IVVal eval wt₁) (TInl wt)
                             (CTInr ct) ¬satm (CSMSMay (CMSNotIntro () _ _))
-  indet-values-not-satormay (IInl ind) (IVInl ind₁ wt₁ vals) (TAInl wt)
+  indet-values-not-satormay (IInl ind) (IVInl ind₁ wt₁ vals) (TInl wt)
                             (CTInr ct) ¬satm (CSMSMay (CMSNotIntro () _ _))
-  indet-values-not-satormay (IInr ind) (IVVal eval wt₁) (TAInr wt)
+  indet-values-not-satormay (IInr ind) (IVVal eval wt₁) (TInr wt)
                             (CTInr ct) ¬satm satm' = ¬satm satm'
-  indet-values-not-satormay (IInr ind) (IVInr ind₁ wt₁ vals) (TAInr wt)
+  indet-values-not-satormay (IInr ind) (IVInr ind₁ wt₁ vals) (TInr wt)
                             (CTInr ct) ¬satm satm' =
     indet-values-not-satormay ind vals wt ct
                               (λ satm → ¬satm (satormay-inr satm))
@@ -237,8 +237,8 @@ module lemmas-values where
     ¬satm (CSMSMay (CMSNotIntro NVSnd RXInr (satormay-pos satm')))
   indet-values-not-satormay IEHole vals wt (CTInr ct) ¬satm satm' =
     ¬satm (CSMSMay (CMSNotIntro NVEHole RXInr (satormay-pos satm')))
-  indet-values-not-satormay (INEHole x) vals wt (CTInr ct) ¬satm satm' =
-    ¬satm (CSMSMay (CMSNotIntro NVNEHole RXInr (satormay-pos satm')))
+  indet-values-not-satormay (IHole x) vals wt (CTInr ct) ¬satm satm' =
+    ¬satm (CSMSMay (CMSNotIntro NVHole RXInr (satormay-pos satm')))
   indet-values-not-satormay {e = e} {ξ = ⟨ ξ1 , ξ2 ⟩} ind vals wt
                             (CTPair ct1 ct2) ¬satm satm'
     with notintro-dec e
@@ -270,11 +270,11 @@ module lemmas-values where
   ... | refl with eval'
   ... | VPair val1 val2
     with wt'
-  ... | TAPair wt1' wt2' =
+  ... | TPair wt1' wt2' =
     indet-values-not-satormay
      (ISnd (λ{e1 e2 refl → contra ni (λ ()) }) ind)
-     (IVIndet NVSnd (TASnd wt) val2 wt2')
-     (TASnd wt) ct2 ¬satm2 (π2 (pair-satormay satm'))
+     (IVIndet NVSnd (TSnd wt) val2 wt2')
+     (TSnd wt) ct2 ¬satm2 (π2 (pair-satormay satm'))
   indet-values-not-satormay {e = e} {ξ = ⟨ ξ1 , ξ2 ⟩} ind vals wt
                             (CTPair ct1 ct2) ¬satm satm' 
       | Inl ni | Inr ¬satm1
@@ -285,11 +285,11 @@ module lemmas-values where
   ... | refl with eval'
   ... | VPair val1 val2
     with wt'
-  ... | TAPair wt1' wt2' =
+  ... | TPair wt1' wt2' =
     indet-values-not-satormay
       (IFst (λ{e1 e2 refl → contra ni (λ ())}) ind)
-      (IVIndet NVFst (TAFst wt) val1 wt1')
-      (TAFst wt) ct1 ¬satm1 (π1 (pair-satormay satm'))
+      (IVIndet NVFst (TFst wt) val1 wt1')
+      (TFst wt) ct1 ¬satm1 (π1 (pair-satormay satm'))
   indet-values-not-satormay ind vals wt (CTPair ct1 ct2) ¬satm satm'
       | Inr ¬ni
     with vals
@@ -297,11 +297,11 @@ module lemmas-values where
   ... | IVIndet ni _ _ _ = ¬ni ni
   ... | IVPair _ _ vals1 vals2
     with wt
-  ... | TAPair wt1 wt2
+  ... | TPair wt1 wt2
     with ind
   indet-values-not-satormay {e = ⟨ e1 , e2 ⟩} {ξ = ⟨ ξ1 , ξ2 ⟩}
                             ind vals wt (CTPair ct1 ct2) ¬satm satm'
-      | Inr ¬ni | IVPair _ _ vals1 vals2 | TAPair wt1 wt2 | IPair ind1 ind2
+      | Inr ¬ni | IVPair _ _ vals1 vals2 | TPair wt1 wt2 | IPair ind1 ind2
     with satisfyormay-dec e1 ξ1
   ... | Inr ¬sat1 =
     indet-values-not-satormay ind1 vals1 wt1 ct1 ¬sat1
@@ -314,14 +314,14 @@ module lemmas-values where
                               (π2 (pair-satormay satm'))
   indet-values-not-satormay {e = ⟨ e1 , e2 ⟩} {ξ = ⟨ ξ1 , ξ2 ⟩}
                             ind vals wt (CTPair ct1 ct2) ¬satm satm'
-      | Inr ¬ni | IVPair _ _ vals1 vals2 | TAPair wt1 wt2 | IPairL ind1 val2
+      | Inr ¬ni | IVPair _ _ vals1 vals2 | TPair wt1 wt2 | IPairL ind1 val2
     with satisfyormay-dec e1 ξ1
   ... | Inr ¬sat1 = 
     indet-values-not-satormay ind1 vals1 wt1 ct1 ¬sat1
                               (π1 (pair-satormay satm'))
   indet-values-not-satormay {e = ⟨ e1 , e2 ⟩} {ξ = ⟨ ξ1 , ξ2 ⟩}
                             ind vals wt (CTPair ct1 ct2) ¬satm satm'
-      | Inr ¬ni | IVPair _ _ vals1 vals2 | TAPair wt1 wt2 | IPairL ind1 val2
+      | Inr ¬ni | IVPair _ _ vals1 vals2 | TPair wt1 wt2 | IPairL ind1 val2
       | Inl sat1
     with satisfyormay-dec e2 ξ2
   ... | Inl sat2 = ¬satm (satormay-pair sat1 sat2)
@@ -335,7 +335,7 @@ module lemmas-values where
   
   indet-values-not-satormay {e = ⟨ e1 , e2 ⟩} {ξ = ⟨ ξ1 , ξ2 ⟩}
                             ind vals wt (CTPair ct1 ct2) ¬satm satm'
-      | Inr ¬ni | IVPair _ _ vals1 vals2 |  TAPair wt1 wt2 | IPairR val1 ind2
+      | Inr ¬ni | IVPair _ _ vals1 vals2 |  TPair wt1 wt2 | IPairR val1 ind2
     with satisfyormay-dec e2 ξ2
   ... | Inr ¬sat2 =
     indet-values-not-satormay ind2 vals2 wt2 ct2 ¬sat2

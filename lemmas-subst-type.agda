@@ -82,9 +82,9 @@ module lemmas-subst-type where
                  (Γ ,, (x , τ1)) , Δ , Δp ⊢ e1 :: τ →
                  Γ , Δ , Δp ⊢ e2 :: τ1 →
                  Γ , Δ , Δp ⊢ [ e2 / x ] e1 :: τ
-    subst-type bd hbd fin2 TAUnit wt2 = TAUnit
-    subst-type bd hbd fin2 TANum wt2 = TANum
-    subst-type {x = x} bd hbd fin2 (TAVar {x = y} y∈) wt2
+    subst-type bd hbd fin2 TUnit wt2 = TUnit
+    subst-type bd hbd fin2 TNum wt2 = TNum
+    subst-type {x = x} bd hbd fin2 (TVar {x = y} y∈) wt2
       with nat-dec y x
     ... | Inl refl
       with nat-dec x x
@@ -92,47 +92,47 @@ module lemmas-subst-type where
     ... | Inl refl
       with some-inj y∈
     ... | refl = wt2
-    subst-type {x = x} bd hbd fin2 (TAVar {x = y} y∈) wt2
+    subst-type {x = x} bd hbd fin2 (TVar {x = y} y∈) wt2
         | Inr y≠x
       with nat-dec x y
     ... | Inl refl = abort (y≠x refl)
-    ... | Inr x≠y = TAVar y∈
+    ... | Inr x≠y = TVar y∈
     subst-type {Γ = Γ} {x = x} bd hbd bu
-               (TALam {x = y} y# wts) wt2
+               (TLam {x = y} y# wts) wt2
       with nat-dec y x
     ... | Inl refl
       with nat-dec x x
     ... | Inr x≠x = abort (x≠x refl)
     ... | Inl refl = abort (some-not-none y#)
     subst-type {Γ = Γ} {x = x} (BDLam ub bd) (HBDLam hbd) fin2
-               (TALam {x = y} y# wts) wt2
+               (TLam {x = y} y# wts) wt2
         | Inr y≠x
       with nat-dec x y
     ... | Inl refl = abort (y≠x refl)
     ... | Inr x≠y =
-      TALam y#
+      TLam y#
             (subst-type
               bd hbd fin2
               (exchange-ta-Γ x≠y wts)
               (weaken-ta-Γ (binders-fresh wt2 ub y#) wt2))
     subst-type (BDAp bd1 bd2) (HBDAp hbd1 hbd2) fin2
-               (TAAp wts1 wts2) wt2 =
-      TAAp (subst-type bd1 hbd1 fin2 wts1 wt2)
+               (TAp wts1 wts2) wt2 =
+      TAp (subst-type bd1 hbd1 fin2 wts1 wt2)
            (subst-type bd2 hbd2 fin2 wts2 wt2)
-    subst-type (BDInl bd) (HBDInl hbd) fin2 (TAInl wts) wt2 =
-      TAInl (subst-type bd hbd fin2 wts wt2)
-    subst-type (BDInr bd) (HBDInr hbd) fin2 (TAInr wts) wt2 =
-      TAInr (subst-type bd hbd fin2 wts wt2)
+    subst-type (BDInl bd) (HBDInl hbd) fin2 (TInl wts) wt2 =
+      TInl (subst-type bd hbd fin2 wts wt2)
+    subst-type (BDInr bd) (HBDInr hbd) fin2 (TInr wts) wt2 =
+      TInr (subst-type bd hbd fin2 wts wt2)
     subst-type (BDMatch 1d2 (BDZRules _ (BDRules rd2 _)))
                (HBDMatch 1hd2 (HBDZRules _ (HBDRules rhd2 _))) fin2
-               (TAMatchZPre wts (RTOneRule rt)) wt2 = 
-      TAMatchZPre (subst-type 1d2 1hd2 fin2 wts wt2)
+               (TMatchZPre wts (RTOneRule rt)) wt2 = 
+      TMatchZPre (subst-type 1d2 1hd2 fin2 wts wt2)
                   (RTOneRule (subst-type-r rd2 rhd2 fin2
                                            rt wt2))
     subst-type (BDMatch 1d2 (BDZRules _ (BDRules rd2 postd2)))
                (HBDMatch 1hd2 (HBDZRules _ (HBDRules rhd2 posthd2))) fin2
-               (TAMatchZPre wts (RTRules rt rst)) wt2 =
-      TAMatchZPre (subst-type 1d2 1hd2 fin2 wts wt2)
+               (TMatchZPre wts (RTRules rt rst)) wt2 =
+      TMatchZPre (subst-type 1d2 1hd2 fin2 wts wt2)
                   (RTRules (subst-type-r rd2 rhd2 fin2 rt wt2)
                            (subst-type-rs postd2 posthd2 fin2
                                           rst wt2))
@@ -140,9 +140,9 @@ module lemmas-subst-type where
                             (BDZRules pred2 (BDRules rd2 predpost)))
                (HBDMatch 1hd2
                          (HBDZRules prehd2 (HBDRules rhd2 prehdpost))) fin2
-               (TAMatchNZPre wts fin1 pret
+               (TMatchNZPre wts fin1 pret
                              (RTOneRule rt) ¬red) wt2 =
-      TAMatchNZPre (subst-type 1d2 1hd2 fin2 wts wt2)
+      TMatchNZPre (subst-type 1d2 1hd2 fin2 wts wt2)
                    (final-subst-final fin1 fin2)
                    (subst-type-rs pred2 prehd2 fin2 pret wt2)
                    (subst-type-rs (BDRules rd2 BDNoRules)
@@ -152,9 +152,9 @@ module lemmas-subst-type where
     subst-type (BDMatch 1d2 (BDZRules pred2 (BDRules rd2 postd2)))
                (HBDMatch 1hd2
                          (HBDZRules prehd2 (HBDRules rhd2 posthd2))) fin2
-               (TAMatchNZPre wts fin1 pret
+               (TMatchNZPre wts fin1 pret
                                  (RTRules rt postt) ¬red) wt2 =
-      TAMatchNZPre (subst-type 1d2 1hd2 fin2 wts wt2)
+      TMatchNZPre (subst-type 1d2 1hd2 fin2 wts wt2)
                    (final-subst-final fin1 fin2)
                    (subst-type-rs pred2 prehd2 fin2 pret wt2)
                    (subst-type-rs (BDRules rd2 postd2)
@@ -162,18 +162,18 @@ module lemmas-subst-type where
                                   fin2 (RTRules rt postt) wt2)
                    λ{satm → ¬red (final-satormay-subst fin1 satm)}
     subst-type (BDPair bd1 bd2) (HBDPair hbd1 hbd2) fin2
-               (TAPair wts1 wts2) wt2 =
-      TAPair (subst-type bd1 hbd1 fin2 wts1 wt2)
+               (TPair wts1 wts2) wt2 =
+      TPair (subst-type bd1 hbd1 fin2 wts1 wt2)
              (subst-type bd2 hbd2 fin2 wts2 wt2)
-    subst-type (BDFst bd) (HBDFst hbd) fin2 (TAFst wts) wt2 =
-      TAFst (subst-type bd hbd fin2 wts wt2)
-    subst-type (BDSnd bd) (HBDSnd hbd) fin2 (TASnd wts) wt2 =
-      TASnd (subst-type bd hbd fin2 wts wt2)
-    subst-type bd hbd fin2 (TAEHole u∈Δ st) wt2 =
-      TAEHole u∈Δ (STASubst st wt2)
-    subst-type (BDNEHole bdσ bd) (HBDNEHole hbdσ hbd) fin2
-               (TANEHole u∈Δ st wts) wt2 =
-      TANEHole u∈Δ (STASubst st wt2)
+    subst-type (BDFst bd) (HBDFst hbd) fin2 (TFst wts) wt2 =
+      TFst (subst-type bd hbd fin2 wts wt2)
+    subst-type (BDSnd bd) (HBDSnd hbd) fin2 (TSnd wts) wt2 =
+      TSnd (subst-type bd hbd fin2 wts wt2)
+    subst-type bd hbd fin2 (TEHole u∈Δ st) wt2 =
+      TEHole u∈Δ (STSubst st wt2)
+    subst-type (BDHole bdσ bd) (HBDHole hbdσ hbd) fin2
+               (THole u∈Δ st wts) wt2 =
+      THole u∈Δ (STSubst st wt2)
                (subst-type bd hbd fin2 wts wt2)          
     
     subst-type-rs : ∀{Γ Δ Δp x τ1 rs τ ξ τ' e2} →
@@ -238,24 +238,24 @@ module lemmas-subst-type where
                     Γ ## Γp →
                     (e ·: τ ▹ p ⊣ θ) →
                     Γ , Δ , Δp ⊢ θ :sl: Γp
-  mat-substs-type wt PTUnit Γ##Γp MUnit = STAEmpty
-  mat-substs-type wt PTNum Γ##Γp MNum = STAEmpty
+  mat-substs-type wt PTUnit Γ##Γp MUnit = STEmpty
+  mat-substs-type wt PTNum Γ##Γp MNum = STEmpty
   mat-substs-type {Γ = Γ} {Δ = Δ} {Δp = Δp}
                   {e = e} {τ = τ}
                   wt PTVar Γ##Γp (MVar {x = x}) =
     tr (λ qq → Γ , Δ , Δp ⊢ (e , τ , x) :: [] :sl: qq)
        (∪-identityʳ (■ (x , τ)))
-       (STAExtend (disjoint-singleton-apart (##-sym Γ##Γp)) STAEmpty wt)
-  mat-substs-type (TAInl wt) (PTInl pt) Γ##Γp (MInl mat) =
+       (STExtend (disjoint-singleton-apart (##-sym Γ##Γp)) STEmpty wt)
+  mat-substs-type (TInl wt) (PTInl pt) Γ##Γp (MInl mat) =
     mat-substs-type wt pt Γ##Γp mat
-  mat-substs-type (TAInr wt) (PTInr pt) Γ##Γp (MInr mat) =
+  mat-substs-type (TInr wt) (PTInr pt) Γ##Γp (MInr mat) =
     mat-substs-type wt pt Γ##Γp mat
   mat-substs-type {Γ = Γ} wt
                   (PTPair {Γ1 = Γ1} {Γ2 = Γ2} Γ1##Γ2 pt1 pt2)
                   Γ##Γp
                   (MPair mat1 mat2)
     with wt
-  ... | TAPair wt1 wt2 =
+  ... | TPair wt1 wt2 =
     substs-concat-type
       (mat-substs-type wt1 pt1
                        (##-sym (union-disjoint-l {Γ1 = Γ1} {Γ2 = Γ2}
@@ -270,15 +270,15 @@ module lemmas-subst-type where
                   Γ##Γp
                   (MNotIntroPair ni mat1 mat2) =
     substs-concat-type
-      (mat-substs-type (TAFst wt) pt1
+      (mat-substs-type (TFst wt) pt1
                        (##-sym (union-disjoint-l {Γ1 = Γ1} {Γ2 = Γ2}
                                                  (##-sym Γ##Γp)))
                        mat1)
-      (mat-substs-type (TASnd wt) pt2
+      (mat-substs-type (TSnd wt) pt2
                        (##-sym (union-disjoint-r {Γ1 = Γ1} {Γ2 = Γ2}
                                                  (##-sym Γ##Γp)))
                        mat2)
-  mat-substs-type wt PTWild Γ##Γp MWild = STAEmpty
+  mat-substs-type wt PTWild Γ##Γp MWild = STEmpty
 
   -- appling a series of substitution for variables to expressions
   -- of the same type does not change the type of the resulting term
@@ -287,13 +287,13 @@ module lemmas-subst-type where
                 Γ , Δ , Δp ⊢ θ :sl: Γθ →
                 (Γθ ∪ Γ) , Δ , Δp ⊢ e :: τ →
                 Γ , Δ , Δp ⊢ apply-substs θ e :: τ
-  substs-type SθEmpty STAEmpty wt = wt
+  substs-type SθEmpty STEmpty wt = wt
   substs-type {Γ = Γ} {Δ = Δ} {Δp = Δp} 
               {θ = (d , τ' , y) :: θ} {e = e} {τ = τ}
               (SθExtend yubθ sim)
-              (STAExtend {Γθ = Γθ} {τ = τ'} {y = y} y#Γ wst wtd)
+              (STExtend {Γθ = Γθ} {τ = τ'} {y = y} y#Γ wst wtd)
               wt =
-    TAAp (TALam y#Γ
+    TAp (TLam y#Γ
                 (substs-type {Γθ = Γθ}
                              sim
                              (weaken-θ-∪Γ {Γ' = ■ (y , τ')} frsh wst)

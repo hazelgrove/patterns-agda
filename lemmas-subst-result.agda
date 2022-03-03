@@ -66,8 +66,8 @@ module lemmas-subst-result where
     indet-subst-final (ISnd npr ind1) fin2 =
       ISnd (subst-not-pair ind1 npr) (indet-subst-final ind1 fin2)
     indet-subst-final IEHole fin2 = IEHole
-    indet-subst-final (INEHole fin1) fin2 =
-      INEHole (final-subst-final fin1 fin2)
+    indet-subst-final (IHole fin1) fin2 =
+      IHole (final-subst-final fin1 fin2)
 
     -- substituting a final expression into a final expression
     -- yields something still final

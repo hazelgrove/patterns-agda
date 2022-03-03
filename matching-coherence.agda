@@ -22,10 +22,10 @@ module matching-coherence where
   sat-mat fin wt PTNum CSNum = [] , MNum
   sat-mat {e = e} {τ = τ} fin wt (PTVar {x = x}) sat =
     (e , τ , x) :: [] , MVar
-  sat-mat fin (TAInl wt) (PTInl pt) (CSInl sat)
+  sat-mat fin (TInl wt) (PTInl pt) (CSInl sat)
     with sat-mat (inl-final fin) wt pt sat
   ... | θ , mat = θ , MInl mat
-  sat-mat fin (TAInr wt) (PTInr pt) (CSInr sat)
+  sat-mat fin (TInr wt) (PTInr pt) (CSInr sat)
     with sat-mat (inr-final fin) wt pt sat
   ... | θ , mat = θ , MInr mat
   sat-mat {e = e} fin wt (PTPair disj pt1 pt2) sat
@@ -36,11 +36,11 @@ module matching-coherence where
     with sat-mat
            (FIndet (IFst (λ{e1 e2 refl → contra ni (λ ())})
                          (final-notintro-indet fin ni)))
-                   (TAFst wt) pt1 sat1 |
+                   (TFst wt) pt1 sat1 |
          sat-mat
            (FIndet (ISnd (λ{e1 e2 refl → contra ni (λ ())})
                          (final-notintro-indet fin ni)))
-                   (TASnd wt) pt2 sat2
+                   (TSnd wt) pt2 sat2
   ... | θ1 , mat1 | θ2 , mat2 =
     θ1 ++ θ2 , MNotIntroPair ni mat1 mat2
   sat-mat {e = e} fin wt (PTPair disj pt1 pt2) sat
@@ -49,7 +49,7 @@ module matching-coherence where
   ... | CSNotIntroPair ni sat1 sat2 = abort (¬ni ni)
   ... | CSPair sat1 sat2
     with wt
-  ... | TAPair wt1 wt2 
+  ... | TPair wt1 wt2 
     with sat-mat (π1 (pair-final fin)) wt1 pt1 sat1 |
          sat-mat (π2 (pair-final fin)) wt2 pt2 sat2
   ... | θ1 , mat1 | θ2 , mat2 = θ1 ++ θ2 , MPair mat1 mat2
@@ -64,10 +64,10 @@ module matching-coherence where
   mat-sat fin wt PTUnit MUnit = CSTruth
   mat-sat fin wt PTNum MNum = CSNum
   mat-sat fin wt PTVar MVar = CSTruth
-  mat-sat fin (TAInl wt) (PTInl pt) (MInl mat)
+  mat-sat fin (TInl wt) (PTInl pt) (MInl mat)
     with mat-sat (inl-final fin) wt pt mat
   ... | sat = CSInl sat
-  mat-sat fin (TAInr wt) (PTInr pt) (MInr mat)
+  mat-sat fin (TInr wt) (PTInr pt) (MInr mat)
     with mat-sat (inr-final fin) wt pt mat
   ... | sat = CSInr sat
   mat-sat {e = e} fin wt (PTPair disj pt1 pt2) mat
@@ -78,11 +78,11 @@ module matching-coherence where
     with mat-sat
            (FIndet (IFst (λ{e1 e2 refl → contra ni (λ ())})
                          (final-notintro-indet fin ni)))
-           (TAFst wt) pt1 mat1 |
+           (TFst wt) pt1 mat1 |
          mat-sat
            (FIndet (ISnd (λ{e1 e2 refl → contra ni (λ ())})
                          (final-notintro-indet fin ni)))
-           (TASnd wt) pt2 mat2
+           (TSnd wt) pt2 mat2
   ... | sat1 | sat2 = CSNotIntroPair ni sat1 sat2
   mat-sat {e = e} fin wt (PTPair disj pt1 pt2) mat
       | Inr ¬ni
@@ -90,7 +90,7 @@ module matching-coherence where
   ... | MNotIntroPair ni mat1 mat2 = abort (¬ni ni)
   ... | MPair mat1 mat2
     with wt
-  ... | TAPair wt1 wt2
+  ... | TPair wt1 wt2
     with mat-sat (π1 (pair-final fin)) wt1 pt1 mat1 |
          mat-sat (π2 (pair-final fin)) wt2 pt2 mat2
   ... | sat1 | sat2 = CSPair sat1 sat2
@@ -116,7 +116,7 @@ module matching-coherence where
   ... | CMSNotIntro ni ref pos = abort (¬ni ni)
   ... | CMSInl msat₁
     with wt
-  ... | TAInl wt₁
+  ... | TInl wt₁
     with maysat-maymat (inl-final fin) wt₁ pt msat₁
   ... | mmat = MMInl mmat
   maysat-maymat {e = e} fin wt (PTInr pt) msat
@@ -130,7 +130,7 @@ module matching-coherence where
   ... | CMSNotIntro ni ref pos = abort (¬ni ni)
   ... | CMSInr msat₁
     with wt
-  ... | TAInr wt₁
+  ... | TInr wt₁
     with maysat-maymat (inr-final fin) wt₁ pt msat₁
   ... | mmat = MMInr mmat
   maysat-maymat {e = e} fin wt (PTPair disj pt1 pt2) msat
@@ -145,26 +145,26 @@ module matching-coherence where
       | Inr ¬ni
     with msat
   ... | CMSNotIntro ni ref pos = abort (¬ni ni)
-  maysat-maymat {e = e} fin (TAPair wt1 wt2)
+  maysat-maymat {e = e} fin (TPair wt1 wt2)
                 (PTPair disj pt1 pt2) msat | Inr ¬ni
       | CMSPairL msat1 sat2
     with maysat-maymat (π1 (pair-final fin)) wt1 pt1 msat1 |
          sat-mat (π2 (pair-final fin)) wt2 pt2 sat2
   ... | mmat1 | θ2 , mat2 = MMPairL mmat1 mat2
-  maysat-maymat {e = e} fin (TAPair wt1 wt2)
+  maysat-maymat {e = e} fin (TPair wt1 wt2)
                 (PTPair disj pt1 pt2) msat | Inr ¬ni
       | CMSPairR sat1 msat2
     with sat-mat (π1 (pair-final fin)) wt1 pt1 sat1 |
          maysat-maymat (π2 (pair-final fin)) wt2 pt2 msat2
   ... | θ1 , mat1 | mmat2 = MMPairR mat1 mmat2
-  maysat-maymat {e = e} fin (TAPair wt1 wt2)
+  maysat-maymat {e = e} fin (TPair wt1 wt2)
                 (PTPair disj pt1 pt2) msat | Inr ¬ni
      | CMSPair msat1 msat2
     with maysat-maymat (π1 (pair-final fin)) wt1 pt1 msat1 |
          maysat-maymat (π2 (pair-final fin)) wt2 pt2 msat2
   ... | mmat1 | mmat2 = MMPair mmat1 mmat2
   maysat-maymat fin wt (PTEHole w∈Δp) msat = MMEHole
-  maysat-maymat fin wt (PTNEHole w∈Δp pt) msat = MMNEHole
+  maysat-maymat fin wt (PTHole w∈Δp pt) msat = MMHole
   maysat-maymat fin wt PTWild (CMSNotIntro ni () pos)
   
   maymat-maysat : ∀{e Δ Δpe τ Δp p ξ Γ} →
@@ -188,7 +188,7 @@ module matching-coherence where
   ... | MMNotIntro ni rf = abort (¬ni ni)
   ... | MMInl mmat₁
     with wt
-  ... | TAInl wt₁
+  ... | TInl wt₁
     with maymat-maysat (inl-final fin) wt₁ pt mmat₁
   ... | msat = CMSInl msat
   maymat-maysat {e = e} fin wt (PTInr pt) mmat
@@ -203,7 +203,7 @@ module matching-coherence where
   ... | MMNotIntro ni rf = abort (¬ni ni)
   ... | MMInr mmat₁
     with wt
-  ... | TAInr wt₁
+  ... | TInr wt₁
     with maymat-maysat (inr-final fin) wt₁ pt mmat₁
   ... | msat = CMSInr msat
   maymat-maysat {e = e} fin wt (PTPair disj pt1 pt2) mmat
@@ -223,26 +223,26 @@ module matching-coherence where
       | Inr ¬ni
     with mmat
   ... | MMNotIntro ni ref = abort (¬ni ni)
-  maymat-maysat {e = e} fin (TAPair wt1 wt2)
+  maymat-maysat {e = e} fin (TPair wt1 wt2)
                 (PTPair disj pt1 pt2) mmat | Inr ¬ni
       | MMPairL mmat1 mat2
     with maymat-maysat (π1 (pair-final fin)) wt1 pt1 mmat1 |
          mat-sat (π2 (pair-final fin)) wt2 pt2 mat2
   ... | msat1 | sat2 = CMSPairL msat1 sat2
-  maymat-maysat {e = e} fin (TAPair wt1 wt2)
+  maymat-maysat {e = e} fin (TPair wt1 wt2)
                 (PTPair disj pt1 pt2) mmat | Inr ¬ni
       | MMPairR mat1 mmat2
     with mat-sat (π1 (pair-final fin)) wt1 pt1 mat1 |
          maymat-maysat (π2 (pair-final fin)) wt2 pt2 mmat2
   ... | sat1 | msat2 = CMSPairR sat1 msat2
-  maymat-maysat {e = e} fin (TAPair wt1 wt2)
+  maymat-maysat {e = e} fin (TPair wt1 wt2)
                 (PTPair disj pt1 pt2) mmat | Inr ¬ni
       | MMPair mmat1 mmat2
     with maymat-maysat (π1 (pair-final fin)) wt1 pt1 mmat1 |
          maymat-maysat (π2 (pair-final fin)) wt2 pt2 mmat2
   ... | msat1 | msat2 = CMSPair msat1 msat2
   maymat-maysat fin wt (PTEHole w∈Δp) mmat = CMSUnknown
-  maymat-maysat fin wt (PTNEHole w∈Δp pt) mmat = CMSUnknown
+  maymat-maysat fin wt (PTHole w∈Δp pt) mmat = CMSUnknown
   maymat-maysat fin wt PTWild (MMNotIntro ni ())
 
   not-satormay-notmat : ∀{Δ Δpe e τ Δp p ξ Γ} →

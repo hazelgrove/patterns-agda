@@ -60,4 +60,4 @@ module lemmas-subst-matching where
   subst-maymat (MMPair mmat1 mmat2) =
     MMPair (subst-maymat mmat1) (subst-maymat mmat2)
   subst-maymat MMEHole = MMEHole
-  subst-maymat MMNEHole = MMNEHole
+  subst-maymat MMHole = MMHole

@@ -62,10 +62,10 @@ module binders-disjoint-symmetric where
     lem-bd-lam (BDEHole bdσ)
       with lem-bd-σ-lam bdσ
     ... | ubσ , bdσ' = UBEHole ubσ , BDEHole bdσ'
-    lem-bd-lam (BDNEHole bdσ bd)
+    lem-bd-lam (BDHole bdσ bd)
       with lem-bd-σ-lam bdσ | lem-bd-lam bd
     ... | ubσ , bdσ' | ub , bd' =
-      UBNEHole ubσ ub , BDNEHole bdσ' bd'
+      UBHole ubσ ub , BDHole bdσ' bd'
 
     lem-bd-σ-lam : {σ : subst-env} {x : Nat} {τ1 : htyp} {e1 : ihexp} →
                    binders-disjoint-σ σ (·λ x ·[ τ1 ] e1) →
@@ -116,9 +116,9 @@ module binders-disjoint-symmetric where
       UBPPair ub1 ub2 , BDPPair bd1' bd2'
     lem-bd-p-lam BDPWild = UBPWild , BDPWild
     lem-bd-p-lam BDPEHole = UBPEHole , BDPEHole
-    lem-bd-p-lam (BDPNEHole bd)
+    lem-bd-p-lam (BDPHole bd)
       with lem-bd-p-lam bd
-    ... | ub , bd' = UBPNEHole ub , BDPNEHole bd'
+    ... | ub , bd' = UBPHole ub , BDPHole bd'
     
   mutual
     lem-bd-ap : {e : ihexp} {e1 e2 : ihexp} →
@@ -164,10 +164,10 @@ module binders-disjoint-symmetric where
       with lem-bd-σ-ap bdσ
     ... | bdσ1 , bdσ2 =
       BDEHole bdσ1 , BDEHole bdσ2
-    lem-bd-ap (BDNEHole bdσ bd)
+    lem-bd-ap (BDHole bdσ bd)
       with lem-bd-σ-ap bdσ | lem-bd-ap bd
     ... | bdσ1 , bdσ2 | bd1 , bd2 =
-      BDNEHole bdσ1 bd1 , BDNEHole bdσ2 bd2
+      BDHole bdσ1 bd1 , BDHole bdσ2 bd2
 
     lem-bd-σ-ap : {σ : subst-env} {e1 e2 : ihexp} →
                   binders-disjoint-σ σ (e1 ∘ e2) →
@@ -218,9 +218,9 @@ module binders-disjoint-symmetric where
       BDPPair bd1₁ bd2₁ , BDPPair bd1₂ bd2₂
     lem-bd-p-ap BDPWild = BDPWild , BDPWild
     lem-bd-p-ap BDPEHole = BDPEHole , BDPEHole
-    lem-bd-p-ap (BDPNEHole bd)
+    lem-bd-p-ap (BDPHole bd)
       with lem-bd-p-ap bd
-    ... | bd1 , bd2 = BDPNEHole bd1 , BDPNEHole bd2
+    ... | bd1 , bd2 = BDPHole bd1 , BDPHole bd2
 
   mutual
     lem-bd-inl : {e : ihexp} {τ : htyp} {e1 : ihexp} →
@@ -244,8 +244,8 @@ module binders-disjoint-symmetric where
     lem-bd-inl (BDFst bd) = BDFst (lem-bd-inl bd)
     lem-bd-inl (BDSnd bd) = BDSnd (lem-bd-inl bd)
     lem-bd-inl (BDEHole bdσ) = BDEHole (lem-bd-σ-inl bdσ)
-    lem-bd-inl (BDNEHole bdσ bd) =
-      BDNEHole (lem-bd-σ-inl bdσ)
+    lem-bd-inl (BDHole bdσ bd) =
+      BDHole (lem-bd-σ-inl bdσ)
                (lem-bd-inl bd)
 
     lem-bd-σ-inl : {σ : subst-env} {τ : htyp} {e1 : ihexp} →
@@ -280,8 +280,8 @@ module binders-disjoint-symmetric where
       BDPPair (lem-bd-p-inl bd1) (lem-bd-p-inl bd2)
     lem-bd-p-inl BDPWild = BDPWild
     lem-bd-p-inl BDPEHole = BDPEHole
-    lem-bd-p-inl (BDPNEHole bd) =
-      BDPNEHole (lem-bd-p-inl bd)
+    lem-bd-p-inl (BDPHole bd) =
+      BDPHole (lem-bd-p-inl bd)
     
   mutual
     lem-bd-inr : {e : ihexp} {τ : htyp} {e1 : ihexp} →
@@ -306,8 +306,8 @@ module binders-disjoint-symmetric where
     lem-bd-inr (BDSnd bd) = BDSnd (lem-bd-inr bd)
     lem-bd-inr (BDEHole bdσ) =
       BDEHole (lem-bd-σ-inr bdσ)
-    lem-bd-inr (BDNEHole bdσ bd) =
-      BDNEHole (lem-bd-σ-inr bdσ) (lem-bd-inr bd)
+    lem-bd-inr (BDHole bdσ bd) =
+      BDHole (lem-bd-σ-inr bdσ) (lem-bd-inr bd)
 
     lem-bd-σ-inr : {σ : subst-env} {τ : htyp} {e1 : ihexp} →
                    binders-disjoint-σ σ (inr τ e1) →
@@ -341,8 +341,8 @@ module binders-disjoint-symmetric where
       BDPPair (lem-bd-p-inr bd1) (lem-bd-p-inr bd2)
     lem-bd-p-inr BDPWild = BDPWild
     lem-bd-p-inr BDPEHole = BDPEHole
-    lem-bd-p-inr (BDPNEHole bd) =
-      BDPNEHole (lem-bd-p-inr bd)
+    lem-bd-p-inr (BDPHole bd) =
+      BDPHole (lem-bd-p-inr bd)
     
   mutual
     lem-bd-match : {e : ihexp} {e1 : ihexp} {τ : htyp}
@@ -415,14 +415,14 @@ module binders-disjoint-symmetric where
       BDEHole bdσpre ,
       BDEHole bdσr ,
       BDEHole bdσpost
-    lem-bd-match (BDNEHole bdσ bd)
+    lem-bd-match (BDHole bdσ bd)
       with lem-bd-σ-match bdσ | lem-bd-match bd
     ... | bdσ' , bdσpre , bdσr , bdσpost
         | bd' , bdpre , bdr , bdpost =
-      BDNEHole bdσ' bd' ,
-      BDNEHole bdσpre bdpre ,
-      BDNEHole bdσr bdr ,
-      BDNEHole bdσpost bdpost
+      BDHole bdσ' bd' ,
+      BDHole bdσpre bdpre ,
+      BDHole bdσr bdr ,
+      BDHole bdσpost bdpost
 
     lem-bd-σ-match : {σ : subst-env} {e1 : ihexp} {τ : htyp}
                      {rs-pre : rules} {r : rule} {rs-post : rules} →
@@ -517,10 +517,10 @@ module binders-disjoint-symmetric where
       BDPWild , BDPWild , BDPWild , BDPWild
     lem-bd-p-match BDPEHole =
       BDPEHole , BDPEHole , BDPEHole , BDPEHole
-    lem-bd-p-match (BDPNEHole bd)
+    lem-bd-p-match (BDPHole bd)
       with lem-bd-p-match bd
     ... | bd' , bdpre , bdr , bdpost =
-      BDPNEHole bd' , BDPNEHole bdpre , BDPNEHole bdr , BDPNEHole bdpost
+      BDPHole bd' , BDPHole bdpre , BDPHole bdr , BDPHole bdpost
     
   mutual
     lem-bd-pair : {e : ihexp} {e1 e2 : ihexp} →
@@ -566,10 +566,10 @@ module binders-disjoint-symmetric where
       with lem-bd-σ-pair bdσ
     ... | bdσ1 , bdσ2 =
       BDEHole bdσ1 , BDEHole bdσ2
-    lem-bd-pair (BDNEHole bdσ bd)
+    lem-bd-pair (BDHole bdσ bd)
       with lem-bd-σ-pair bdσ | lem-bd-pair bd
     ... | bdσ1 , bdσ2 | bd1 , bd2 =
-      BDNEHole bdσ1 bd1 , BDNEHole bdσ2 bd2
+      BDHole bdσ1 bd1 , BDHole bdσ2 bd2
 
     lem-bd-σ-pair : {σ : subst-env} {e1 e2 : ihexp} →
                     binders-disjoint-σ σ ⟨ e1 , e2 ⟩ →
@@ -621,9 +621,9 @@ module binders-disjoint-symmetric where
       BDPPair bd1' bd2' , BDPPair ub1 ub2
     lem-bd-p-pair BDPWild = BDPWild , BDPWild
     lem-bd-p-pair BDPEHole = BDPEHole , BDPEHole
-    lem-bd-p-pair (BDPNEHole bd)
+    lem-bd-p-pair (BDPHole bd)
       with lem-bd-p-pair bd
-    ... | bd' , ub = BDPNEHole bd' , BDPNEHole ub
+    ... | bd' , ub = BDPHole bd' , BDPHole ub
     
   mutual
     lem-bd-fst : {e : ihexp} {e1 : ihexp} →
@@ -646,8 +646,8 @@ module binders-disjoint-symmetric where
     lem-bd-fst (BDFst bd) = BDFst (lem-bd-fst bd)
     lem-bd-fst (BDSnd bd) = BDSnd (lem-bd-fst bd)
     lem-bd-fst (BDEHole bdσ) = BDEHole (lem-bd-σ-fst bdσ)
-    lem-bd-fst (BDNEHole bdσ bd) =
-      BDNEHole (lem-bd-σ-fst bdσ) (lem-bd-fst bd)
+    lem-bd-fst (BDHole bdσ bd) =
+      BDHole (lem-bd-σ-fst bdσ) (lem-bd-fst bd)
 
     lem-bd-σ-fst : {σ : subst-env} {e1 : ihexp} →
                    binders-disjoint-σ σ (fst e1) →
@@ -681,8 +681,8 @@ module binders-disjoint-symmetric where
       BDPPair (lem-bd-p-fst bd1) (lem-bd-p-fst bd2)
     lem-bd-p-fst BDPWild = BDPWild
     lem-bd-p-fst BDPEHole = BDPEHole
-    lem-bd-p-fst (BDPNEHole bd) =
-      BDPNEHole (lem-bd-p-fst bd)
+    lem-bd-p-fst (BDPHole bd) =
+      BDPHole (lem-bd-p-fst bd)
     
   mutual
     lem-bd-snd : {e : ihexp} {e1 : ihexp} →
@@ -706,8 +706,8 @@ module binders-disjoint-symmetric where
     lem-bd-snd (BDFst bd) = BDFst (lem-bd-snd bd)
     lem-bd-snd (BDSnd bd) = BDSnd (lem-bd-snd bd)
     lem-bd-snd (BDEHole bdσ) = BDEHole (lem-bd-σ-snd bdσ)
-    lem-bd-snd (BDNEHole bdσ bd) =
-      BDNEHole (lem-bd-σ-snd bdσ) (lem-bd-snd bd)
+    lem-bd-snd (BDHole bdσ bd) =
+      BDHole (lem-bd-σ-snd bdσ) (lem-bd-snd bd)
 
     lem-bd-σ-snd : {σ : subst-env} {e1 : ihexp} →
                    binders-disjoint-σ σ (snd e1) →
@@ -741,8 +741,8 @@ module binders-disjoint-symmetric where
       BDPPair (lem-bd-p-snd bd1) (lem-bd-p-snd bd2)
     lem-bd-p-snd BDPWild = BDPWild
     lem-bd-p-snd BDPEHole = BDPEHole
-    lem-bd-p-snd (BDPNEHole bd) =
-      BDPNEHole (lem-bd-p-snd bd)
+    lem-bd-p-snd (BDPHole bd) =
+      BDPHole (lem-bd-p-snd bd)
 
   mutual
     lem-bd-ehole : {e : ihexp} {u : Nat} {σ : subst-env} →
@@ -767,8 +767,8 @@ module binders-disjoint-symmetric where
     lem-bd-ehole (BDFst bd) = BDFst (lem-bd-ehole bd)
     lem-bd-ehole (BDSnd bd) = BDSnd (lem-bd-ehole bd)
     lem-bd-ehole (BDEHole bdσ) = BDEHole (lem-bd-σ-ehole bdσ)
-    lem-bd-ehole (BDNEHole bdσ bd) =
-      BDNEHole (lem-bd-σ-ehole bdσ)
+    lem-bd-ehole (BDHole bdσ bd) =
+      BDHole (lem-bd-σ-ehole bdσ)
                (lem-bd-ehole bd)
 
     lem-bd-σ-ehole : {σ : subst-env} {u : Nat} {σ1 : subst-env} →
@@ -803,117 +803,117 @@ module binders-disjoint-symmetric where
       BDPPair (lem-bd-p-ehole bd1) (lem-bd-p-ehole bd2)
     lem-bd-p-ehole BDPWild = BDPWild
     lem-bd-p-ehole BDPEHole = BDPEHole
-    lem-bd-p-ehole (BDPNEHole bd) =
-      BDPNEHole (lem-bd-p-ehole bd)
+    lem-bd-p-ehole (BDPHole bd) =
+      BDPHole (lem-bd-p-ehole bd)
     
   mutual
-    lem-bd-nehole : {e : ihexp} {e1 : ihexp} {u : Nat} {σ : subst-env} →
+    lem-bd-hole : {e : ihexp} {e1 : ihexp} {u : Nat} {σ : subst-env} →
                     binders-disjoint e ⦇⌜ e1 ⌟⦈⟨ u , σ ⟩ →
                     binders-disjoint e σ ×
                       binders-disjoint e e1
-    lem-bd-nehole BDUnit = BDUnit , BDUnit
-    lem-bd-nehole BDNum = BDNum , BDNum
-    lem-bd-nehole BDVar = BDVar , BDVar
-    lem-bd-nehole (BDLam (UBNEHole ubσ ub) bd)
-      with lem-bd-nehole bd
+    lem-bd-hole BDUnit = BDUnit , BDUnit
+    lem-bd-hole BDNum = BDNum , BDNum
+    lem-bd-hole BDVar = BDVar , BDVar
+    lem-bd-hole (BDLam (UBHole ubσ ub) bd)
+      with lem-bd-hole bd
     ... | bdσ ,  bd' =
       BDLam ubσ bdσ , BDLam ub bd' 
-    lem-bd-nehole (BDAp bd1 bd2)
-      with lem-bd-nehole bd1 | lem-bd-nehole bd2
+    lem-bd-hole (BDAp bd1 bd2)
+      with lem-bd-hole bd1 | lem-bd-hole bd2
     ... | bd1σ  , bd1' | bd2σ , bd2' =
       BDAp bd1σ bd2σ , BDAp bd1' bd2'
-    lem-bd-nehole (BDInl bd)
-      with lem-bd-nehole bd
+    lem-bd-hole (BDInl bd)
+      with lem-bd-hole bd
     ... |  bdσ , bd' =
       BDInl bdσ , BDInl bd'
-    lem-bd-nehole (BDInr bd)
-      with lem-bd-nehole bd
+    lem-bd-hole (BDInr bd)
+      with lem-bd-hole bd
     ... | bdσ , bd'  =
        BDInr bdσ , BDInr bd'
-    lem-bd-nehole (BDMatch bd (BDZRules bdpre bdpost))
-      with lem-bd-nehole bd |
-           lem-bd-rs-nehole bdpre |
-           lem-bd-rs-nehole bdpost
+    lem-bd-hole (BDMatch bd (BDZRules bdpre bdpost))
+      with lem-bd-hole bd |
+           lem-bd-rs-hole bdpre |
+           lem-bd-rs-hole bdpost
     ... | bdσ , bd'
         | bdpreσ , bdpre'
         | bdpostσ , bdpost' =
       BDMatch bdσ (BDZRules bdpreσ bdpostσ) ,
       BDMatch bd' (BDZRules bdpre' bdpost')
-    lem-bd-nehole (BDPair bd1 bd2)
-      with lem-bd-nehole bd1 | lem-bd-nehole bd2
+    lem-bd-hole (BDPair bd1 bd2)
+      with lem-bd-hole bd1 | lem-bd-hole bd2
     ... | bdσ1 , bd1' | bdσ2 , bd2' =
       BDPair bdσ1 bdσ2 , BDPair bd1' bd2' 
-    lem-bd-nehole (BDFst bd)
-      with lem-bd-nehole bd
+    lem-bd-hole (BDFst bd)
+      with lem-bd-hole bd
     ... | bdσ , bd' = BDFst bdσ , BDFst bd'
-    lem-bd-nehole (BDSnd bd)
-      with lem-bd-nehole bd
+    lem-bd-hole (BDSnd bd)
+      with lem-bd-hole bd
     ... | bdσ , bd' = BDSnd bdσ , BDSnd bd' 
-    lem-bd-nehole (BDEHole bdσ)
-      with lem-bd-σ-nehole bdσ
+    lem-bd-hole (BDEHole bdσ)
+      with lem-bd-σ-hole bdσ
     ... | bdσσ , bdσ' =
        BDEHole bdσσ , BDEHole bdσ'
-    lem-bd-nehole (BDNEHole bdσ bde)
-      with lem-bd-σ-nehole bdσ | lem-bd-nehole bde
+    lem-bd-hole (BDHole bdσ bde)
+      with lem-bd-σ-hole bdσ | lem-bd-hole bde
     ... | bdσσ , bdσ' | bdeσ , bde' =
-      BDNEHole bdσσ bdeσ , BDNEHole bdσ' bde'
+      BDHole bdσσ bdeσ , BDHole bdσ' bde'
 
-    lem-bd-σ-nehole : {σ : subst-env} {e1 : ihexp} {u : Nat} {σ1 : subst-env} →
+    lem-bd-σ-hole : {σ : subst-env} {e1 : ihexp} {u : Nat} {σ1 : subst-env} →
                       binders-disjoint-σ σ ⦇⌜ e1 ⌟⦈⟨ u , σ1 ⟩ →
                       binders-disjoint-σ σ σ1 ×
                         binders-disjoint-σ σ e1 
-    lem-bd-σ-nehole BDσId = BDσId , BDσId
-    lem-bd-σ-nehole (BDσSubst bdd (UBNEHole ubσ ub) bdσ)
-      with lem-bd-nehole bdd | lem-bd-σ-nehole bdσ
+    lem-bd-σ-hole BDσId = BDσId , BDσId
+    lem-bd-σ-hole (BDσSubst bdd (UBHole ubσ ub) bdσ)
+      with lem-bd-hole bdd | lem-bd-σ-hole bdσ
     ... | bddσ , bdd' | bdσσ , bdσ' =
       BDσSubst bddσ ubσ bdσσ , BDσSubst bdd' ub bdσ'
                         
-    lem-bd-rs-nehole : {rs : rules} {e1 : ihexp} {u : Nat} {σ : subst-env} →
+    lem-bd-rs-hole : {rs : rules} {e1 : ihexp} {u : Nat} {σ : subst-env} →
                        binders-disjoint-rs rs ⦇⌜ e1 ⌟⦈⟨ u , σ ⟩ →
                        binders-disjoint-rs rs σ ×
                          binders-disjoint-rs rs e1
-    lem-bd-rs-nehole BDNoRules = BDNoRules , BDNoRules
-    lem-bd-rs-nehole (BDRules bdr bdrs)
-      with lem-bd-r-nehole bdr | lem-bd-rs-nehole bdrs
+    lem-bd-rs-hole BDNoRules = BDNoRules , BDNoRules
+    lem-bd-rs-hole (BDRules bdr bdrs)
+      with lem-bd-r-hole bdr | lem-bd-rs-hole bdrs
     ... | bdrσ , bdr' | bdrsσ , bdrs' =
       BDRules bdrσ bdrsσ , BDRules bdr' bdrs'
 
-    lem-bd-r-nehole : {r : rule} {e1 : ihexp} {u : Nat} {σ : subst-env} →
+    lem-bd-r-hole : {r : rule} {e1 : ihexp} {u : Nat} {σ : subst-env} →
                       binders-disjoint-r r ⦇⌜ e1 ⌟⦈⟨ u , σ ⟩ →
                       binders-disjoint-r r σ ×
                         binders-disjoint-r r e1
-    lem-bd-r-nehole (BDRule bdp bde)
-      with lem-bd-p-nehole bdp | lem-bd-nehole bde
+    lem-bd-r-hole (BDRule bdp bde)
+      with lem-bd-p-hole bdp | lem-bd-hole bde
     ... | bdpσ , bdp' | bdeσ , bde' =
       BDRule bdpσ bdeσ , BDRule bdp' bde'
     
-    lem-bd-p-nehole : {p : pattrn} {e1 : ihexp} {u : Nat} {σ : subst-env} →
+    lem-bd-p-hole : {p : pattrn} {e1 : ihexp} {u : Nat} {σ : subst-env} →
                       binders-disjoint-p p ⦇⌜ e1 ⌟⦈⟨ u , σ ⟩ →
                       binders-disjoint-p p σ ×
                         binders-disjoint-p p e1
-    lem-bd-p-nehole BDPUnit = BDPUnit , BDPUnit
-    lem-bd-p-nehole BDPNum = BDPNum , BDPNum
-    lem-bd-p-nehole (BDPVar (UBNEHole ubσ ub)) =
+    lem-bd-p-hole BDPUnit = BDPUnit , BDPUnit
+    lem-bd-p-hole BDPNum = BDPNum , BDPNum
+    lem-bd-p-hole (BDPVar (UBHole ubσ ub)) =
       BDPVar ubσ , BDPVar ub 
-    lem-bd-p-nehole (BDPInl bd)
-      with lem-bd-p-nehole bd
+    lem-bd-p-hole (BDPInl bd)
+      with lem-bd-p-hole bd
     ... | bdσ , bd' =
       BDPInl bdσ , BDPInl bd'
-    lem-bd-p-nehole (BDPInr bd)
-      with lem-bd-p-nehole bd
+    lem-bd-p-hole (BDPInr bd)
+      with lem-bd-p-hole bd
     ... | bdσ , bd' =
       BDPInr bdσ , BDPInr bd'
-    lem-bd-p-nehole (BDPPair bd1 bd2)
-      with lem-bd-p-nehole bd1 |
-           lem-bd-p-nehole bd2
+    lem-bd-p-hole (BDPPair bd1 bd2)
+      with lem-bd-p-hole bd1 |
+           lem-bd-p-hole bd2
     ... | bdσ1 , bd1' | bdσ2 , bd2' =
       BDPPair bdσ1 bdσ2 , BDPPair bd1' bd2'
-    lem-bd-p-nehole BDPWild = BDPWild , BDPWild
-    lem-bd-p-nehole BDPEHole = BDPEHole , BDPEHole
-    lem-bd-p-nehole (BDPNEHole bd)
-      with lem-bd-p-nehole bd
+    lem-bd-p-hole BDPWild = BDPWild , BDPWild
+    lem-bd-p-hole BDPEHole = BDPEHole , BDPEHole
+    lem-bd-p-hole (BDPHole bd)
+      with lem-bd-p-hole bd
     ... | bdσ ,  bd' =
-      BDPNEHole bdσ , BDPNEHole bd'
+      BDPHole bdσ , BDPHole bd'
       
   mutual
     lem-σ-bd-subst : {e : ihexp} {d : ihexp} {y : Nat} {σ : subst-env} →
@@ -966,10 +966,10 @@ module binders-disjoint-symmetric where
       with lem-σ-bd-σ-subst bdσ
     ... | bdσ' , ubσ , bdσσ =
       BDEHole bdσ' , UBEHole ubσ , BDEHole bdσσ
-    lem-σ-bd-subst (BDNEHole bdσ bde)
+    lem-σ-bd-subst (BDHole bdσ bde)
       with lem-σ-bd-σ-subst bdσ | lem-σ-bd-subst bde
     ... | bdσ' , ubσ , bdσσ | bde' , ube , bdeσ =
-      BDNEHole bdσ' bde' , UBNEHole ubσ ube , BDNEHole bdσσ bdeσ
+      BDHole bdσ' bde' , UBHole ubσ ube , BDHole bdσσ bdeσ
 
     lem-σ-bd-σ-subst : {σ : subst-env} {d : ihexp} {y : Nat} {σ1 : subst-env} →
                        binders-disjoint-σ σ (Subst d y σ1) →
@@ -1028,10 +1028,10 @@ module binders-disjoint-symmetric where
       BDPPair bd1' bd2' , UBPPair ub1 ub2 , BDPPair bdσ1 bdσ2
     lem-σ-bd-p-subst BDPWild = BDPWild , UBPWild , BDPWild
     lem-σ-bd-p-subst BDPEHole = BDPEHole , UBPEHole , BDPEHole
-    lem-σ-bd-p-subst (BDPNEHole bd)
+    lem-σ-bd-p-subst (BDPHole bd)
       with lem-σ-bd-p-subst bd
     ... | bd' , ub , bdσ =
-      BDPNEHole bd' , UBPNEHole ub , BDPNEHole bdσ
+      BDPHole bd' , UBPHole ub , BDPHole bdσ
     
   mutual
     lem-rs-bd : {e : ihexp} {r : rule} {rs : rules} →
@@ -1076,10 +1076,10 @@ module binders-disjoint-symmetric where
     lem-rs-bd (BDEHole bdσ)
       with lem-rs-bd-σ bdσ
     ... | bdσr , bdσrs = BDEHole bdσr , BDEHole bdσrs
-    lem-rs-bd (BDNEHole bdσ bd)
+    lem-rs-bd (BDHole bdσ bd)
       with lem-rs-bd-σ bdσ | lem-rs-bd bd
     ... | bdσr , bdσrs | bdr , bdrs =
-      BDNEHole bdσr bdr , BDNEHole bdσrs bdrs
+      BDHole bdσr bdr , BDHole bdσrs bdrs
 
     lem-rs-bd-σ : {σ : subst-env} {r : rule} {rs : rules} →
                   binders-disjoint-σ σ (r / rs) →
@@ -1130,9 +1130,9 @@ module binders-disjoint-symmetric where
       BDPPair bdr1 bdr2 , BDPPair bdrs1 bdrs2
     lem-rs-bd-p BDPWild = BDPWild , BDPWild
     lem-rs-bd-p BDPEHole = BDPEHole , BDPEHole
-    lem-rs-bd-p (BDPNEHole bd)
+    lem-rs-bd-p (BDPHole bd)
       with lem-rs-bd-p bd
-    ... | bdr , bdrs = BDPNEHole bdr , BDPNEHole bdrs
+    ... | bdr , bdrs = BDPHole bdr , BDPHole bdrs
     
   mutual
     lem-r-bd : {e : ihexp} {pr : pattrn} {er : ihexp} →
@@ -1177,10 +1177,10 @@ module binders-disjoint-symmetric where
     lem-r-bd (BDEHole bdσ)
       with lem-r-bd-σ bdσ
     ... | bdσp , bdσe = BDEHole bdσp , BDEHole bdσe
-    lem-r-bd (BDNEHole bdσ bd)
+    lem-r-bd (BDHole bdσ bd)
       with lem-r-bd-σ bdσ | lem-r-bd bd
     ... | bdσp , bdσe | bdp , bde =
-      BDNEHole bdσp bdp , BDNEHole bdσe bde
+      BDHole bdσp bdp , BDHole bdσe bde
 
     lem-r-bd-σ : {σ : subst-env} {pr : pattrn} {er : ihexp} →
                  binders-disjoint-σ σ (pr => er) →
@@ -1231,10 +1231,10 @@ module binders-disjoint-symmetric where
       BDPPair bdp1 bdp2 , BDPPair bde1 bde2
     lem-r-bd-p BDPWild = BDPWild , BDPWild
     lem-r-bd-p BDPEHole = BDPEHole , BDPEHole
-    lem-r-bd-p (BDPNEHole bd)
+    lem-r-bd-p (BDPHole bd)
       with lem-r-bd-p bd
     ... | bdp , bde =
-      BDPNEHole bdp , BDPNEHole bde
+      BDPHole bdp , BDPHole bde
 
   mutual
     lem-p-bd-var : {e : ihexp} {x : Nat} →
@@ -1260,8 +1260,8 @@ module binders-disjoint-symmetric where
     lem-p-bd-var (BDFst bd) = UBFst (lem-p-bd-var bd)
     lem-p-bd-var (BDSnd bd) = UBSnd (lem-p-bd-var bd)
     lem-p-bd-var (BDEHole bdσ) = UBEHole (lem-p-bd-σ-var bdσ)
-    lem-p-bd-var (BDNEHole bdσ bd) =
-      UBNEHole (lem-p-bd-σ-var bdσ) (lem-p-bd-var bd)
+    lem-p-bd-var (BDHole bdσ bd) =
+      UBHole (lem-p-bd-σ-var bdσ) (lem-p-bd-var bd)
 
     lem-p-bd-σ-var : {σ : subst-env} {x : Nat} →
                      binders-disjoint-σ {T = pattrn} σ (X x) →
@@ -1299,8 +1299,8 @@ module binders-disjoint-symmetric where
               (lem-p-bd-p-var bd2)
     lem-p-bd-p-var BDPWild = UBPWild
     lem-p-bd-p-var BDPEHole = UBPEHole
-    lem-p-bd-p-var (BDPNEHole bd) =
-      UBPNEHole (lem-p-bd-p-var bd)
+    lem-p-bd-p-var (BDPHole bd) =
+      UBPHole (lem-p-bd-p-var bd)
 
   mutual
     lem-p-bd-inl : {e : ihexp} {p1 : pattrn} →
@@ -1325,8 +1325,8 @@ module binders-disjoint-symmetric where
     lem-p-bd-inl (BDSnd bd) = BDSnd (lem-p-bd-inl bd)
     lem-p-bd-inl (BDEHole bdσ) =
       BDEHole (lem-p-bd-σ-inl bdσ)
-    lem-p-bd-inl (BDNEHole bdσ bd) =
-      BDNEHole (lem-p-bd-σ-inl bdσ) (lem-p-bd-inl bd)
+    lem-p-bd-inl (BDHole bdσ bd) =
+      BDHole (lem-p-bd-σ-inl bdσ) (lem-p-bd-inl bd)
     
     lem-p-bd-σ-inl : {σ : subst-env} {p1 : pattrn} →
                      binders-disjoint-σ σ (inl p1) →
@@ -1363,8 +1363,8 @@ module binders-disjoint-symmetric where
         (lem-p-bd-p-inl bd2)
     lem-p-bd-p-inl BDPWild = BDPWild
     lem-p-bd-p-inl BDPEHole = BDPEHole
-    lem-p-bd-p-inl (BDPNEHole bd) =
-      BDPNEHole (lem-p-bd-p-inl bd)
+    lem-p-bd-p-inl (BDPHole bd) =
+      BDPHole (lem-p-bd-p-inl bd)
 
   mutual
     lem-p-bd-inr : {e : ihexp} {p1 : pattrn} →
@@ -1389,8 +1389,8 @@ module binders-disjoint-symmetric where
     lem-p-bd-inr (BDSnd bd) = BDSnd (lem-p-bd-inr bd)
     lem-p-bd-inr (BDEHole bdσ) =
       BDEHole (lem-p-bd-σ-inr bdσ)
-    lem-p-bd-inr (BDNEHole bdσ bd) =
-      BDNEHole (lem-p-bd-σ-inr bdσ) (lem-p-bd-inr bd)
+    lem-p-bd-inr (BDHole bdσ bd) =
+      BDHole (lem-p-bd-σ-inr bdσ) (lem-p-bd-inr bd)
 
     lem-p-bd-σ-inr : {σ : subst-env} {p1 : pattrn} →
                      binders-disjoint-σ σ (inr p1) →
@@ -1427,8 +1427,8 @@ module binders-disjoint-symmetric where
               (lem-p-bd-p-inr bd2)
     lem-p-bd-p-inr BDPWild = BDPWild
     lem-p-bd-p-inr BDPEHole = BDPEHole
-    lem-p-bd-p-inr (BDPNEHole bd) =
-      BDPNEHole (lem-p-bd-p-inr bd)
+    lem-p-bd-p-inr (BDPHole bd) =
+      BDPHole (lem-p-bd-p-inr bd)
 
   mutual
     lem-p-bd-pair : {e : ihexp} {p1 p2 : pattrn} →
@@ -1473,10 +1473,10 @@ module binders-disjoint-symmetric where
     lem-p-bd-pair (BDEHole bdσ)
       with lem-p-bd-σ-pair bdσ
     ... | bdσ1 , bdσ2 = BDEHole bdσ1 , BDEHole bdσ2
-    lem-p-bd-pair (BDNEHole bdσ bd)
+    lem-p-bd-pair (BDHole bdσ bd)
       with lem-p-bd-σ-pair bdσ | lem-p-bd-pair bd
     ... | bdσ1 , bdσ2 | bd1 , bd2 =
-      BDNEHole bdσ1 bd1 , BDNEHole bdσ2 bd2
+      BDHole bdσ1 bd1 , BDHole bdσ2 bd2
 
     lem-p-bd-σ-pair : {σ : subst-env} {p1 p2 : pattrn} →
                       binders-disjoint-σ σ ⟨ p1 , p2 ⟩ →
@@ -1530,78 +1530,78 @@ module binders-disjoint-symmetric where
       BDPPair bd1₁ bd2₁ , BDPPair bd1₂ bd2₂
     lem-p-bd-p-pair BDPWild = BDPWild , BDPWild
     lem-p-bd-p-pair BDPEHole = BDPEHole , BDPEHole
-    lem-p-bd-p-pair (BDPNEHole bd)
+    lem-p-bd-p-pair (BDPHole bd)
       with lem-p-bd-p-pair bd
-    ... | bd1 , bd2 = BDPNEHole bd1 , BDPNEHole bd2
+    ... | bd1 , bd2 = BDPHole bd1 , BDPHole bd2
 
   mutual
-    lem-p-bd-nehole : {e : ihexp}
+    lem-p-bd-hole : {e : ihexp}
                       {p1 : pattrn} {w : Nat} {τ : htyp} →
                       binders-disjoint e ⦇⌜ p1 ⌟⦈[ w , τ ] →
                       binders-disjoint e p1
-    lem-p-bd-nehole BDUnit = BDUnit
-    lem-p-bd-nehole BDNum = BDNum
-    lem-p-bd-nehole BDVar = BDVar
-    lem-p-bd-nehole (BDLam (UBPNEHole ub) bd) =
-      BDLam ub (lem-p-bd-nehole bd)
-    lem-p-bd-nehole (BDAp bd1 bd2) =
-      BDAp (lem-p-bd-nehole bd1) (lem-p-bd-nehole bd2)
-    lem-p-bd-nehole (BDInl bd) =
-      BDInl (lem-p-bd-nehole bd)
-    lem-p-bd-nehole (BDInr bd) =
-      BDInr (lem-p-bd-nehole bd)
-    lem-p-bd-nehole (BDMatch bd (BDZRules bdpre bdpost)) =
-      BDMatch (lem-p-bd-nehole bd)
-              (BDZRules (lem-p-bd-rs-nehole bdpre)
-                        (lem-p-bd-rs-nehole bdpost))
-    lem-p-bd-nehole (BDPair bd1 bd2) =
-      BDPair (lem-p-bd-nehole bd1) (lem-p-bd-nehole bd2)
-    lem-p-bd-nehole (BDFst bd) =
-      BDFst (lem-p-bd-nehole bd)
-    lem-p-bd-nehole (BDSnd bd) =
-      BDSnd (lem-p-bd-nehole bd)
-    lem-p-bd-nehole (BDEHole bdσ) =
-      BDEHole (lem-p-bd-σ-nehole bdσ)
-    lem-p-bd-nehole (BDNEHole bdσ bd) =
-      BDNEHole (lem-p-bd-σ-nehole bdσ) (lem-p-bd-nehole bd)
+    lem-p-bd-hole BDUnit = BDUnit
+    lem-p-bd-hole BDNum = BDNum
+    lem-p-bd-hole BDVar = BDVar
+    lem-p-bd-hole (BDLam (UBPHole ub) bd) =
+      BDLam ub (lem-p-bd-hole bd)
+    lem-p-bd-hole (BDAp bd1 bd2) =
+      BDAp (lem-p-bd-hole bd1) (lem-p-bd-hole bd2)
+    lem-p-bd-hole (BDInl bd) =
+      BDInl (lem-p-bd-hole bd)
+    lem-p-bd-hole (BDInr bd) =
+      BDInr (lem-p-bd-hole bd)
+    lem-p-bd-hole (BDMatch bd (BDZRules bdpre bdpost)) =
+      BDMatch (lem-p-bd-hole bd)
+              (BDZRules (lem-p-bd-rs-hole bdpre)
+                        (lem-p-bd-rs-hole bdpost))
+    lem-p-bd-hole (BDPair bd1 bd2) =
+      BDPair (lem-p-bd-hole bd1) (lem-p-bd-hole bd2)
+    lem-p-bd-hole (BDFst bd) =
+      BDFst (lem-p-bd-hole bd)
+    lem-p-bd-hole (BDSnd bd) =
+      BDSnd (lem-p-bd-hole bd)
+    lem-p-bd-hole (BDEHole bdσ) =
+      BDEHole (lem-p-bd-σ-hole bdσ)
+    lem-p-bd-hole (BDHole bdσ bd) =
+      BDHole (lem-p-bd-σ-hole bdσ) (lem-p-bd-hole bd)
 
-    lem-p-bd-σ-nehole : {σ : subst-env} {p1 : pattrn} {w : Nat} {τ : htyp} →
+    lem-p-bd-σ-hole : {σ : subst-env} {p1 : pattrn} {w : Nat} {τ : htyp} →
                         binders-disjoint-σ σ ⦇⌜ p1 ⌟⦈[ w , τ ] →
                         binders-disjoint-σ σ p1
-    lem-p-bd-σ-nehole BDσId = BDσId
-    lem-p-bd-σ-nehole (BDσSubst bd (UBPNEHole ub) bdσ) =
-      BDσSubst (lem-p-bd-nehole bd) ub (lem-p-bd-σ-nehole bdσ)
+    lem-p-bd-σ-hole BDσId = BDσId
+    lem-p-bd-σ-hole (BDσSubst bd (UBPHole ub) bdσ) =
+      BDσSubst (lem-p-bd-hole bd) ub (lem-p-bd-σ-hole bdσ)
     
-    lem-p-bd-rs-nehole : {rs : rules} {p1 : pattrn} {w : Nat} {τ : htyp} →
+    lem-p-bd-rs-hole : {rs : rules} {p1 : pattrn} {w : Nat} {τ : htyp} →
                          binders-disjoint-rs rs ⦇⌜ p1 ⌟⦈[ w , τ ] →
                          binders-disjoint-rs rs p1
-    lem-p-bd-rs-nehole BDNoRules = BDNoRules
-    lem-p-bd-rs-nehole (BDRules bdr bdrs) =
-      BDRules (lem-p-bd-r-nehole bdr) (lem-p-bd-rs-nehole bdrs)
+    lem-p-bd-rs-hole BDNoRules = BDNoRules
+    lem-p-bd-rs-hole (BDRules bdr bdrs) =
+      BDRules (lem-p-bd-r-hole bdr) (lem-p-bd-rs-hole bdrs)
 
-    lem-p-bd-r-nehole : {r : rule} {p1 : pattrn} {w : Nat} {τ : htyp} →
+    lem-p-bd-r-hole : {r : rule} {p1 : pattrn} {w : Nat} {τ : htyp} →
                         binders-disjoint-r r ⦇⌜ p1 ⌟⦈[ w , τ ] →
                         binders-disjoint-r r p1
-    lem-p-bd-r-nehole (BDRule bdp bd) =
-      BDRule (lem-p-bd-p-nehole bdp) (lem-p-bd-nehole bd)
+    lem-p-bd-r-hole (BDRule bdp bd) =
+      BDRule (lem-p-bd-p-hole bdp) (lem-p-bd-hole bd)
 
-    lem-p-bd-p-nehole : {p : pattrn} {p1 : pattrn} {w : Nat} {τ : htyp} →
+    lem-p-bd-p-hole : {p : pattrn} {p1 : pattrn} {w : Nat} {τ : htyp} →
                         binders-disjoint-p p ⦇⌜ p1 ⌟⦈[ w , τ ] →
                         binders-disjoint-p p p1
-    lem-p-bd-p-nehole BDPUnit = BDPUnit
-    lem-p-bd-p-nehole BDPNum = BDPNum
-    lem-p-bd-p-nehole (BDPVar (UBPNEHole ub)) = BDPVar ub
-    lem-p-bd-p-nehole (BDPInl bd) =
-      BDPInl (lem-p-bd-p-nehole bd)
-    lem-p-bd-p-nehole (BDPInr bd) =
-      BDPInr (lem-p-bd-p-nehole bd)
-    lem-p-bd-p-nehole (BDPPair bd1 bd2) =
-      BDPPair (lem-p-bd-p-nehole bd1)
-              (lem-p-bd-p-nehole bd2)
-    lem-p-bd-p-nehole BDPWild = BDPWild
-    lem-p-bd-p-nehole BDPEHole = BDPEHole
-    lem-p-bd-p-nehole (BDPNEHole bd) =
-      BDPNEHole (lem-p-bd-p-nehole bd)
+    lem-p-bd-p-hole BDPUnit = BDPUnit
+    lem-p-bd-p-hole BDPNum = BDPNum
+    lem-p-bd-p-hole (BDPVar (UBPHole ub)) = BDPVar ub
+    lem-p-bd-p-hole (BDPInl bd) =
+      BDPInl (lem-p-bd-p-hole bd)
+    lem-p-bd-p-hole (BDPInr bd) =
+      BDPInr (lem-p-bd-p-hole bd)
+    lem-p-bd-p-hole (BDPPair bd1 bd2) =
+      BDPPair (lem-p-bd-p-hole bd1)
+              (lem-p-bd-p-hole bd2)
+    lem-p-bd-p-hole BDPWild = BDPWild
+    lem-p-bd-p-hole BDPEHole = BDPEHole
+    lem-p-bd-p-hole (BDPHole bd) =
+      BDPHole (lem-p-bd-p-hole bd)
 
   -- the following are the main results of this file, proving
   -- that each binders-disjoint judgement is symmetric
@@ -1646,9 +1646,9 @@ module binders-disjoint-symmetric where
     binders-disjoint-sym {e2 = ⦇-⦈⟨ u , σ ⟩} bd =
       BDEHole (σ-binders-disjoint-sym (lem-bd-ehole bd))
     binders-disjoint-sym {e2 = ⦇⌜ e2 ⌟⦈⟨ u , σ ⟩} bd
-      with lem-bd-nehole bd
+      with lem-bd-hole bd
     ... | bdσ , bd' =
-      BDNEHole (σ-binders-disjoint-sym bdσ)
+      BDHole (σ-binders-disjoint-sym bdσ)
                (binders-disjoint-sym bd')
 
     σ-binders-disjoint-sym : {e : ihexp} {σ : subst-env} →
@@ -1700,7 +1700,7 @@ module binders-disjoint-symmetric where
     p-binders-disjoint-sym {p = wild} bd = BDPWild
     p-binders-disjoint-sym {p = ⦇-⦈[ w ]} bd = BDPEHole
     p-binders-disjoint-sym {p = ⦇⌜ p ⌟⦈[ w , τ ]} bd =
-      BDPNEHole (p-binders-disjoint-sym (lem-p-bd-nehole bd))
+      BDPHole (p-binders-disjoint-sym (lem-p-bd-hole bd))
 
   mutual
     binders-disjoint-σ-sym : {σ : subst-env} {e : ihexp} →
@@ -1740,9 +1740,9 @@ module binders-disjoint-symmetric where
     binders-disjoint-σ-sym {e = ⦇-⦈⟨ u , σ ⟩} bd =
       BDEHole (σ-binders-disjoint-σ-sym (lem-bd-σ-ehole bd))
     binders-disjoint-σ-sym {e = ⦇⌜ e ⌟⦈⟨ u , σ ⟩} bd
-      with lem-bd-σ-nehole bd
+      with lem-bd-σ-hole bd
     ... | bdσ , bde =
-      BDNEHole (σ-binders-disjoint-σ-sym bdσ)
+      BDHole (σ-binders-disjoint-σ-sym bdσ)
                (binders-disjoint-σ-sym bde)
 
     σ-binders-disjoint-σ-sym : {σ1 : subst-env} {σ2 : subst-env} →
@@ -1794,7 +1794,7 @@ module binders-disjoint-symmetric where
     p-binders-disjoint-σ-sym {p = wild} bd = BDPWild
     p-binders-disjoint-σ-sym {p = ⦇-⦈[ w ]} bd = BDPEHole
     p-binders-disjoint-σ-sym {p = ⦇⌜ p ⌟⦈[ w , τ ]} bd =
-      BDPNEHole (p-binders-disjoint-σ-sym (lem-p-bd-σ-nehole bd))
+      BDPHole (p-binders-disjoint-σ-sym (lem-p-bd-σ-hole bd))
     
   mutual
     binders-disjoint-rs-sym : {rs : rules} {e : ihexp} →
@@ -1835,9 +1835,9 @@ module binders-disjoint-symmetric where
     binders-disjoint-rs-sym {e = ⦇-⦈⟨ u , σ ⟩} bd =
       BDEHole (σ-binders-disjoint-rs-sym (lem-bd-rs-ehole bd))
     binders-disjoint-rs-sym {e = ⦇⌜ e ⌟⦈⟨ u , σ ⟩} bd
-      with lem-bd-rs-nehole bd
+      with lem-bd-rs-hole bd
     ... | bdσ , bd' =
-      BDNEHole (σ-binders-disjoint-rs-sym bdσ)
+      BDHole (σ-binders-disjoint-rs-sym bdσ)
                (binders-disjoint-rs-sym bd')
 
     σ-binders-disjoint-rs-sym : {rs : rules} {σ : subst-env} →
@@ -1889,7 +1889,7 @@ module binders-disjoint-symmetric where
     p-binders-disjoint-rs-sym {p = wild} bd = BDPWild
     p-binders-disjoint-rs-sym {p = ⦇-⦈[ w ]} bd = BDPEHole
     p-binders-disjoint-rs-sym {p = ⦇⌜ p ⌟⦈[ w , τ ]} bd =
-      BDPNEHole (p-binders-disjoint-rs-sym (lem-p-bd-rs-nehole bd))
+      BDPHole (p-binders-disjoint-rs-sym (lem-p-bd-rs-hole bd))
 
   mutual
     binders-disjoint-r-sym : {r : rule} {e : ihexp} →
@@ -1930,9 +1930,9 @@ module binders-disjoint-symmetric where
     binders-disjoint-r-sym {e = ⦇-⦈⟨ u , σ ⟩} bd =
       BDEHole (σ-binders-disjoint-r-sym (lem-bd-r-ehole bd))
     binders-disjoint-r-sym {e = ⦇⌜ e ⌟⦈⟨ u , σ ⟩} bd
-      with lem-bd-r-nehole bd
+      with lem-bd-r-hole bd
     ... | bdσ , bd' =
-      BDNEHole (σ-binders-disjoint-r-sym bdσ)
+      BDHole (σ-binders-disjoint-r-sym bdσ)
                (binders-disjoint-r-sym bd')
 
     σ-binders-disjoint-r-sym : {r : rule} {σ : subst-env} →
@@ -1984,7 +1984,7 @@ module binders-disjoint-symmetric where
     p-binders-disjoint-r-sym {p = wild} bd = BDPWild
     p-binders-disjoint-r-sym {p = ⦇-⦈[ w ]} bd = BDPEHole
     p-binders-disjoint-r-sym {p = ⦇⌜ p ⌟⦈[ w , τ ]} bd =
-      BDPNEHole (p-binders-disjoint-r-sym (lem-p-bd-r-nehole bd))
+      BDPHole (p-binders-disjoint-r-sym (lem-p-bd-r-hole bd))
     
   mutual
     binders-disjoint-p-sym : {p : pattrn} {e : ihexp} →
@@ -2025,9 +2025,9 @@ module binders-disjoint-symmetric where
     binders-disjoint-p-sym {e = ⦇-⦈⟨ u , σ ⟩} bd =
       BDEHole (σ-binders-disjoint-p-sym (lem-bd-p-ehole bd))
     binders-disjoint-p-sym {e = ⦇⌜ e ⌟⦈⟨ u , σ ⟩} bd
-      with lem-bd-p-nehole bd
+      with lem-bd-p-hole bd
     ... | bdσ , bd' =
-      BDNEHole (σ-binders-disjoint-p-sym bdσ)
+      BDHole (σ-binders-disjoint-p-sym bdσ)
                (binders-disjoint-p-sym bd')
 
     σ-binders-disjoint-p-sym : {p : pattrn} {σ : subst-env} →
@@ -2079,5 +2079,5 @@ module binders-disjoint-symmetric where
     p-binders-disjoint-p-sym {p2 = wild} bd = BDPWild
     p-binders-disjoint-p-sym {p2 = ⦇-⦈[ w ]} bd = BDPEHole
     p-binders-disjoint-p-sym {p2 = ⦇⌜ p2 ⌟⦈[ w , τ ]} bd =
-      BDPNEHole (p-binders-disjoint-p-sym (lem-p-bd-p-nehole bd))
+      BDPHole (p-binders-disjoint-p-sym (lem-p-bd-p-hole bd))
   

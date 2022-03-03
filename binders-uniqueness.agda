@@ -31,7 +31,7 @@ module binders-uniqueness where
       BUPWild   : binders-unique-p wild
       BUPEHole  : ∀{w} →
                   binders-unique-p ⦇-⦈[ w ]
-      BUPNEHole : ∀{p w τ} →
+      BUPHole : ∀{p w τ} →
                   binders-unique-p p →
                   binders-unique-p ⦇⌜ p ⌟⦈[ w , τ ]
 
@@ -79,7 +79,7 @@ module binders-uniqueness where
       BUEHole  : ∀{u σ} →
                  binders-unique-σ σ →
                  binders-unique ⦇-⦈⟨ u , σ ⟩
-      BUNEHole : ∀{e u σ} →
+      BUHole : ∀{e u σ} →
                  binders-unique-σ σ →
                  binders-unique e →
                  binders-disjoint-σ σ e →
@@ -133,7 +133,7 @@ module binders-uniqueness where
       HBUPWild   : hole-binders-unique-p wild
       HBUPEHole  : ∀{w} →
                    hole-binders-unique-p ⦇-⦈[ w ]
-      HBUPNEHole : ∀{p w τ} →
+      HBUPHole : ∀{p w τ} →
                    hole-binders-unique-p p →
                    hole-unbound-in-p w p →
                    hole-binders-unique-p ⦇⌜ p ⌟⦈[ w , τ ]
@@ -181,7 +181,7 @@ module binders-uniqueness where
       HBUEHole  : ∀{u σ} →
                   hole-binders-unique-σ σ →
                   hole-binders-unique ⦇-⦈⟨ u , σ ⟩
-      HBUNEHole : ∀{e u σ} →
+      HBUHole : ∀{e u σ} →
                   hole-binders-unique-σ σ →
                   hole-binders-unique e →
                   hole-binders-disjoint-σ σ e →

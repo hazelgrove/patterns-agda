@@ -44,7 +44,7 @@ module lemmas-patterns where
     CTPair (pattern-constr-same-type pt1)
            (pattern-constr-same-type pt2)
   pattern-constr-same-type (PTEHole w∈Δp) = CTUnknown
-  pattern-constr-same-type (PTNEHole w∈Δp pt) = CTUnknown
+  pattern-constr-same-type (PTHole w∈Δp pt) = CTUnknown
   pattern-constr-same-type PTWild = CTTruth
 
   -- the constraint emitted by a series of rules has the
@@ -86,7 +86,7 @@ module lemmas-patterns where
     PPair (pattern-constr-pos pt1)
           (pattern-constr-pos pt2)
   pattern-constr-pos (PTEHole w∈Δp) = PUnknown
-  pattern-constr-pos (PTNEHole w∈Δp pt) = PUnknown
+  pattern-constr-pos (PTHole w∈Δp pt) = PUnknown
   pattern-constr-pos PTWild = PTruth
 
   -- refutable constraints are only emitted by refutable patterns
@@ -102,7 +102,7 @@ module lemmas-patterns where
   constr-ref-pattern-ref (PTPair disj pt1 pt2) (RXPairR xref2) =
     RPairR (constr-ref-pattern-ref pt2 xref2)
   constr-ref-pattern-ref (PTEHole w∈Δp) xref = REHole
-  constr-ref-pattern-ref (PTNEHole w∈Δp pt) xref = RNEHole
+  constr-ref-pattern-ref (PTHole w∈Δp pt) xref = RHole
 
   -- refutable patterns emit refutable constraints
   pattern-ref-constr-ref : ∀{Δp p τ ξ Γ} →
@@ -117,7 +117,7 @@ module lemmas-patterns where
   pattern-ref-constr-ref (PTPair disj pt1 pt2) (RPairR ref2) =
     RXPairR (pattern-ref-constr-ref pt2 ref2)
   pattern-ref-constr-ref (PTEHole w∈Δp) ref = RXUnknown
-  pattern-ref-constr-ref (PTNEHole w∈Δp pt) ref = RXUnknown
+  pattern-ref-constr-ref (PTHole w∈Δp pt) ref = RXUnknown
 
   -- the different rule typing judgement behave as expected
   rules-type-no-target : ∀{Γ Δ Δp rs τ ξ τ'} →
@@ -194,10 +194,10 @@ module lemmas-patterns where
   notintro-mat-ref-not NVEHole (MNotIntroPair ni mat1 mat2)
                        (RPairR ref) =
     notintro-mat-ref-not NVSnd mat2 ref
-  notintro-mat-ref-not NVNEHole (MNotIntroPair ni mat1 mat2)
+  notintro-mat-ref-not NVHole (MNotIntroPair ni mat1 mat2)
                        (RPairL ref) =
     notintro-mat-ref-not NVFst mat1 ref
-  notintro-mat-ref-not NVNEHole (MNotIntroPair ni mat1 mat2)
+  notintro-mat-ref-not NVHole (MNotIntroPair ni mat1 mat2)
                        (RPairR ref) =
     notintro-mat-ref-not NVSnd mat2 ref
                         

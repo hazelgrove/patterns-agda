@@ -55,8 +55,8 @@ module lemmas-subst-exhaustive where
       EXSnd (subst-exhaustive ex1 ex2)
     subst-exhaustive (EXEHole w∈Δ) ex2 =
       EXEHole (EXσSubst w∈Δ ex2)
-    subst-exhaustive (EXNEHole w∈Δ ex1) ex2 =
-      EXNEHole (EXσSubst w∈Δ ex2) (subst-exhaustive ex1 ex2)
+    subst-exhaustive (EXHole w∈Δ ex1) ex2 =
+      EXHole (EXσSubst w∈Δ ex2) (subst-exhaustive ex1 ex2)
 
     subst-exhaustive-targets : ∀{Δp rs x e2} →
                                Δp ⊢ rs exhaustive-targets →

@@ -119,14 +119,14 @@ module dynamics-core where
   
   -- e takes a step to e'
   data _↦_ : (e : ihexp) → (e' : ihexp) → Set where
-    ITApFun   : ∀{e1 e1' e2} →
+    ITpFun   : ∀{e1 e1' e2} →
                 e1 ↦ e1' →
                 (e1 ∘ e2) ↦ (e1' ∘ e2)
-    ITApArg   : ∀{e1 e2 e2'} →
+    ITpArg   : ∀{e1 e2 e2'} →
                 e1 final →
                 e2 ↦ e2' →
                 (e1 ∘ e2) ↦ (e1 ∘ e2')
-    ITAp      : ∀{x τ e1 e2} →
+    ITp      : ∀{x τ e1 e2} →
                 e2 final →
                 ((·λ x ·[ τ ] e1) ∘ e2) ↦ ([ e2 / x ] e1)
     ITPairL   : ∀{e1 e1' e2} →
@@ -168,6 +168,6 @@ module dynamics-core where
                   erase-r (rs / (pr => er) / nil) rss →
                   match e ·: τ of (rs / (pr => er) / (r' / rs')) ↦
                     match e ·: τ of (rss / r' / rs')
-    ITNEHole : ∀{e e' u σ} →
+    ITHole : ∀{e e' u σ} →
                e ↦ e' →
                ⦇⌜ e ⌟⦈⟨ u , σ ⟩ ↦ ⦇⌜ e' ⌟⦈⟨ u , σ ⟩

@@ -107,8 +107,8 @@ module lemmas-subst-satisfy where
     all-notintro-sat NVSnd sat NVSnd
   final-sat-subst (FIndet IEHole) sat =
     all-notintro-sat NVEHole sat NVEHole
-  final-sat-subst (FIndet (INEHole ind)) sat =
-    all-notintro-sat NVNEHole sat NVNEHole
+  final-sat-subst (FIndet (IHole ind)) sat =
+    all-notintro-sat NVHole sat NVHole
               
   final-subst-maysat : ∀{x e1 e2 ξ} →
                        e1 final →
@@ -281,8 +281,8 @@ module lemmas-subst-satisfy where
     all-notintro-maysat NVSnd msat NVSnd
   final-maysat-subst (FIndet IEHole) msat =
     all-notintro-maysat NVEHole msat NVEHole
-  final-maysat-subst (FIndet (INEHole fin)) msat =
-    all-notintro-maysat NVNEHole msat NVNEHole
+  final-maysat-subst (FIndet (IHole fin)) msat =
+    all-notintro-maysat NVHole msat NVHole
                        
   -- replacing a variable may allow it to satisfy something
   -- it previously did not

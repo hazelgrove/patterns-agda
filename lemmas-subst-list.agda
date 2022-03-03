@@ -50,13 +50,13 @@ module lemmas-subst-list where
                        Γ , Δ , Δp ⊢ θ1 :sl: Γ1 →
                        Γ , Δ , Δp ⊢ θ2 :sl: Γ2 →
                        Γ , Δ , Δp ⊢ (θ1 ++ θ2) :sl: (Γ1 ∪ Γ2)
-  substs-concat-type STAEmpty st2 = st2
+  substs-concat-type STEmpty st2 = st2
   substs-concat-type {Γ = Γ} {Δ = Δ} {Δp = Δp}
                    {θ1 = (d , τ , y) :: θ1} {θ2 = θ2} {Γ2 = Γ2}
-                   (STAExtend {Γθ = Γ1} {τ = τ} y#Γ1 st1 wt1) st2 =
+                   (STExtend {Γθ = Γ1} {τ = τ} y#Γ1 st1 wt1) st2 =
     tr (λ qq → Γ , Δ , Δp ⊢ (d , τ , y) :: θ1 ++ θ2 :sl: qq)
        (! (∪-assoc (■ (y , τ)) Γ1 Γ2))
-       (STAExtend y#Γ1 (substs-concat-type st1 st2) wt1)
+       (STExtend y#Γ1 (substs-concat-type st1 st2) wt1)
 
   -- if two lists are jointly simultanteous, then
   -- the combined list is simultaneous

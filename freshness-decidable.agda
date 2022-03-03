@@ -40,8 +40,8 @@ module freshness-decidable where
   unbound-in-p-dec x ⦇-⦈[ w ] = Inl UBPEHole
   unbound-in-p-dec x ⦇⌜ p ⌟⦈[ w , τ ]
     with unbound-in-p-dec x p
-  ... | Inl ubp = Inl (UBPNEHole ubp)
-  ... | Inr ¬ubp = Inr (λ{(UBPNEHole ubp) → ¬ubp ubp})
+  ... | Inl ubp = Inl (UBPHole ubp)
+  ... | Inr ¬ubp = Inr (λ{(UBPHole ubp) → ¬ubp ubp})
   
   mutual
     fresh-dec : (x : Nat) →
@@ -111,12 +111,12 @@ module freshness-decidable where
     fresh-dec x ⦇⌜ e ⌟⦈⟨ u , σ ⟩
       with fresh-σ-dec x σ
     ... | Inr ¬frshσ =
-      Inr λ{(FNEHole frshσ frsh) → ¬frshσ frshσ}
+      Inr λ{(FHole frshσ frsh) → ¬frshσ frshσ}
     ... | Inl frshσ
       with fresh-dec x e
     ... | Inr ¬frsh =
-      Inr λ{(FNEHole frshσ frsh) → ¬frsh frsh}
-    ... | Inl frsh = Inl (FNEHole frshσ frsh)
+      Inr λ{(FHole frshσ frsh) → ¬frsh frsh}
+    ... | Inl frsh = Inl (FHole frshσ frsh)
     
     fresh-σ-dec : (x : Nat) →
                   (σ : subst-env) →

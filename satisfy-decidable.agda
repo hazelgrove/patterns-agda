@@ -161,7 +161,7 @@ module satisfy-decidable where
   satisfy-complete {e = ⦇⌜ e ⌟⦈⟨ u , σ ⟩} {ξ = ⟨ ξ1 , ξ2 ⟩} sateq
     with true-and sateq
   ... | sat1 , sat2 =
-    CSNotIntroPair NVNEHole (satisfy-complete sat1)
+    CSNotIntroPair NVHole (satisfy-complete sat1)
                    (satisfy-complete sat2)
   satisfy-complete {ξ = ξ1 ∨ ξ2} sateq
     with true-or sateq
@@ -510,7 +510,7 @@ module satisfy-decidable where
   maysatisfy-complete {e = ⦇⌜ e ⌟⦈⟨ u , σ ⟩} {ξ = inl ξ} msateq
     with true-and {P = possible-bool ξ} msateq
   ... | pos , refl =
-    CMSNotIntro NVNEHole RXInl (PInl (possible-complete pos))
+    CMSNotIntro NVHole RXInl (PInl (possible-complete pos))
   maysatisfy-complete {e = e1 ∘ e2} {ξ = inr ξ} msateq
     with true-and {P = possible-bool ξ} msateq
   ... | pos , refl =
@@ -536,7 +536,7 @@ module satisfy-decidable where
   maysatisfy-complete {e = ⦇⌜ e ⌟⦈⟨ u , σ ⟩} {ξ = inr ξ} msateq
     with true-and {P = possible-bool ξ} msateq
   ... | pos , refl =
-    CMSNotIntro NVNEHole RXInr (PInr (possible-complete pos))
+    CMSNotIntro NVHole RXInr (PInr (possible-complete pos))
   maysatisfy-complete {e = e1 ∘ e2} {ξ = ⟨ ξ1 , ξ2 ⟩} msateq
     with true-and {P = possible-bool ξ1 and possible-bool ξ2}
                   {Q = xrefutable-bool ξ1 or xrefutable-bool ξ2} msateq
@@ -628,10 +628,10 @@ module satisfy-decidable where
     with true-and {P = possible-bool ξ1} {Q = possible-bool ξ2} pos
   ... | pos1 , pos2 with true-or ref 
   ... | Inl ref1 =
-    CMSNotIntro NVNEHole (RXPairL (xrefutable-complete ref1))
+    CMSNotIntro NVHole (RXPairL (xrefutable-complete ref1))
                 (PPair (possible-complete pos1) (possible-complete pos2))
   ... | Inr ref2 =
-    CMSNotIntro NVNEHole (RXPairR (xrefutable-complete ref2))
+    CMSNotIntro NVHole (RXPairR (xrefutable-complete ref2))
                 (PPair (possible-complete pos1) (possible-complete pos2))
   maysatisfy-complete {e = e} {ξ = ξ1 ∨ ξ2} msateq
     with true-or {P = maysatisfy-bool e ξ1 and not (satisfy-bool e ξ2)}

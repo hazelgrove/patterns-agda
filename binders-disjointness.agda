@@ -37,7 +37,7 @@ module binders-disjointness where
                   binders-disjoint-p wild t
       BDPEHole  : ∀{w t} →
                   binders-disjoint-p ⦇-⦈[ w ] t
-      BDPNEHole : ∀{p w τ t} →
+      BDPHole : ∀{p w τ t} →
                   binders-disjoint-p p t →
                   binders-disjoint-p ⦇⌜ p ⌟⦈[ w , τ ] t
       
@@ -113,7 +113,7 @@ module binders-disjointness where
       BDEHole  : ∀{u σ t} →
                  binders-disjoint-σ σ t →
                  binders-disjoint ⦇-⦈⟨ u , σ ⟩ t
-      BDNEHole : ∀{e u σ t} →
+      BDHole : ∀{e u σ t} →
                  binders-disjoint-σ σ t →
                  binders-disjoint e t →
                  binders-disjoint ⦇⌜ e ⌟⦈⟨ u , σ ⟩ t
@@ -142,7 +142,7 @@ module binders-disjointness where
       HBDPEHole  : ∀{w t} →
                    hole-unbound-in w t →
                    hole-binders-disjoint-p ⦇-⦈[ w ] t
-      HBDPNEHole : ∀{p w τ t} →
+      HBDPHole : ∀{p w τ t} →
                    hole-unbound-in w t →
                    hole-binders-disjoint-p p t →
                    hole-binders-disjoint-p ⦇⌜ p ⌟⦈[ w , τ ] t
@@ -217,7 +217,7 @@ module binders-disjointness where
       HBDEHole  : ∀{u σ t} →
                   hole-binders-disjoint-σ σ t →
                   hole-binders-disjoint ⦇-⦈⟨ u , σ ⟩ t
-      HBDNEHole : ∀{e u σ t} →
+      HBDHole : ∀{e u σ t} →
                   hole-binders-disjoint-σ σ t →
                   hole-binders-disjoint e t →
                   hole-binders-disjoint ⦇⌜ e ⌟⦈⟨ u , σ ⟩ t

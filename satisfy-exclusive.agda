@@ -39,34 +39,34 @@ module satisfy-exclusive where
     
   -- num cases
   satisfy-exclusive {e = N n} (CTNum {n = m})
-                    TANum fin with nat-dec n m
+                    TNum fin with nat-dec n m
   ... | Inl refl = Satisfy CSNum (λ{ (CMSNotIntro () ref pos)})
                            (CSMSSat CSNum)
   ... | Inr n≠m = NotSatisfy (λ{CSNum → n≠m refl})
                              (λ{(CMSNotIntro () ref pos)})
                              λ{(CSMSSat CSNum) → n≠m refl
                              ; (CSMSMay (CMSNotIntro () _ _))}
-  satisfy-exclusive CTNum (TAAp wt1 wt2) fin =
+  satisfy-exclusive CTNum (TAp wt1 wt2) fin =
     MaySatisfy (λ ()) (CMSNotIntro NVAp RXNum PNum)
                (CSMSMay (CMSNotIntro NVAp RXNum PNum))
-  satisfy-exclusive CTNum (TAMatchZPre wt x) fin =
+  satisfy-exclusive CTNum (TMatchZPre wt x) fin =
     MaySatisfy (λ ()) (CMSNotIntro NVMatch RXNum PNum)
                (CSMSMay (CMSNotIntro NVMatch RXNum PNum))
-  satisfy-exclusive CTNum (TAMatchNZPre wt x x₁ x₂ x₃) fin =
+  satisfy-exclusive CTNum (TMatchNZPre wt x x₁ x₂ x₃) fin =
     MaySatisfy (λ ()) (CMSNotIntro NVMatch RXNum PNum)
                (CSMSMay (CMSNotIntro NVMatch RXNum PNum))
-  satisfy-exclusive CTNum (TAFst wt) fin =
+  satisfy-exclusive CTNum (TFst wt) fin =
     MaySatisfy (λ ()) (CMSNotIntro NVFst RXNum PNum)
                (CSMSMay (CMSNotIntro NVFst RXNum PNum))
-  satisfy-exclusive CTNum (TASnd wt) fin =
+  satisfy-exclusive CTNum (TSnd wt) fin =
     MaySatisfy (λ ()) (CMSNotIntro NVSnd RXNum PNum)
                (CSMSMay (CMSNotIntro NVSnd RXNum PNum))
-  satisfy-exclusive CTNum (TAEHole u∈Δ st) fin =
+  satisfy-exclusive CTNum (TEHole u∈Δ st) fin =
     MaySatisfy (λ ()) (CMSNotIntro NVEHole RXNum PNum)
                (CSMSMay (CMSNotIntro NVEHole RXNum PNum))
-  satisfy-exclusive CTNum (TANEHole u∈Δ st wt) fin =
-    MaySatisfy (λ ()) (CMSNotIntro NVNEHole RXNum PNum)
-               (CSMSMay (CMSNotIntro NVNEHole RXNum PNum))
+  satisfy-exclusive CTNum (THole u∈Δ st wt) fin =
+    MaySatisfy (λ ()) (CMSNotIntro NVHole RXNum PNum)
+               (CSMSMay (CMSNotIntro NVHole RXNum PNum))
 
   -- inl cases
   satisfy-exclusive {ξ = ξ} {e = e} (CTInl ct) wt fin
@@ -88,18 +88,18 @@ module satisfy-exclusive where
   ... | Inr ¬ref | Inr ¬pos = abort (not-ref-not-pos-not ¬ref ¬pos)
   satisfy-exclusive {ξ = ξ} (CTInl ct) wt fin | Inr ¬ni
     with wt
-  ... | TAAp _ _ = abort (¬ni NVAp)
-  ... | TAMatchZPre _ _ = abort (¬ni NVMatch)
-  ... | TAMatchNZPre _ _ _ _ _ = abort (¬ni NVMatch)
-  ... | TAFst _ = abort (¬ni NVFst)
-  ... | TASnd _ = abort (¬ni NVSnd)
-  ... | TAEHole _ _ = abort (¬ni NVEHole)
-  ... | TANEHole _ _ _ = abort (¬ni NVNEHole)
-  ... | TAInr _ =
+  ... | TAp _ _ = abort (¬ni NVAp)
+  ... | TMatchZPre _ _ = abort (¬ni NVMatch)
+  ... | TMatchNZPre _ _ _ _ _ = abort (¬ni NVMatch)
+  ... | TFst _ = abort (¬ni NVFst)
+  ... | TSnd _ = abort (¬ni NVSnd)
+  ... | TEHole _ _ = abort (¬ni NVEHole)
+  ... | THole _ _ _ = abort (¬ni NVHole)
+  ... | TInr _ =
     NotSatisfy (λ ())
                (λ{(CMSNotIntro () _ _)})
                (λ{(CSMSMay (CMSNotIntro () _ _))})
-  ... | TAInl wt'
+  ... | TInl wt'
     with satisfy-exclusive ct wt' (inl-final fin)
   ... | Satisfy sat ¬msat satm =
     Satisfy (CSInl sat)
@@ -135,18 +135,18 @@ module satisfy-exclusive where
   ... | Inr ¬ref | Inr ¬pos = abort (not-ref-not-pos-not ¬ref ¬pos)
   satisfy-exclusive {ξ = ξ} (CTInr ct) wt fin | Inr ¬ni
     with wt
-  ... | TAAp _ _ = abort (¬ni NVAp)
-  ... | TAMatchZPre _ _ = abort (¬ni NVMatch)
-  ... | TAMatchNZPre _ _ _ _ _ = abort (¬ni NVMatch)
-  ... | TAFst _ = abort (¬ni NVFst)
-  ... | TASnd _ = abort (¬ni NVSnd)
-  ... | TAEHole _ _ = abort (¬ni NVEHole)
-  ... | TANEHole _ _ _ = abort (¬ni NVNEHole)
-  ... | TAInl _ =
+  ... | TAp _ _ = abort (¬ni NVAp)
+  ... | TMatchZPre _ _ = abort (¬ni NVMatch)
+  ... | TMatchNZPre _ _ _ _ _ = abort (¬ni NVMatch)
+  ... | TFst _ = abort (¬ni NVFst)
+  ... | TSnd _ = abort (¬ni NVSnd)
+  ... | TEHole _ _ = abort (¬ni NVEHole)
+  ... | THole _ _ _ = abort (¬ni NVHole)
+  ... | TInl _ =
     NotSatisfy (λ ())
                (λ{(CMSNotIntro () _ _)})
                (λ{(CSMSMay (CMSNotIntro () _ _))})
-  ... | TAInr wt'
+  ... | TInr wt'
     with satisfy-exclusive ct wt' (inr-final fin)
   ... | Satisfy sat ¬msat satm =
     Satisfy (CSInr sat)
@@ -168,10 +168,10 @@ module satisfy-exclusive where
   ... | Inl ni with final-notintro-indet fin ni
   ... | ind
     with satisfy-exclusive
-           ct1 (TAFst wt)
+           ct1 (TFst wt)
            (FIndet (IFst (λ{e1 e2 refl → contra ni (λ ())}) ind)) |
          satisfy-exclusive
-           ct2 (TASnd wt)
+           ct2 (TSnd wt)
            (FIndet (ISnd (λ{e1 e2 refl → contra ni (λ ())}) ind))
   ... | Satisfy sat1 ¬msat1 satm1 | Satisfy sat2 ¬msat2 satm2 =
     Satisfy (CSNotIntroPair ni sat1 sat2)
@@ -299,14 +299,14 @@ module satisfy-exclusive where
   satisfy-exclusive {ξ = ξ} {e = e}
                     (CTPair ct1 ct2) wt fin | Inr ¬ni
     with wt
-  ... | TAAp _ _ = abort (¬ni NVAp)
-  ... | TAMatchZPre _ _ = abort (¬ni NVMatch)
-  ... | TAMatchNZPre _ _ _ _ _ = abort (¬ni NVMatch)
-  ... | TAFst _ = abort (¬ni NVFst)
-  ... | TASnd _ = abort (¬ni NVSnd)
-  ... | TAEHole _ _ = abort (¬ni NVEHole)
-  ... | TANEHole _ _ _ = abort (¬ni NVNEHole)
-  ... | TAPair wt1 wt2
+  ... | TAp _ _ = abort (¬ni NVAp)
+  ... | TMatchZPre _ _ = abort (¬ni NVMatch)
+  ... | TMatchNZPre _ _ _ _ _ = abort (¬ni NVMatch)
+  ... | TFst _ = abort (¬ni NVFst)
+  ... | TSnd _ = abort (¬ni NVSnd)
+  ... | TEHole _ _ = abort (¬ni NVEHole)
+  ... | THole _ _ _ = abort (¬ni NVHole)
+  ... | TPair wt1 wt2
     with pair-final fin
   ... | fin1 , fin2 
     with satisfy-exclusive ct1 wt1 fin1 |

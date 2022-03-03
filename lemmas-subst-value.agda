@@ -15,7 +15,7 @@ module lemmas-subst-value where
   subst-notintro NVFst = NVFst
   subst-notintro NVSnd = NVSnd
   subst-notintro NVEHole = NVEHole
-  subst-notintro NVNEHole = NVNEHole
+  subst-notintro NVHole = NVHole
                             
   subst-val : ∀{x e1 e2} →
               e1 val →

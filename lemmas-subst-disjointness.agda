@@ -52,8 +52,8 @@ module lemmas-subst-disjointness where
     subst-binders-disjoint {e1 = ⦇-⦈⟨ u , σ ⟩} (BDEHole bdσ) bd2 ube =
       BDEHole (subst-binders-disjoint-σ bdσ bd2 ube)
     subst-binders-disjoint {e1 = ⦇⌜ e1 ⌟⦈⟨ u , σ ⟩}
-                           (BDNEHole bdσ bd1) bd2 ube =
-      BDNEHole (subst-binders-disjoint-σ bdσ bd2 ube)
+                           (BDHole bdσ bd1) bd2 ube =
+      BDHole (subst-binders-disjoint-σ bdσ bd2 ube)
                (subst-binders-disjoint bd1 bd2 ube)
 
     subst-binders-disjoint-σ : ∀{x σ e2} {e : ihexp} →
@@ -131,8 +131,8 @@ module lemmas-subst-disjointness where
       HBDSnd (subst-hole-binders-disjoint bd1 bd2)
     subst-hole-binders-disjoint {e1 = ⦇-⦈⟨ u , σ ⟩} (HBDEHole bdσ) bd2 =
       HBDEHole (HBDσSubst bd2 bdσ)
-    subst-hole-binders-disjoint {e1 = ⦇⌜ e1 ⌟⦈⟨ u , σ ⟩} (HBDNEHole bdσ bd1) bd2 =
-      HBDNEHole (HBDσSubst bd2 bdσ) (subst-hole-binders-disjoint bd1 bd2)
+    subst-hole-binders-disjoint {e1 = ⦇⌜ e1 ⌟⦈⟨ u , σ ⟩} (HBDHole bdσ bd1) bd2 =
+      HBDHole (HBDσSubst bd2 bdσ) (subst-hole-binders-disjoint bd1 bd2)
 
     subst-hole-binders-disjoint-zrs : ∀{x zrs e2} {e : ihexp} →
                                       hole-binders-disjoint-zrs zrs e →

@@ -74,7 +74,7 @@ These files give definitions and syntactic sugar for common elements of type the
 - [value-judgements.agda](value-judgements.agda) defines the the e val and e notintro judgements and proves a few quick lemmas.
 - [result-judgements.agda](result-judgements.agda) defines the e indet and e final judgements and proves a few quick lemmas.
 - [constraints-core.agda](constraint-core.agda) defines the syntax of the incomplete constraint language. As well, it defines constraint typing, ξ refutable, ξ possible, and the satisfaction judgements.
-- [complete-constrants-core.agda](complete-constraints-core.agda) defines the syntax of the complete constraint language. As well, it defines complete contraint typing, satisfaction judgements, and the dual, truthify, and falsify functions.
+- [complete-constrants-core.agda](complete-constraints-core.agda) defines the syntax of the complete constraint language. As well, it defines complete contraint typing, satisfaction judgements, and the dual, truify, and falsify functions.
 - [patterns-core.agda](patterns-core.agda) defines the various matching judgements, pattern typing, and the p refutable judgement.
 - [dynamics-core.agda](dynamics-core.agda) defines substitution, instruction transitions, and the "e' is a value of e" judgement.
 - [statics-core.agda](statics-core.agda) defines type assignment, constraint entailment, exhaustiveness, and nonredundancy.
@@ -136,7 +136,7 @@ The following files prove the main results from the paper.
 - [complete-satisfy-exclusive.agda](complete-satisfy-exclusive.agda) argues that for an expression e and a constraint ξ of the same type, either e satisfies ξ or e satisfies the dual of ξ, but not both.
 - [matching-determinism.agda](matching-determinism.agda) argues that for an expression e and a pattern p of the same type, exactly one of the following holds: e matches p, e may match p, or e does not match p.
 - [matching-coherence.agda](matching-coherence.agda) shows that patterns and their constraints behave as expected, e.g., an expression matches the pattern if and only if it satisfies the emitted constraint.
-- [complete-relationship.agda](complete-relationship.agda) establishes the relationship between the incomplete and complete constraint languages via the falsify and truthify functions.
+- [complete-relationship.agda](complete-relationship.agda) establishes the relationship between the incomplete and complete constraint languages via the falsify and truify functions.
 - [material-entailment.agda](material-entailment.agda) proves that ξ1 entailing ξ2 is equivalent to ⊤ entailing (dual ξ1) ∨ ξ2.
 
 Together, the following files prove type safety:

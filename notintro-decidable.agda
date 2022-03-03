@@ -27,7 +27,7 @@ module notintro-decidable where
   notintro-sound NVFst = refl
   notintro-sound NVSnd = refl
   notintro-sound NVEHole = refl
-  notintro-sound NVNEHole = refl
+  notintro-sound NVHole = refl
   
   notintro-complete : ∀{e} →
                       notintro-bool e == true →
@@ -37,7 +37,7 @@ module notintro-decidable where
   notintro-complete {e = fst e} nieq = NVFst
   notintro-complete {e = snd e} nieq = NVSnd
   notintro-complete {e = ⦇-⦈⟨ u , σ ⟩} nieq = NVEHole
-  notintro-complete {e = ⦇⌜ e ⌟⦈⟨ u , σ ⟩} nieq = NVNEHole
+  notintro-complete {e = ⦇⌜ e ⌟⦈⟨ u , σ ⟩} nieq = NVHole
   
   notintro-dec : (e : ihexp) →
                  (e notintro) + (e notintro → ⊥)

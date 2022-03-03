@@ -39,8 +39,8 @@ module hole-binders-disjoint-symmetric where
     lem-hbd-lam (HBDFst bd) = HBDFst (lem-hbd-lam bd)
     lem-hbd-lam (HBDSnd bd) = HBDSnd (lem-hbd-lam bd)
     lem-hbd-lam (HBDEHole bdσ) = HBDEHole (lem-hbd-σ-lam bdσ)
-    lem-hbd-lam (HBDNEHole bdσ bd) =
-      HBDNEHole (lem-hbd-σ-lam bdσ) (lem-hbd-lam bd)
+    lem-hbd-lam (HBDHole bdσ bd) =
+      HBDHole (lem-hbd-σ-lam bdσ) (lem-hbd-lam bd)
 
     lem-hbd-σ-lam : {σ : subst-env} {x : Nat} {τ1 : htyp} {e1 : ihexp} →
                     hole-binders-disjoint-σ σ (·λ x ·[ τ1 ] e1) →
@@ -74,8 +74,8 @@ module hole-binders-disjoint-symmetric where
       HBDPPair (lem-hbd-p-lam bd1) (lem-hbd-p-lam bd2)
     lem-hbd-p-lam HBDPWild = HBDPWild
     lem-hbd-p-lam (HBDPEHole (HUBLam ub)) = HBDPEHole ub
-    lem-hbd-p-lam (HBDPNEHole (HUBLam ub) bd) =
-      HBDPNEHole ub (lem-hbd-p-lam bd)
+    lem-hbd-p-lam (HBDPHole (HUBLam ub) bd) =
+      HBDPHole ub (lem-hbd-p-lam bd)
     
   mutual
     lem-hbd-ap : {e : ihexp} {e1 e2 : ihexp} →
@@ -120,10 +120,10 @@ module hole-binders-disjoint-symmetric where
     lem-hbd-ap (HBDEHole bdσ)
       with lem-hbd-σ-ap bdσ
     ... | bdσ1 , bdσ2 = HBDEHole bdσ1 , HBDEHole bdσ2
-    lem-hbd-ap (HBDNEHole bdσ bd)
+    lem-hbd-ap (HBDHole bdσ bd)
       with lem-hbd-σ-ap bdσ | lem-hbd-ap bd
     ... | bdσ1 , bdσ2 | bd1 , bd2 =
-      HBDNEHole bdσ1 bd1 , HBDNEHole bdσ2 bd2
+      HBDHole bdσ1 bd1 , HBDHole bdσ2 bd2
 
     lem-hbd-σ-ap : {σ : subst-env} {e1 e2 : ihexp} →
                   hole-binders-disjoint-σ σ (e1 ∘ e2) →
@@ -174,10 +174,10 @@ module hole-binders-disjoint-symmetric where
     lem-hbd-p-ap HBDPWild = HBDPWild , HBDPWild
     lem-hbd-p-ap (HBDPEHole (HUBAp ub1 ub2)) =
       HBDPEHole ub1 , HBDPEHole ub2
-    lem-hbd-p-ap (HBDPNEHole (HUBAp ub1 ub2) bd)
+    lem-hbd-p-ap (HBDPHole (HUBAp ub1 ub2) bd)
       with lem-hbd-p-ap bd
     ... | bd1 , bd2 =
-      HBDPNEHole ub1 bd1 , HBDPNEHole ub2 bd2
+      HBDPHole ub1 bd1 , HBDPHole ub2 bd2
 
   mutual
     lem-hbd-inl : {e : ihexp} {τ : htyp} {e1 : ihexp} →
@@ -201,8 +201,8 @@ module hole-binders-disjoint-symmetric where
     lem-hbd-inl (HBDSnd bd) = HBDSnd (lem-hbd-inl bd)
     lem-hbd-inl (HBDEHole bdσ) =
       HBDEHole (lem-hbd-σ-inl bdσ)
-    lem-hbd-inl (HBDNEHole bdσ bd) =
-      HBDNEHole (lem-hbd-σ-inl bdσ) (lem-hbd-inl bd)
+    lem-hbd-inl (HBDHole bdσ bd) =
+      HBDHole (lem-hbd-σ-inl bdσ) (lem-hbd-inl bd)
 
     lem-hbd-σ-inl : {σ : subst-env} {τ : htyp} {e1 : ihexp} →
                    hole-binders-disjoint-σ σ (inl τ e1) →
@@ -236,8 +236,8 @@ module hole-binders-disjoint-symmetric where
       HBDPPair (lem-hbd-p-inl bd1) (lem-hbd-p-inl bd2)
     lem-hbd-p-inl HBDPWild = HBDPWild
     lem-hbd-p-inl (HBDPEHole (HUBInl ub)) = HBDPEHole ub
-    lem-hbd-p-inl (HBDPNEHole (HUBInl ub) bd) =
-      HBDPNEHole ub (lem-hbd-p-inl bd)
+    lem-hbd-p-inl (HBDPHole (HUBInl ub) bd) =
+      HBDPHole ub (lem-hbd-p-inl bd)
     
   mutual
     lem-hbd-inr : {e : ihexp} {τ : htyp} {e1 : ihexp} →
@@ -261,8 +261,8 @@ module hole-binders-disjoint-symmetric where
     lem-hbd-inr (HBDSnd bd) = HBDSnd (lem-hbd-inr bd)
     lem-hbd-inr (HBDEHole bdσ) =
       HBDEHole (lem-hbd-σ-inr bdσ)
-    lem-hbd-inr (HBDNEHole bdσ bd) =
-      HBDNEHole (lem-hbd-σ-inr bdσ) (lem-hbd-inr bd)
+    lem-hbd-inr (HBDHole bdσ bd) =
+      HBDHole (lem-hbd-σ-inr bdσ) (lem-hbd-inr bd)
 
     lem-hbd-σ-inr : {σ : subst-env} {τ : htyp} {e1 : ihexp} →
                     hole-binders-disjoint-σ σ (inr τ e1) →
@@ -296,8 +296,8 @@ module hole-binders-disjoint-symmetric where
       HBDPPair (lem-hbd-p-inr bd1) (lem-hbd-p-inr bd2)
     lem-hbd-p-inr HBDPWild = HBDPWild
     lem-hbd-p-inr (HBDPEHole (HUBInr ub)) = HBDPEHole ub
-    lem-hbd-p-inr (HBDPNEHole (HUBInr ub) bd) =
-      HBDPNEHole ub (lem-hbd-p-inr bd)
+    lem-hbd-p-inr (HBDPHole (HUBInr ub) bd) =
+      HBDPHole ub (lem-hbd-p-inr bd)
     
   mutual
     lem-hbd-match : {e : ihexp} {e1 : ihexp} {τ : htyp}
@@ -365,14 +365,14 @@ module hole-binders-disjoint-symmetric where
       HBDEHole bdσpre ,
       HBDEHole bdσr ,
       HBDEHole bdσpost
-    lem-hbd-match (HBDNEHole bdσ bd)
+    lem-hbd-match (HBDHole bdσ bd)
       with lem-hbd-σ-match bdσ | lem-hbd-match bd
     ... | bdσ' , bdσpre , bdσr , bdσpost
         | bd' , bdpre , bdr , bdpost =
-      HBDNEHole bdσ' bd' ,
-      HBDNEHole bdσpre bdpre ,
-      HBDNEHole bdσr bdr ,
-      HBDNEHole bdσpost bdpost
+      HBDHole bdσ' bd' ,
+      HBDHole bdσpre bdpre ,
+      HBDHole bdσr bdr ,
+      HBDHole bdσpost bdpost
 
     lem-hbd-σ-match : {σ : subst-env} {e1 : ihexp} {τ : htyp}
                       {rs-pre : rules} {r : rule} {rs-post : rules} →
@@ -462,13 +462,13 @@ module hole-binders-disjoint-symmetric where
                       (HUBMatch ub
                         (HUBZRules ubpre (HUBRules ubr ubpost)))) =
       HBDPEHole ub , HBDPEHole ubpre , HBDPEHole ubr , HBDPEHole ubpost
-    lem-hbd-p-match (HBDPNEHole
+    lem-hbd-p-match (HBDPHole
                       (HUBMatch ub
                         (HUBZRules ubpre (HUBRules ubr ubpost))) bd)
       with lem-hbd-p-match bd
     ... | bd' , bdpre , bdr , bdpost =
-      HBDPNEHole ub bd' , HBDPNEHole ubpre bdpre ,
-      HBDPNEHole ubr bdr , HBDPNEHole ubpost bdpost
+      HBDPHole ub bd' , HBDPHole ubpre bdpre ,
+      HBDPHole ubr bdr , HBDPHole ubpost bdpost
     
   mutual
     lem-hbd-pair : {e : ihexp} {e1 e2 : ihexp} →
@@ -514,10 +514,10 @@ module hole-binders-disjoint-symmetric where
       with lem-hbd-σ-pair bdσ
     ... | bdσ1 , bdσ2 =
       HBDEHole bdσ1 , HBDEHole bdσ2
-    lem-hbd-pair (HBDNEHole bdσ bd)
+    lem-hbd-pair (HBDHole bdσ bd)
       with lem-hbd-σ-pair bdσ | lem-hbd-pair bd
     ... | bdσ1 , bdσ2 | bd1 , bd2 =
-      HBDNEHole bdσ1 bd1 , HBDNEHole bdσ2 bd2
+      HBDHole bdσ1 bd1 , HBDHole bdσ2 bd2
 
     lem-hbd-σ-pair : {σ : subst-env} {e1 e2 : ihexp} →
                      hole-binders-disjoint-σ σ ⟨ e1 , e2 ⟩ →
@@ -569,9 +569,9 @@ module hole-binders-disjoint-symmetric where
     lem-hbd-p-pair HBDPWild = HBDPWild , HBDPWild
     lem-hbd-p-pair (HBDPEHole (HUBPair ub1 ub2))=
       HBDPEHole ub1 , HBDPEHole ub2
-    lem-hbd-p-pair (HBDPNEHole (HUBPair ub1 ub2) bd)
+    lem-hbd-p-pair (HBDPHole (HUBPair ub1 ub2) bd)
       with lem-hbd-p-pair bd
-    ... | bd1 , bd2 = HBDPNEHole ub1 bd1 , HBDPNEHole ub2 bd2
+    ... | bd1 , bd2 = HBDPHole ub1 bd1 , HBDPHole ub2 bd2
     
   mutual
     lem-hbd-fst : {e : ihexp} {e1 : ihexp} →
@@ -594,8 +594,8 @@ module hole-binders-disjoint-symmetric where
     lem-hbd-fst (HBDFst bd) = HBDFst (lem-hbd-fst bd)
     lem-hbd-fst (HBDSnd bd) = HBDSnd (lem-hbd-fst bd)
     lem-hbd-fst (HBDEHole bdσ) = HBDEHole (lem-hbd-σ-fst bdσ)
-    lem-hbd-fst (HBDNEHole bdσ bd) =
-      HBDNEHole (lem-hbd-σ-fst bdσ) (lem-hbd-fst bd)
+    lem-hbd-fst (HBDHole bdσ bd) =
+      HBDHole (lem-hbd-σ-fst bdσ) (lem-hbd-fst bd)
 
     lem-hbd-σ-fst : {σ : subst-env} {e1 : ihexp} →
                    hole-binders-disjoint-σ σ (fst e1) →
@@ -629,8 +629,8 @@ module hole-binders-disjoint-symmetric where
       HBDPPair (lem-hbd-p-fst bd1) (lem-hbd-p-fst bd2)
     lem-hbd-p-fst HBDPWild = HBDPWild
     lem-hbd-p-fst (HBDPEHole (HUBFst ub)) = HBDPEHole ub
-    lem-hbd-p-fst (HBDPNEHole (HUBFst ub) bd) =
-      HBDPNEHole ub (lem-hbd-p-fst bd)
+    lem-hbd-p-fst (HBDPHole (HUBFst ub) bd) =
+      HBDPHole ub (lem-hbd-p-fst bd)
     
   mutual
     lem-hbd-snd : {e : ihexp} {e1 : ihexp} →
@@ -653,8 +653,8 @@ module hole-binders-disjoint-symmetric where
     lem-hbd-snd (HBDFst bd) = HBDFst (lem-hbd-snd bd)
     lem-hbd-snd (HBDSnd bd) = HBDSnd (lem-hbd-snd bd)
     lem-hbd-snd (HBDEHole bdσ) = HBDEHole (lem-hbd-σ-snd bdσ)
-    lem-hbd-snd (HBDNEHole bdσ bd) =
-      HBDNEHole (lem-hbd-σ-snd bdσ) (lem-hbd-snd bd)
+    lem-hbd-snd (HBDHole bdσ bd) =
+      HBDHole (lem-hbd-σ-snd bdσ) (lem-hbd-snd bd)
 
     lem-hbd-σ-snd : {σ : subst-env} {e1 : ihexp} →
                     hole-binders-disjoint-σ σ (snd e1) →
@@ -688,8 +688,8 @@ module hole-binders-disjoint-symmetric where
       HBDPPair (lem-hbd-p-snd bd1) (lem-hbd-p-snd bd2)
     lem-hbd-p-snd HBDPWild = HBDPWild
     lem-hbd-p-snd (HBDPEHole (HUBSnd ub)) = HBDPEHole ub
-    lem-hbd-p-snd (HBDPNEHole (HUBSnd ub) bd) =
-      HBDPNEHole ub (lem-hbd-p-snd bd)
+    lem-hbd-p-snd (HBDPHole (HUBSnd ub) bd) =
+      HBDPHole ub (lem-hbd-p-snd bd)
 
   mutual
     lem-hbd-ehole : {e : ihexp} {u : Nat} {σ : subst-env} →
@@ -714,8 +714,8 @@ module hole-binders-disjoint-symmetric where
     lem-hbd-ehole (HBDFst bd) = HBDFst (lem-hbd-ehole bd)
     lem-hbd-ehole (HBDSnd bd) = HBDSnd (lem-hbd-ehole bd)
     lem-hbd-ehole (HBDEHole bdσ) = HBDEHole (lem-hbd-σ-ehole bdσ)
-    lem-hbd-ehole (HBDNEHole bdσ bd) =
-      HBDNEHole (lem-hbd-σ-ehole bdσ)
+    lem-hbd-ehole (HBDHole bdσ bd) =
+      HBDHole (lem-hbd-σ-ehole bdσ)
                (lem-hbd-ehole bd)
 
     lem-hbd-σ-ehole : {σ : subst-env} {u : Nat} {σ1 : subst-env} →
@@ -751,117 +751,117 @@ module hole-binders-disjoint-symmetric where
     lem-hbd-p-ehole HBDPWild = HBDPWild
     lem-hbd-p-ehole (HBDPEHole (HUBEHole ubσ)) =
       HBDPEHole ubσ
-    lem-hbd-p-ehole (HBDPNEHole (HUBEHole ubσ) bd) =
-      HBDPNEHole ubσ (lem-hbd-p-ehole bd)
+    lem-hbd-p-ehole (HBDPHole (HUBEHole ubσ) bd) =
+      HBDPHole ubσ (lem-hbd-p-ehole bd)
       
   mutual
-    lem-hbd-nehole : {e : ihexp} {e1 : ihexp} {u : Nat} {σ : subst-env} →
+    lem-hbd-hole : {e : ihexp} {e1 : ihexp} {u : Nat} {σ : subst-env} →
                      hole-binders-disjoint e ⦇⌜ e1 ⌟⦈⟨ u , σ ⟩ →
                      hole-binders-disjoint e σ ×
                        hole-binders-disjoint e e1
-    lem-hbd-nehole HBDUnit = HBDUnit , HBDUnit
-    lem-hbd-nehole HBDNum = HBDNum , HBDNum
-    lem-hbd-nehole HBDVar = HBDVar , HBDVar
-    lem-hbd-nehole (HBDLam bd)
-      with lem-hbd-nehole bd
+    lem-hbd-hole HBDUnit = HBDUnit , HBDUnit
+    lem-hbd-hole HBDNum = HBDNum , HBDNum
+    lem-hbd-hole HBDVar = HBDVar , HBDVar
+    lem-hbd-hole (HBDLam bd)
+      with lem-hbd-hole bd
     ... | bdσ ,  bd' =
       HBDLam bdσ , HBDLam bd' 
-    lem-hbd-nehole (HBDAp bd1 bd2)
-      with lem-hbd-nehole bd1 | lem-hbd-nehole bd2
+    lem-hbd-hole (HBDAp bd1 bd2)
+      with lem-hbd-hole bd1 | lem-hbd-hole bd2
     ... | bd1σ  , bd1' | bd2σ , bd2' =
       HBDAp bd1σ bd2σ , HBDAp bd1' bd2'
-    lem-hbd-nehole (HBDInl bd)
-      with lem-hbd-nehole bd
+    lem-hbd-hole (HBDInl bd)
+      with lem-hbd-hole bd
     ... |  bdσ , bd' =
       HBDInl bdσ , HBDInl bd'
-    lem-hbd-nehole (HBDInr bd)
-      with lem-hbd-nehole bd
+    lem-hbd-hole (HBDInr bd)
+      with lem-hbd-hole bd
     ... | bdσ , bd'  =
        HBDInr bdσ , HBDInr bd'
-    lem-hbd-nehole (HBDMatch bd (HBDZRules bdpre bdpost))
-      with lem-hbd-nehole bd |
-           lem-hbd-rs-nehole bdpre |
-           lem-hbd-rs-nehole bdpost
+    lem-hbd-hole (HBDMatch bd (HBDZRules bdpre bdpost))
+      with lem-hbd-hole bd |
+           lem-hbd-rs-hole bdpre |
+           lem-hbd-rs-hole bdpost
     ... | bdσ , bd'
         | bdpreσ , bdpre'
         | bdpostσ , bdpost' =
       HBDMatch bdσ (HBDZRules bdpreσ bdpostσ) ,
       HBDMatch bd' (HBDZRules bdpre' bdpost')
-    lem-hbd-nehole (HBDPair bd1 bd2)
-      with lem-hbd-nehole bd1 | lem-hbd-nehole bd2
+    lem-hbd-hole (HBDPair bd1 bd2)
+      with lem-hbd-hole bd1 | lem-hbd-hole bd2
     ... | bdσ1 , bd1' | bdσ2 , bd2' =
       HBDPair bdσ1 bdσ2 , HBDPair bd1' bd2' 
-    lem-hbd-nehole (HBDFst bd)
-      with lem-hbd-nehole bd
+    lem-hbd-hole (HBDFst bd)
+      with lem-hbd-hole bd
     ... | bdσ , bd' = HBDFst bdσ , HBDFst bd'
-    lem-hbd-nehole (HBDSnd bd)
-      with lem-hbd-nehole bd
+    lem-hbd-hole (HBDSnd bd)
+      with lem-hbd-hole bd
     ... | bdσ , bd' = HBDSnd bdσ , HBDSnd bd' 
-    lem-hbd-nehole (HBDEHole bdσ)
-      with lem-hbd-σ-nehole bdσ
+    lem-hbd-hole (HBDEHole bdσ)
+      with lem-hbd-σ-hole bdσ
     ... | bdσσ , bdσ' =
        HBDEHole bdσσ , HBDEHole bdσ'
-    lem-hbd-nehole (HBDNEHole bdσ bde)
-      with lem-hbd-σ-nehole bdσ | lem-hbd-nehole bde
+    lem-hbd-hole (HBDHole bdσ bde)
+      with lem-hbd-σ-hole bdσ | lem-hbd-hole bde
     ... | bdσσ , bdσ' | bdeσ , bde' =
-      HBDNEHole bdσσ bdeσ , HBDNEHole bdσ' bde'
+      HBDHole bdσσ bdeσ , HBDHole bdσ' bde'
 
-    lem-hbd-σ-nehole : {σ : subst-env} {e1 : ihexp} {u : Nat} {σ1 : subst-env} →
+    lem-hbd-σ-hole : {σ : subst-env} {e1 : ihexp} {u : Nat} {σ1 : subst-env} →
                        hole-binders-disjoint-σ σ ⦇⌜ e1 ⌟⦈⟨ u , σ1 ⟩ →
                        hole-binders-disjoint-σ σ σ1 ×
                          hole-binders-disjoint-σ σ e1 
-    lem-hbd-σ-nehole HBDσId = HBDσId , HBDσId
-    lem-hbd-σ-nehole (HBDσSubst bdd bdσ)
-      with lem-hbd-nehole bdd | lem-hbd-σ-nehole bdσ
+    lem-hbd-σ-hole HBDσId = HBDσId , HBDσId
+    lem-hbd-σ-hole (HBDσSubst bdd bdσ)
+      with lem-hbd-hole bdd | lem-hbd-σ-hole bdσ
     ... | bddσ , bdd' | bdσσ , bdσ' =
       HBDσSubst bddσ bdσσ , HBDσSubst bdd' bdσ'
 
-    lem-hbd-rs-nehole : {rs : rules} {e1 : ihexp} {u : Nat} {σ : subst-env} →
+    lem-hbd-rs-hole : {rs : rules} {e1 : ihexp} {u : Nat} {σ : subst-env} →
                         hole-binders-disjoint-rs rs ⦇⌜ e1 ⌟⦈⟨ u , σ ⟩ →
                         hole-binders-disjoint-rs rs σ ×
                           hole-binders-disjoint-rs rs e1
-    lem-hbd-rs-nehole HBDNoRules = HBDNoRules , HBDNoRules
-    lem-hbd-rs-nehole (HBDRules bdr bdrs)
-      with lem-hbd-r-nehole bdr | lem-hbd-rs-nehole bdrs
+    lem-hbd-rs-hole HBDNoRules = HBDNoRules , HBDNoRules
+    lem-hbd-rs-hole (HBDRules bdr bdrs)
+      with lem-hbd-r-hole bdr | lem-hbd-rs-hole bdrs
     ... | bdrσ , bdr' | bdrsσ , bdrs' =
       HBDRules bdrσ bdrsσ , HBDRules bdr' bdrs'
 
-    lem-hbd-r-nehole : {r : rule} {e1 : ihexp} {u : Nat} {σ : subst-env} →
+    lem-hbd-r-hole : {r : rule} {e1 : ihexp} {u : Nat} {σ : subst-env} →
                        hole-binders-disjoint-r r ⦇⌜ e1 ⌟⦈⟨ u , σ ⟩ →
                        hole-binders-disjoint-r r σ ×
                          hole-binders-disjoint-r r e1
-    lem-hbd-r-nehole (HBDRule bdp bde)
-      with lem-hbd-p-nehole bdp | lem-hbd-nehole bde
+    lem-hbd-r-hole (HBDRule bdp bde)
+      with lem-hbd-p-hole bdp | lem-hbd-hole bde
     ... | bdpσ , bdp' | bdeσ , bde' =
       HBDRule bdpσ bdeσ , HBDRule bdp' bde'
     
-    lem-hbd-p-nehole : {p : pattrn} {e1 : ihexp} {u : Nat} {σ : subst-env} →
+    lem-hbd-p-hole : {p : pattrn} {e1 : ihexp} {u : Nat} {σ : subst-env} →
                        hole-binders-disjoint-p p ⦇⌜ e1 ⌟⦈⟨ u , σ ⟩ →
                        hole-binders-disjoint-p p σ ×
                          hole-binders-disjoint-p p e1
-    lem-hbd-p-nehole HBDPUnit = HBDPUnit , HBDPUnit
-    lem-hbd-p-nehole HBDPNum = HBDPNum , HBDPNum
-    lem-hbd-p-nehole HBDPVar = HBDPVar , HBDPVar
-    lem-hbd-p-nehole (HBDPInl bd)
-      with lem-hbd-p-nehole bd
+    lem-hbd-p-hole HBDPUnit = HBDPUnit , HBDPUnit
+    lem-hbd-p-hole HBDPNum = HBDPNum , HBDPNum
+    lem-hbd-p-hole HBDPVar = HBDPVar , HBDPVar
+    lem-hbd-p-hole (HBDPInl bd)
+      with lem-hbd-p-hole bd
     ... | bdσ , bd' =
       HBDPInl bdσ , HBDPInl bd'
-    lem-hbd-p-nehole (HBDPInr bd)
-      with lem-hbd-p-nehole bd
+    lem-hbd-p-hole (HBDPInr bd)
+      with lem-hbd-p-hole bd
     ... | bdσ , bd' =
       HBDPInr bdσ , HBDPInr bd'
-    lem-hbd-p-nehole (HBDPPair bd1 bd2)
-      with lem-hbd-p-nehole bd1 |
-           lem-hbd-p-nehole bd2
+    lem-hbd-p-hole (HBDPPair bd1 bd2)
+      with lem-hbd-p-hole bd1 |
+           lem-hbd-p-hole bd2
     ... | bdσ1 , bd1' | bdσ2 , bd2' =
       HBDPPair bdσ1 bdσ2 , HBDPPair bd1' bd2'
-    lem-hbd-p-nehole HBDPWild = HBDPWild , HBDPWild
-    lem-hbd-p-nehole (HBDPEHole (HUBNEHole ubσ ub)) =
+    lem-hbd-p-hole HBDPWild = HBDPWild , HBDPWild
+    lem-hbd-p-hole (HBDPEHole (HUBHole ubσ ub)) =
       HBDPEHole ubσ , HBDPEHole ub
-    lem-hbd-p-nehole (HBDPNEHole (HUBNEHole ubσ ub) bd)
-      with lem-hbd-p-nehole bd
+    lem-hbd-p-hole (HBDPHole (HUBHole ubσ ub) bd)
+      with lem-hbd-p-hole bd
     ... | bdσ ,  bd' =
-      HBDPNEHole ubσ bdσ , HBDPNEHole ub bd'
+      HBDPHole ubσ bdσ , HBDPHole ub bd'
 
   mutual
     lem-σ-hbd-subst : {e : ihexp} {d : ihexp} {y : Nat} {σ : subst-env} →
@@ -912,10 +912,10 @@ module hole-binders-disjoint-symmetric where
       with lem-σ-hbd-σ-subst bdσ
     ... | bdσ' , bdσσ =
       HBDEHole bdσ' , HBDEHole bdσσ
-    lem-σ-hbd-subst (HBDNEHole bdσ bde)
+    lem-σ-hbd-subst (HBDHole bdσ bde)
       with lem-σ-hbd-σ-subst bdσ | lem-σ-hbd-subst bde
     ... | bdσ' , bdσσ | bde' , bdeσ =
-      HBDNEHole bdσ' bde' , HBDNEHole bdσσ bdeσ
+      HBDHole bdσ' bde' , HBDHole bdσσ bdeσ
 
     lem-σ-hbd-σ-subst : {σ : subst-env} {d : ihexp} {y : Nat} {σ1 : subst-env} →
                         hole-binders-disjoint-σ σ (Subst d y σ1) →
@@ -968,10 +968,10 @@ module hole-binders-disjoint-symmetric where
     lem-σ-hbd-p-subst HBDPWild = HBDPWild , HBDPWild
     lem-σ-hbd-p-subst (HBDPEHole (HUBσSubst ubσ ub)) =
       HBDPEHole ubσ , HBDPEHole ub
-    lem-σ-hbd-p-subst (HBDPNEHole (HUBσSubst ubσ ub) bd)
+    lem-σ-hbd-p-subst (HBDPHole (HUBσSubst ubσ ub) bd)
       with lem-σ-hbd-p-subst bd
     ... | bd' , bdσ =
-      HBDPNEHole ubσ bd' , HBDPNEHole ub bdσ
+      HBDPHole ubσ bd' , HBDPHole ub bdσ
 
   mutual
     lem-rs-hbd : {e : ihexp} {r : rule} {rs : rules} →
@@ -1016,10 +1016,10 @@ module hole-binders-disjoint-symmetric where
     lem-rs-hbd (HBDEHole bdσ)
       with lem-rs-hbd-σ bdσ
     ... | bdσr , bdσrs = HBDEHole bdσr , HBDEHole bdσrs
-    lem-rs-hbd (HBDNEHole bdσ bd)
+    lem-rs-hbd (HBDHole bdσ bd)
       with lem-rs-hbd-σ bdσ | lem-rs-hbd bd
     ... | bdσr , bdσrs | bdr , bdrs =
-      HBDNEHole bdσr bdr , HBDNEHole bdσrs bdrs
+      HBDHole bdσr bdr , HBDHole bdσrs bdrs
 
     lem-rs-hbd-σ : {σ : subst-env} {r : rule} {rs : rules} →
                    hole-binders-disjoint-σ σ (r / rs) →
@@ -1070,9 +1070,9 @@ module hole-binders-disjoint-symmetric where
     lem-rs-hbd-p HBDPWild = HBDPWild , HBDPWild
     lem-rs-hbd-p (HBDPEHole (HUBRules ubr ubrs)) =
       HBDPEHole ubr , HBDPEHole ubrs
-    lem-rs-hbd-p (HBDPNEHole (HUBRules ubr ubrs) bd)
+    lem-rs-hbd-p (HBDPHole (HUBRules ubr ubrs) bd)
       with lem-rs-hbd-p bd
-    ... | bdr , bdrs = HBDPNEHole ubr bdr , HBDPNEHole ubrs bdrs
+    ... | bdr , bdrs = HBDPHole ubr bdr , HBDPHole ubrs bdrs
     
   mutual
     lem-r-hbd : {e : ihexp} {pr : pattrn} {er : ihexp} →
@@ -1117,10 +1117,10 @@ module hole-binders-disjoint-symmetric where
     lem-r-hbd (HBDEHole bdσ)
       with lem-r-hbd-σ bdσ
     ... | bdσp , bdσe = HBDEHole bdσp , HBDEHole bdσe
-    lem-r-hbd (HBDNEHole bdσ bd)
+    lem-r-hbd (HBDHole bdσ bd)
       with lem-r-hbd-σ bdσ | lem-r-hbd bd
     ... | bdσp , bdσe | bdp , bde =
-      HBDNEHole bdσp bdp , HBDNEHole bdσe bde
+      HBDHole bdσp bdp , HBDHole bdσe bde
 
     lem-r-hbd-σ : {σ : subst-env} {pr : pattrn} {er : ihexp} →
                   hole-binders-disjoint-σ σ (pr => er) →
@@ -1171,10 +1171,10 @@ module hole-binders-disjoint-symmetric where
     lem-r-hbd-p HBDPWild = HBDPWild , HBDPWild
     lem-r-hbd-p (HBDPEHole (HUBRule ubp ube)) =
       HBDPEHole ubp , HBDPEHole ube
-    lem-r-hbd-p (HBDPNEHole (HUBRule ubp ube) bd)
+    lem-r-hbd-p (HBDPHole (HUBRule ubp ube) bd)
       with lem-r-hbd-p bd
     ... | bdp , bde =
-      HBDPNEHole ubp bdp , HBDPNEHole ube bde
+      HBDPHole ubp bdp , HBDPHole ube bde
 
   mutual
     lem-p-hbd-inl : {e : ihexp} {p1 : pattrn} →
@@ -1198,8 +1198,8 @@ module hole-binders-disjoint-symmetric where
     lem-p-hbd-inl (HBDSnd bd) = HBDSnd (lem-p-hbd-inl bd)
     lem-p-hbd-inl (HBDEHole bdσ) =
       HBDEHole (lem-p-hbd-σ-inl bdσ)
-    lem-p-hbd-inl (HBDNEHole bdσ bd) =
-      HBDNEHole (lem-p-hbd-σ-inl bdσ) (lem-p-hbd-inl bd)
+    lem-p-hbd-inl (HBDHole bdσ bd) =
+      HBDHole (lem-p-hbd-σ-inl bdσ) (lem-p-hbd-inl bd)
 
     lem-p-hbd-σ-inl : {σ : subst-env} {p1 : pattrn} →
                       hole-binders-disjoint-σ σ (inl p1) →
@@ -1237,8 +1237,8 @@ module hole-binders-disjoint-symmetric where
     lem-p-hbd-p-inl HBDPWild = HBDPWild
     lem-p-hbd-p-inl (HBDPEHole (HUBPInl ub)) =
       HBDPEHole ub
-    lem-p-hbd-p-inl (HBDPNEHole (HUBPInl ub) bd) =
-      HBDPNEHole ub (lem-p-hbd-p-inl bd)
+    lem-p-hbd-p-inl (HBDPHole (HUBPInl ub) bd) =
+      HBDPHole ub (lem-p-hbd-p-inl bd)
 
   mutual
     lem-p-hbd-inr : {e : ihexp} {p1 : pattrn} →
@@ -1263,8 +1263,8 @@ module hole-binders-disjoint-symmetric where
     lem-p-hbd-inr (HBDSnd bd) = HBDSnd (lem-p-hbd-inr bd)
     lem-p-hbd-inr (HBDEHole bdσ) =
       HBDEHole (lem-p-hbd-σ-inr bdσ)
-    lem-p-hbd-inr (HBDNEHole bdσ bd) =
-      HBDNEHole (lem-p-hbd-σ-inr bdσ) (lem-p-hbd-inr bd)
+    lem-p-hbd-inr (HBDHole bdσ bd) =
+      HBDHole (lem-p-hbd-σ-inr bdσ) (lem-p-hbd-inr bd)
 
     lem-p-hbd-σ-inr : {σ : subst-env} {p1 : pattrn} →
                       hole-binders-disjoint-σ σ (inr p1) →
@@ -1302,8 +1302,8 @@ module hole-binders-disjoint-symmetric where
     lem-p-hbd-p-inr HBDPWild = HBDPWild
     lem-p-hbd-p-inr (HBDPEHole (HUBPInr ub)) =
       HBDPEHole ub
-    lem-p-hbd-p-inr (HBDPNEHole (HUBPInr ub) bd) =
-      HBDPNEHole ub (lem-p-hbd-p-inr bd)
+    lem-p-hbd-p-inr (HBDPHole (HUBPInr ub) bd) =
+      HBDPHole ub (lem-p-hbd-p-inr bd)
 
   mutual
     lem-p-hbd-pair : {e : ihexp} {p1 p2 : pattrn} →
@@ -1348,10 +1348,10 @@ module hole-binders-disjoint-symmetric where
     lem-p-hbd-pair (HBDEHole bdσ)
       with lem-p-hbd-σ-pair bdσ
     ... | bdσ1 , bdσ2 = HBDEHole bdσ1 , HBDEHole bdσ2
-    lem-p-hbd-pair (HBDNEHole bdσ bd)
+    lem-p-hbd-pair (HBDHole bdσ bd)
       with lem-p-hbd-σ-pair bdσ | lem-p-hbd-pair bd
     ... | bdσ1 , bdσ2 | bd1 , bd2 =
-      HBDNEHole bdσ1 bd1 , HBDNEHole bdσ2 bd2
+      HBDHole bdσ1 bd1 , HBDHole bdσ2 bd2
 
     lem-p-hbd-σ-pair : {σ : subst-env} {p1 p2 : pattrn} →
                        hole-binders-disjoint-σ σ ⟨ p1 , p2 ⟩ →
@@ -1405,10 +1405,10 @@ module hole-binders-disjoint-symmetric where
     lem-p-hbd-p-pair HBDPWild = HBDPWild , HBDPWild
     lem-p-hbd-p-pair (HBDPEHole (HUBPPair ub1 ub2)) =
       HBDPEHole ub1 , HBDPEHole ub2
-    lem-p-hbd-p-pair (HBDPNEHole (HUBPPair ub1 ub2) bd)
+    lem-p-hbd-p-pair (HBDPHole (HUBPPair ub1 ub2) bd)
       with lem-p-hbd-p-pair bd
     ... | bd1 , bd2 =
-      HBDPNEHole ub1 bd1 , HBDPNEHole ub2 bd2
+      HBDPHole ub1 bd1 , HBDPHole ub2 bd2
 
   mutual
     lem-p-hbd-ehole : {e : ihexp} {u : Nat} →
@@ -1435,8 +1435,8 @@ module hole-binders-disjoint-symmetric where
     lem-p-hbd-ehole (HBDSnd bd) = HUBSnd (lem-p-hbd-ehole bd)
     lem-p-hbd-ehole (HBDEHole bdσ) =
       HUBEHole (lem-p-hbd-σ-ehole bdσ)
-    lem-p-hbd-ehole (HBDNEHole bdσ bd) =
-      HUBNEHole (lem-p-hbd-σ-ehole bdσ) (lem-p-hbd-ehole bd)
+    lem-p-hbd-ehole (HBDHole bdσ bd) =
+      HUBHole (lem-p-hbd-σ-ehole bdσ) (lem-p-hbd-ehole bd)
   
     lem-p-hbd-σ-ehole : {σ : subst-env} {w : Nat} →
                         hole-binders-disjoint-σ {T = pattrn} σ ⦇-⦈[ w ] →
@@ -1474,110 +1474,110 @@ module hole-binders-disjoint-symmetric where
     lem-p-hbd-p-ehole HBDPWild = HUBPWild
     lem-p-hbd-p-ehole (HBDPEHole (HUBPEHole u≠w)) =
       HUBPEHole (flip u≠w)
-    lem-p-hbd-p-ehole (HBDPNEHole (HUBPEHole u≠w) bd) =
-      HUBPNEHole (flip u≠w) (lem-p-hbd-p-ehole bd)
+    lem-p-hbd-p-ehole (HBDPHole (HUBPEHole u≠w) bd) =
+      HUBPHole (flip u≠w) (lem-p-hbd-p-ehole bd)
 
   mutual
-    lem-p-hbd-nehole : {e : ihexp} {p1 : pattrn} {w : Nat} {τ : htyp} →
+    lem-p-hbd-hole : {e : ihexp} {p1 : pattrn} {w : Nat} {τ : htyp} →
                        hole-binders-disjoint e ⦇⌜ p1 ⌟⦈[ w , τ ] →
                        hole-unbound-in-e w e ×
                          hole-binders-disjoint e p1
-    lem-p-hbd-nehole HBDUnit = HUBUnit , HBDUnit
-    lem-p-hbd-nehole HBDNum = HUBNum , HBDNum
-    lem-p-hbd-nehole HBDVar = HUBVar , HBDVar
-    lem-p-hbd-nehole (HBDLam bd)
-      with lem-p-hbd-nehole bd
+    lem-p-hbd-hole HBDUnit = HUBUnit , HBDUnit
+    lem-p-hbd-hole HBDNum = HUBNum , HBDNum
+    lem-p-hbd-hole HBDVar = HUBVar , HBDVar
+    lem-p-hbd-hole (HBDLam bd)
+      with lem-p-hbd-hole bd
     ... | ub , bd' = HUBLam ub , HBDLam bd'
-    lem-p-hbd-nehole (HBDAp bd1 bd2)
-      with lem-p-hbd-nehole bd1 | lem-p-hbd-nehole bd2
+    lem-p-hbd-hole (HBDAp bd1 bd2)
+      with lem-p-hbd-hole bd1 | lem-p-hbd-hole bd2
     ... | ub1 , bd1' | ub2 , bd2' =
       HUBAp ub1 ub2 , HBDAp bd1' bd2'
-    lem-p-hbd-nehole (HBDInl bd)
-      with lem-p-hbd-nehole bd
+    lem-p-hbd-hole (HBDInl bd)
+      with lem-p-hbd-hole bd
     ... | ub , bd' = HUBInl ub , HBDInl bd'
-    lem-p-hbd-nehole (HBDInr bd)
-      with lem-p-hbd-nehole bd
+    lem-p-hbd-hole (HBDInr bd)
+      with lem-p-hbd-hole bd
     ... | ub , bd' = HUBInr ub , HBDInr bd'
-    lem-p-hbd-nehole (HBDMatch bd (HBDZRules bdpre bdpost))
-      with lem-p-hbd-nehole bd |
-           lem-p-hbd-rs-nehole bdpre |
-           lem-p-hbd-rs-nehole bdpost
+    lem-p-hbd-hole (HBDMatch bd (HBDZRules bdpre bdpost))
+      with lem-p-hbd-hole bd |
+           lem-p-hbd-rs-hole bdpre |
+           lem-p-hbd-rs-hole bdpost
     ... | ub , bd'
         | ubpre , bdpre'
         | ubdpost , bdpost' =
       HUBMatch ub (HUBZRules ubpre ubdpost) ,
       HBDMatch bd' (HBDZRules bdpre' bdpost')
-    lem-p-hbd-nehole (HBDPair bd1 bd2)
-      with lem-p-hbd-nehole bd1 | lem-p-hbd-nehole bd2
+    lem-p-hbd-hole (HBDPair bd1 bd2)
+      with lem-p-hbd-hole bd1 | lem-p-hbd-hole bd2
     ... | ub1 , bd1' | ub2 , bd2' =
       HUBPair ub1 ub2 , HBDPair bd1' bd2'
-    lem-p-hbd-nehole (HBDFst bd)
-      with lem-p-hbd-nehole bd
+    lem-p-hbd-hole (HBDFst bd)
+      with lem-p-hbd-hole bd
     ... | ub , bd' = HUBFst ub , HBDFst bd'
-    lem-p-hbd-nehole (HBDSnd bd)
-      with lem-p-hbd-nehole bd
+    lem-p-hbd-hole (HBDSnd bd)
+      with lem-p-hbd-hole bd
     ... | ub , bd' = HUBSnd ub , HBDSnd bd'
-    lem-p-hbd-nehole (HBDEHole bdσ)
-      with lem-p-hbd-σ-nehole bdσ
+    lem-p-hbd-hole (HBDEHole bdσ)
+      with lem-p-hbd-σ-hole bdσ
     ... | ubσ , bdσ' = HUBEHole ubσ , HBDEHole bdσ'
-    lem-p-hbd-nehole (HBDNEHole bdσ bd)
-      with lem-p-hbd-σ-nehole bdσ | lem-p-hbd-nehole bd
+    lem-p-hbd-hole (HBDHole bdσ bd)
+      with lem-p-hbd-σ-hole bdσ | lem-p-hbd-hole bd
     ... | ubσ , bdσ' | ub , bd' =
-      HUBNEHole ubσ ub , HBDNEHole bdσ' bd'
+      HUBHole ubσ ub , HBDHole bdσ' bd'
 
-    lem-p-hbd-σ-nehole : {σ : subst-env} {p1 : pattrn} {w : Nat} {τ : htyp} →
+    lem-p-hbd-σ-hole : {σ : subst-env} {p1 : pattrn} {w : Nat} {τ : htyp} →
                          hole-binders-disjoint-σ σ ⦇⌜ p1 ⌟⦈[ w , τ ] →
                          hole-unbound-in-σ w σ ×
                            hole-binders-disjoint-σ σ p1
-    lem-p-hbd-σ-nehole HBDσId = HUBσId , HBDσId
-    lem-p-hbd-σ-nehole (HBDσSubst bd bdσ)
-      with lem-p-hbd-nehole bd | lem-p-hbd-σ-nehole bdσ
+    lem-p-hbd-σ-hole HBDσId = HUBσId , HBDσId
+    lem-p-hbd-σ-hole (HBDσSubst bd bdσ)
+      with lem-p-hbd-hole bd | lem-p-hbd-σ-hole bdσ
     ... | ub , bd' | ubσ , bdσ' =
       HUBσSubst ub ubσ , HBDσSubst bd' bdσ'
     
-    lem-p-hbd-rs-nehole : {rs : rules} {p1 : pattrn} {w : Nat} {τ : htyp} →
+    lem-p-hbd-rs-hole : {rs : rules} {p1 : pattrn} {w : Nat} {τ : htyp} →
                           hole-binders-disjoint-rs rs ⦇⌜ p1 ⌟⦈[ w , τ ] →
                           hole-unbound-in-rs w rs ×
                             hole-binders-disjoint-rs rs p1
-    lem-p-hbd-rs-nehole HBDNoRules = HUBNoRules , HBDNoRules
-    lem-p-hbd-rs-nehole (HBDRules bdr bdrs)
-      with lem-p-hbd-r-nehole bdr | lem-p-hbd-rs-nehole bdrs
+    lem-p-hbd-rs-hole HBDNoRules = HUBNoRules , HBDNoRules
+    lem-p-hbd-rs-hole (HBDRules bdr bdrs)
+      with lem-p-hbd-r-hole bdr | lem-p-hbd-rs-hole bdrs
     ... | ubr , bdr' | ubrs , bdrs' =
       HUBRules ubr ubrs , HBDRules bdr' bdrs'
 
-    lem-p-hbd-r-nehole : {r : rule} {p1 : pattrn} {w : Nat} {τ : htyp} →
+    lem-p-hbd-r-hole : {r : rule} {p1 : pattrn} {w : Nat} {τ : htyp} →
                          hole-binders-disjoint-r r ⦇⌜ p1 ⌟⦈[ w , τ ] →
                          hole-unbound-in-r w r ×
                            hole-binders-disjoint-r r p1
-    lem-p-hbd-r-nehole (HBDRule bdp bde)
-      with lem-p-hbd-p-nehole bdp | lem-p-hbd-nehole bde
+    lem-p-hbd-r-hole (HBDRule bdp bde)
+      with lem-p-hbd-p-hole bdp | lem-p-hbd-hole bde
     ... | ubp , bdp' | ube , bde' =
       HUBRule ubp ube , HBDRule bdp' bde'
 
-    lem-p-hbd-p-nehole : {p : pattrn} {p1 : pattrn} {w : Nat} {τ : htyp} →
+    lem-p-hbd-p-hole : {p : pattrn} {p1 : pattrn} {w : Nat} {τ : htyp} →
                          hole-binders-disjoint-p p ⦇⌜ p1 ⌟⦈[ w , τ ] →
                          hole-unbound-in-p w p ×
                            hole-binders-disjoint-p p p1
-    lem-p-hbd-p-nehole HBDPUnit = HUBPUnit , HBDPUnit
-    lem-p-hbd-p-nehole HBDPNum = HUBPNum , HBDPNum
-    lem-p-hbd-p-nehole HBDPVar = HUBPVar , HBDPVar
-    lem-p-hbd-p-nehole (HBDPInl bd)
-      with lem-p-hbd-p-nehole bd
+    lem-p-hbd-p-hole HBDPUnit = HUBPUnit , HBDPUnit
+    lem-p-hbd-p-hole HBDPNum = HUBPNum , HBDPNum
+    lem-p-hbd-p-hole HBDPVar = HUBPVar , HBDPVar
+    lem-p-hbd-p-hole (HBDPInl bd)
+      with lem-p-hbd-p-hole bd
     ... | ub , bd' = HUBPInl ub , HBDPInl bd'
-    lem-p-hbd-p-nehole (HBDPInr bd)
-      with lem-p-hbd-p-nehole bd
+    lem-p-hbd-p-hole (HBDPInr bd)
+      with lem-p-hbd-p-hole bd
     ... | ub , bd' = HUBPInr ub , HBDPInr bd'
-    lem-p-hbd-p-nehole (HBDPPair bd1 bd2)
-      with lem-p-hbd-p-nehole bd1 | lem-p-hbd-p-nehole bd2
+    lem-p-hbd-p-hole (HBDPPair bd1 bd2)
+      with lem-p-hbd-p-hole bd1 | lem-p-hbd-p-hole bd2
     ... | ub1 , bd1' | ub2 , bd2' =
       HUBPPair ub1 ub2 , HBDPPair bd1' bd2'
-    lem-p-hbd-p-nehole HBDPWild = HUBPWild , HBDPWild
-    lem-p-hbd-p-nehole (HBDPEHole (HUBPNEHole u≠w ub)) =
+    lem-p-hbd-p-hole HBDPWild = HUBPWild , HBDPWild
+    lem-p-hbd-p-hole (HBDPEHole (HUBPHole u≠w ub)) =
       HUBPEHole (flip u≠w) , HBDPEHole ub
-    lem-p-hbd-p-nehole (HBDPNEHole (HUBPNEHole u≠w ub) bd)
-      with lem-p-hbd-p-nehole bd
+    lem-p-hbd-p-hole (HBDPHole (HUBPHole u≠w ub) bd)
+      with lem-p-hbd-p-hole bd
     ... | ub' , bd' =
-      HUBPNEHole (flip u≠w) ub' , HBDPNEHole ub bd'
+      HUBPHole (flip u≠w) ub' , HBDPHole ub bd'
     
   mutual
     hole-binders-disjoint-sym : {e1 e2 : ihexp} →
@@ -1618,9 +1618,9 @@ module hole-binders-disjoint-symmetric where
     hole-binders-disjoint-sym {e2 = ⦇-⦈⟨ u , σ ⟩} bd =
       HBDEHole (σ-hole-binders-disjoint-sym (lem-hbd-ehole bd))
     hole-binders-disjoint-sym {e2 = ⦇⌜ e2 ⌟⦈⟨ u , σ ⟩} bd
-      with lem-hbd-nehole bd
+      with lem-hbd-hole bd
     ... | bdσ , bd' =
-      HBDNEHole (σ-hole-binders-disjoint-sym bdσ)
+      HBDHole (σ-hole-binders-disjoint-sym bdσ)
                 (hole-binders-disjoint-sym bd')
 
     rs-hole-binders-disjoint-sym : {e : ihexp} {rs : rules} →
@@ -1671,9 +1671,9 @@ module hole-binders-disjoint-symmetric where
     p-hole-binders-disjoint-sym {p = ⦇-⦈[ w ]} bd =
       HBDPEHole (lem-p-hbd-ehole bd)
     p-hole-binders-disjoint-sym {p = ⦇⌜ p ⌟⦈[ w , τ ]} bd
-      with lem-p-hbd-nehole bd
+      with lem-p-hbd-hole bd
     ... | ub , bd' =
-      HBDPNEHole ub (p-hole-binders-disjoint-sym bd')
+      HBDPHole ub (p-hole-binders-disjoint-sym bd')
 
   mutual
     hole-binders-disjoint-σ-sym : {σ : subst-env} {e : ihexp} →
@@ -1713,9 +1713,9 @@ module hole-binders-disjoint-symmetric where
     hole-binders-disjoint-σ-sym {e = ⦇-⦈⟨ u , σ ⟩} hbd =
       HBDEHole (σ-hole-binders-disjoint-σ-sym (lem-hbd-σ-ehole hbd))
     hole-binders-disjoint-σ-sym {e = ⦇⌜ e ⌟⦈⟨ u , σ ⟩} hbd
-      with lem-hbd-σ-nehole hbd
+      with lem-hbd-σ-hole hbd
     ... | hbdσ , hbde =
-      HBDNEHole (σ-hole-binders-disjoint-σ-sym hbdσ)
+      HBDHole (σ-hole-binders-disjoint-σ-sym hbdσ)
                 (hole-binders-disjoint-σ-sym hbde)
 
     σ-hole-binders-disjoint-σ-sym : {σ1 : subst-env} {σ2 : subst-env} →
@@ -1766,9 +1766,9 @@ module hole-binders-disjoint-symmetric where
     p-hole-binders-disjoint-σ-sym {p = ⦇-⦈[ w ]} hbd =
       HBDPEHole (lem-p-hbd-σ-ehole hbd)
     p-hole-binders-disjoint-σ-sym {p = ⦇⌜ p ⌟⦈[ w , τ ]} hbd
-      with lem-p-hbd-σ-nehole hbd
+      with lem-p-hbd-σ-hole hbd
     ... | hub , hbd' =
-      HBDPNEHole hub
+      HBDPHole hub
                  (p-hole-binders-disjoint-σ-sym hbd')
 
   mutual
@@ -1808,9 +1808,9 @@ module hole-binders-disjoint-symmetric where
     hole-binders-disjoint-rs-sym {e = ⦇-⦈⟨ u , σ ⟩} hbd =
       HBDEHole (σ-hole-binders-disjoint-rs-sym (lem-hbd-rs-ehole hbd))
     hole-binders-disjoint-rs-sym {e = ⦇⌜ e ⌟⦈⟨ u , σ ⟩} hbd
-      with lem-hbd-rs-nehole hbd
+      with lem-hbd-rs-hole hbd
     ... | hbdσ , hbd' =
-      HBDNEHole (σ-hole-binders-disjoint-rs-sym hbdσ)
+      HBDHole (σ-hole-binders-disjoint-rs-sym hbdσ)
                (hole-binders-disjoint-rs-sym hbd')
 
     σ-hole-binders-disjoint-rs-sym : {rs : rules} {σ : subst-env} →
@@ -1861,9 +1861,9 @@ module hole-binders-disjoint-symmetric where
     p-hole-binders-disjoint-rs-sym {p = ⦇-⦈[ w ]} hbd =
       HBDPEHole (lem-p-hbd-rs-ehole hbd)
     p-hole-binders-disjoint-rs-sym {p = ⦇⌜ p ⌟⦈[ w , τ ]} hbd
-      with lem-p-hbd-rs-nehole hbd
+      with lem-p-hbd-rs-hole hbd
     ... | hub , hbd' =
-      HBDPNEHole hub
+      HBDPHole hub
                  (p-hole-binders-disjoint-rs-sym hbd')
 
   mutual
@@ -1903,9 +1903,9 @@ module hole-binders-disjoint-symmetric where
     hole-binders-disjoint-r-sym {e = ⦇-⦈⟨ u , σ ⟩} hbd =
       HBDEHole (σ-hole-binders-disjoint-r-sym (lem-hbd-r-ehole hbd))
     hole-binders-disjoint-r-sym {e = ⦇⌜ e ⌟⦈⟨ u , σ ⟩} hbd
-      with lem-hbd-r-nehole hbd
+      with lem-hbd-r-hole hbd
     ... | hbdσ , hbd' =
-      HBDNEHole (σ-hole-binders-disjoint-r-sym hbdσ)
+      HBDHole (σ-hole-binders-disjoint-r-sym hbdσ)
                 (hole-binders-disjoint-r-sym hbd')
 
     σ-hole-binders-disjoint-r-sym : {r : rule} {σ : subst-env} →
@@ -1956,9 +1956,9 @@ module hole-binders-disjoint-symmetric where
     p-hole-binders-disjoint-r-sym {p = ⦇-⦈[ w ]} hbd =
       HBDPEHole (lem-p-hbd-r-ehole hbd)
     p-hole-binders-disjoint-r-sym {p = ⦇⌜ p ⌟⦈[ w , τ ]} hbd
-      with lem-p-hbd-r-nehole hbd
+      with lem-p-hbd-r-hole hbd
     ... | hub , hbd' =
-      HBDPNEHole hub
+      HBDPHole hub
                  (p-hole-binders-disjoint-r-sym hbd')
     
   mutual
@@ -1998,9 +1998,9 @@ module hole-binders-disjoint-symmetric where
     hole-binders-disjoint-p-sym {e = ⦇-⦈⟨ u , σ ⟩} hbd =
       HBDEHole (σ-hole-binders-disjoint-p-sym (lem-hbd-p-ehole hbd))
     hole-binders-disjoint-p-sym {e = ⦇⌜ e ⌟⦈⟨ u , σ ⟩} hbd
-      with lem-hbd-p-nehole hbd
+      with lem-hbd-p-hole hbd
     ... | hbdσ , hbd' =
-      HBDNEHole (σ-hole-binders-disjoint-p-sym hbdσ)
+      HBDHole (σ-hole-binders-disjoint-p-sym hbdσ)
                (hole-binders-disjoint-p-sym hbd')
 
     σ-hole-binders-disjoint-p-sym : {p : pattrn} {σ : subst-env} →
@@ -2051,7 +2051,7 @@ module hole-binders-disjoint-symmetric where
     p-hole-binders-disjoint-p-sym {p2 = ⦇-⦈[ w ]} hbd =
       HBDPEHole (lem-p-hbd-p-ehole hbd)
     p-hole-binders-disjoint-p-sym {p2 = ⦇⌜ p2 ⌟⦈[ w , τ ]} hbd
-      with lem-p-hbd-p-nehole hbd
+      with lem-p-hbd-p-hole hbd
     ... | hub , hbd' =
-      HBDPNEHole hub
+      HBDPHole hub
                  (p-hole-binders-disjoint-p-sym hbd')

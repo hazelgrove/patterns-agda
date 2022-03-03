@@ -14,20 +14,22 @@ module statics-core where
     -- type assignment
     -- 
     -- note that the on-paper version of this judgement includes 
-    -- only a single Δ context for both expression and pattern holes,
-    -- and it is clear from the context which is being considered.
-    -- however, since expression holes require hole closures while
-    -- pattern holes only require the type of the hole, we must
-    -- explicitly separate this into two contexts Δ and Δp here.
+    -- only a single hole context Δ for both expressions and patterns.
+    -- however, since we choose to include hole closures here
+    -- (see the definition of subst-env below), expression holes
+    -- require hole closures while pattern holes only require the
+    -- type of the hole. thus, we must explicitly separate this into
+    -- two contexts Δ and Δp in this mechanization.
     --
     -- additionally, note that we do not include exhaustiveness
-    -- or redundancy checking as part of this judgement, and
-    -- instead include them as separate judgements. while this
-    -- is beneficial in its own right, it is not merely a matter
-    -- of taste. these checks are defined in terms of the
-    -- entailment judgement given below, which in turn uses
-    -- this typing judgement to the left of an arrow. thus,
-    -- including such checks here would break positivity.
+    -- or redundancy checking as part of the typing rule for match
+    -- expression, and instead include them as separate judgements.
+    -- while this is benenficial in that it makes these checks
+    -- optional, it is not merely a matter of taste. these checks
+    -- are defined in terms of the entailment judgement given below,
+    -- which itself is circularly defined using this typing judgement
+    -- to the left of an arrow. thus, including such checks here
+    -- would break positivity.
     --
     -- morally, however, this does not actually matter. while the
     -- definition of entailment technically relies on the typing
@@ -38,74 +40,79 @@ module statics-core where
     -- this avoids any actual circularity
     data _,_,_⊢_::_ : (Γ : tctx) → (Δ : hctx) → (Δp : phctx) →
                       (e : ihexp) → (τ : htyp) → Set where
-      TAUnit       : ∀{Γ Δ Δp} →
-                     Γ , Δ , Δp ⊢ unit :: unit
-      TANum        : ∀{Γ Δ Δp n} →
-                     Γ , Δ , Δp ⊢ (N n) :: num
-      TAVar        : ∀{Γ x τ Δ Δp} →
-                     (x , τ) ∈ Γ →
-                     Γ , Δ , Δp ⊢ (X x) :: τ
-      TALam        : ∀{Γ x τ1 Δ Δp e τ2} →
-                     x # Γ →
-                     (Γ ,, (x , τ1)) , Δ , Δp ⊢ e :: τ2 →
-                     Γ , Δ , Δp ⊢ (·λ x ·[ τ1 ] e) :: (τ1 ==> τ2)
-      TAAp         : ∀{Γ Δ Δp e1 e2 τ τ2} →
-                     Γ , Δ , Δp ⊢ e1 :: (τ2 ==> τ) →
-                     Γ , Δ , Δp ⊢ e2 :: τ2 →
-                     Γ , Δ , Δp ⊢ (e1 ∘ e2) :: τ
-      TAInl        : ∀{Γ Δ Δp e τ1 τ2} →
-                     Γ , Δ , Δp ⊢ e :: τ1 →
-                     Γ , Δ , Δp ⊢ inl τ2 e :: τ1 ⊕ τ2
-      TAInr        : ∀{Γ Δ Δp e τ1 τ2} →
-                     Γ , Δ , Δp ⊢ e :: τ2 →
-                     Γ , Δ , Δp ⊢ inr τ1 e :: τ1 ⊕ τ2
-      TAMatchZPre  : ∀{Γ Δ Δp e τ τ' r rs ξ} →
-                     Γ , Δ , Δp ⊢ e :: τ →
-                     Γ , Δ , Δp ⊢ (r / rs) ::s τ [ ξ ]=> τ' →
-                     Γ , Δ , Δp ⊢
-                       match e ·: τ of (nil / r / rs) :: τ'
-      TAMatchNZPre : ∀{Γ Δ Δp e τ τ' rs-pre r rs-post ξpre ξrest} →
-                     Γ , Δ , Δp ⊢ e :: τ →
-                     e final →
-                     Γ , Δ , Δp ⊢ rs-pre ::s τ [ ξpre ]=> τ' →
-                     Γ , Δ , Δp ⊢ (r / rs-post) ::s τ [ ξrest ]=> τ' →
-                     (e ⊧̇†? ξpre → ⊥) →
-                     Γ , Δ , Δp ⊢
-                       match e ·: τ of (rs-pre / r / rs-post) :: τ'
-      TAPair       : ∀{Γ Δ Δp e1 e2 τ1 τ2} →
-                     Γ , Δ , Δp ⊢ e1 :: τ1 →
-                     Γ , Δ , Δp ⊢ e2 :: τ2 →
-                     Γ , Δ , Δp ⊢ ⟨ e1 , e2 ⟩ :: (τ1 ⊠ τ2)
-      TAFst        : ∀{Γ Δ Δp e τ1 τ2} →
-                     Γ , Δ , Δp ⊢ e :: (τ1 ⊠ τ2) →
-                     Γ , Δ , Δp ⊢ (fst e) :: τ1
-      TASnd        : ∀{Γ Δ Δp e τ1 τ2} →
-                     Γ , Δ , Δp ⊢ e :: (τ1 ⊠ τ2) →
-                     Γ , Δ , Δp ⊢ (snd e) :: τ2
-      TAEHole      : ∀{Γ Δ Δp u σ Γ' τ} →
-                     (u , (Γ' , τ)) ∈ Δ →
-                     Γ , Δ , Δp ⊢ σ :se: Γ' →
-                     Γ , Δ , Δp ⊢ ⦇-⦈⟨ u , σ ⟩ :: τ
-      TANEHole     : ∀{Γ Δ Δp u σ Γ' τ e τ'} →
-                     (u , (Γ' , τ)) ∈ Δ →
-                     Γ , Δ , Δp ⊢ σ :se: Γ' →
-                     Γ , Δ , Δp ⊢ e :: τ' → 
-                     Γ , Δ , Δp ⊢ ⦇⌜ e ⌟⦈⟨ u , σ ⟩ :: τ
+      TUnit       : ∀{Γ Δ Δp} →
+                    Γ , Δ , Δp ⊢ unit :: unit
+      TNum        : ∀{Γ Δ Δp n} →
+                    Γ , Δ , Δp ⊢ (N n) :: num
+      TVar        : ∀{Γ x τ Δ Δp} →
+                    (x , τ) ∈ Γ →
+                    Γ , Δ , Δp ⊢ (X x) :: τ
+      TLam        : ∀{Γ x τ1 Δ Δp e τ2} →
+                    x # Γ →
+                    (Γ ,, (x , τ1)) , Δ , Δp ⊢ e :: τ2 →
+                    Γ , Δ , Δp ⊢ (·λ x ·[ τ1 ] e) :: (τ1 ==> τ2)
+      TAp         : ∀{Γ Δ Δp e1 e2 τ τ2} →
+                    Γ , Δ , Δp ⊢ e1 :: (τ2 ==> τ) →
+                    Γ , Δ , Δp ⊢ e2 :: τ2 →
+                    Γ , Δ , Δp ⊢ (e1 ∘ e2) :: τ
+      TInl        : ∀{Γ Δ Δp e τ1 τ2} →
+                    Γ , Δ , Δp ⊢ e :: τ1 →
+                    Γ , Δ , Δp ⊢ inl τ2 e :: τ1 ⊕ τ2
+      TInr        : ∀{Γ Δ Δp e τ1 τ2} →
+                    Γ , Δ , Δp ⊢ e :: τ2 →
+                    Γ , Δ , Δp ⊢ inr τ1 e :: τ1 ⊕ τ2
+      TMatchZPre  : ∀{Γ Δ Δp e τ τ' r rs ξ} →
+                    Γ , Δ , Δp ⊢ e :: τ →
+                    Γ , Δ , Δp ⊢ (r / rs) ::s τ [ ξ ]=> τ' →
+                    Γ , Δ , Δp ⊢
+                      match e ·: τ of (nil / r / rs) :: τ'
+      TMatchNZPre : ∀{Γ Δ Δp e τ τ' rs-pre r rs-post ξpre ξrest} →
+                    Γ , Δ , Δp ⊢ e :: τ →
+                    e final →
+                    Γ , Δ , Δp ⊢ rs-pre ::s τ [ ξpre ]=> τ' →
+                    Γ , Δ , Δp ⊢ (r / rs-post) ::s τ [ ξrest ]=> τ' →
+                    (e ⊧̇†? ξpre → ⊥) →
+                    Γ , Δ , Δp ⊢
+                      match e ·: τ of (rs-pre / r / rs-post) :: τ'
+      TPair       : ∀{Γ Δ Δp e1 e2 τ1 τ2} →
+                    Γ , Δ , Δp ⊢ e1 :: τ1 →
+                    Γ , Δ , Δp ⊢ e2 :: τ2 →
+                    Γ , Δ , Δp ⊢ ⟨ e1 , e2 ⟩ :: (τ1 ⊠ τ2)
+      TFst        : ∀{Γ Δ Δp e τ1 τ2} →
+                    Γ , Δ , Δp ⊢ e :: (τ1 ⊠ τ2) →
+                    Γ , Δ , Δp ⊢ (fst e) :: τ1
+      TSnd        : ∀{Γ Δ Δp e τ1 τ2} →
+                    Γ , Δ , Δp ⊢ e :: (τ1 ⊠ τ2) →
+                    Γ , Δ , Δp ⊢ (snd e) :: τ2
+      TEHole      : ∀{Γ Δ Δp u σ Γ' τ} →
+                    (u , (Γ' , τ)) ∈ Δ →
+                    Γ , Δ , Δp ⊢ σ :se: Γ' →
+                    Γ , Δ , Δp ⊢ ⦇-⦈⟨ u , σ ⟩ :: τ
+      THole     : ∀{Γ Δ Δp u σ Γ' τ e τ'} →
+                    (u , (Γ' , τ)) ∈ Δ →
+                    Γ , Δ , Δp ⊢ σ :se: Γ' →
+                    Γ , Δ , Δp ⊢ e :: τ' → 
+                    Γ , Δ , Δp ⊢ ⦇⌜ e ⌟⦈⟨ u , σ ⟩ :: τ
 
     -- substitution environment typing
     -- 
-    -- typing for hole closures à la Hazel
+    -- typing for the substitution environments for hole
+    -- closures à la Hazel. while not included on-paper,
+    -- these will be necessary to eventually support a
+    -- fill-and-resume operation, so we include them here
+    -- with future development in mind. they have no effect
+    -- on the rest of the theory
     data _,_,_⊢_:se:_ : (Γ : tctx) → (Δ : hctx) → (Δp : phctx) →
                        (σ : subst-env) → (Γ' : tctx) → Set where
-      STAId    : ∀{Γ Δ Δp Γ'} →
-                 ((x : Nat) (τ : htyp) →
-                  (x , τ) ∈ Γ' →
-                  (x , τ) ∈ Γ) →
-                 Γ , Δ , Δp ⊢ Id Γ' :se: Γ'
-      STASubst : ∀{Γ Δ Δp d y τ σ Γ'} →
-                 (Γ ,, (y , τ)) , Δ , Δp ⊢ σ :se: Γ' →
-                 Γ , Δ , Δp ⊢ d :: τ →
-                 Γ , Δ , Δp ⊢ Subst d y σ :se: Γ'
+      STId    : ∀{Γ Δ Δp Γ'} →
+                ((x : Nat) (τ : htyp) →
+                (x , τ) ∈ Γ' →
+                (x , τ) ∈ Γ) →
+                Γ , Δ , Δp ⊢ Id Γ' :se: Γ'
+      STSubst : ∀{Γ Δ Δp d y τ σ Γ'} →
+                (Γ ,, (y , τ)) , Δ , Δp ⊢ σ :se: Γ' →
+                Γ , Δ , Δp ⊢ d :: τ →
+                Γ , Δ , Δp ⊢ Subst d y σ :se: Γ'
 
     -- rule typing
     --
@@ -137,23 +144,30 @@ module statics-core where
 
   -- substitution list typing
   --
-  -- the purpose of this typing is somewhat different to that
-  -- of substitution environments. an environment σ records a
-  -- series of substitutions which are applied one after another,
-  -- and the typing judgement Γ , Δ , Δp ⊢ σ :se: Γσ tells us that
-  -- any term which is well-typed in Γσ will be well-typed in Γ after
-  -- applying σ. contrastingly, a list of substitutions θ is supposed
-  -- to indicate a set of substitutions applied "simultaneously"
-  -- as emitted by a single pattern match. for this reason,
-  -- we don't extend Γ to Γ ,, (y , τ) in the recursive part of
-  -- STExtend. as well, we require that the type Γθ records all typing
-  -- assumptions about substituted variables in θ, while substitution
-  -- environment only requires that the Id Γ case records a subset thereof
+  -- this is the same as the on-paper judgement, but it is
+  -- worth mentioning why this differs from the substitution
+  -- environment typing shown above as in Hazel.
+  --
+  -- an environment σ records a series of substitutions which are
+  -- applied one after another, and the typing judgement
+  -- Γ , Δ , Δp ⊢ σ :se: Γσ tells us that any term which is well-typed
+  -- in Γσ will be well-typed in Γ after applying σ. this is exactly
+  -- what we want for recording the substitutions around a non-empty
+  -- hole during live programming.
+  -- contrastingly, a list of substitutions θ as emitted by a match
+  -- expression is not morally applied "one by one", but rather
+  -- applied "simultaneously" when the match expression is evaluted.
+  -- for this reason, we don't extend Γ to Γ ,, (y , τ) in the
+  -- recursive part of STExtend, while we do in STSubst. as well,
+  -- we require that the type Γθ records all typing
+  -- assumptions about substituted variables in θ, while the
+  -- formulation of STId ends up only forcing that the type Γσ of
+  -- some σ records a subset thereof.
   data _,_,_⊢_:sl:_ : tctx → hctx → phctx →
                       subst-list → tctx → Set where
-      STAEmpty  : ∀{Γ Δ Δp} →
+      STEmpty  : ∀{Γ Δ Δp} →
                   Γ , Δ , Δp ⊢ [] :sl: ∅
-      STAExtend : ∀{Γ Δ Δp θ Γθ d τ y} →
+      STExtend : ∀{Γ Δ Δp θ Γθ d τ y} →
                   y # Γ →
                   Γ , Δ , Δp ⊢ θ :sl: Γθ →
                   Γ , Δ , Δp ⊢ d :: τ →
@@ -286,7 +300,7 @@ module statics-core where
       EXEHole      : ∀{Δp u σ} →
                      Δp ⊢ σ exhaustive-σ →
                      Δp ⊢ ⦇-⦈⟨ u , σ ⟩ exhaustive
-      EXNEHole     : ∀{Δp e u σ} →
+      EXHole     : ∀{Δp e u σ} →
                      Δp ⊢ σ exhaustive-σ →
                      Δp ⊢ e exhaustive →
                      Δp ⊢ ⦇⌜ e ⌟⦈⟨ u , σ ⟩ exhaustive
@@ -367,7 +381,7 @@ module statics-core where
                      Δp ⊢ (snd e) nonredundant
       NREHole      : ∀{Δp u σ} →
                      Δp ⊢ ⦇-⦈⟨ u , σ ⟩ nonredundant
-      NRNEHole     : ∀{Δp e u σ} →
+      NRHole     : ∀{Δp e u σ} →
                      Δp ⊢ e nonredundant →
                      Δp ⊢ ⦇⌜ e ⌟⦈⟨ u , σ ⟩ nonredundant
 

@@ -36,7 +36,7 @@ module value-judgements where
                (snd e) notintro
     NVEHole  : ∀{u σ} →
                ⦇-⦈⟨ u , σ ⟩ notintro
-    NVNEHole : ∀{e u σ} →
+    NVHole : ∀{e u σ} →
                ⦇⌜ e ⌟⦈⟨ u , σ ⟩ notintro
 
   

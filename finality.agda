@@ -26,13 +26,13 @@ module finality where
                  (ITPairR eval1₁ stp) =
     final-step-not (FVal eval2) stp
   final-step-not (FIndet (IAp ind1 fin2))
-                 (ITApFun stp) =
+                 (ITpFun stp) =
     final-step-not (FIndet ind1) stp
   final-step-not (FIndet (IAp ind1 fin2))
-                 (ITApArg eval1 stp) =
+                 (ITpArg eval1 stp) =
     final-step-not fin2 stp
   final-step-not (FIndet (IAp () fin2))
-                 (ITAp fin)
+                 (ITp fin)
   final-step-not (FIndet (IInl ind)) (ITInl stp) =
     final-step-not (FIndet ind) stp
   final-step-not (FIndet (IInr ind)) (ITInr stp) =
@@ -70,8 +70,8 @@ module finality where
   final-step-not (FIndet (ISnd npr ind))
                  (ITSndPair fin) =
     npr _ _ refl
-  final-step-not (FIndet (INEHole fin))
-                 (ITNEHole stp) =
+  final-step-not (FIndet (IHole fin))
+                 (ITHole stp) =
     final-step-not fin stp
   final-step-not (FIndet (IFst npr ind1))
                  (ITFst stp) =

@@ -292,7 +292,7 @@ module lemmas-or-append where
   pattern-∨+ (PTInr pt) ξ = refl
   pattern-∨+ (PTPair Γ1##Γ2 pt1 pt2) ξ = refl
   pattern-∨+ (PTEHole w∈Δp) ξ = refl
-  pattern-∨+ (PTNEHole w∈Δp pt) ξ = refl
+  pattern-∨+ (PTHole w∈Δp pt) ξ = refl
   pattern-∨+ PTWild ξ = refl
 
   -- appending more rules to the end of a list of rules

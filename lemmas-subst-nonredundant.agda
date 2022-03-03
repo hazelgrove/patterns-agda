@@ -54,8 +54,8 @@ module lemmas-subst-nonredundant where
     subst-nonredundant (NRSnd nr1) nr2 =
       NRSnd (subst-nonredundant nr1 nr2)
     subst-nonredundant NREHole nr2 = NREHole
-    subst-nonredundant (NRNEHole nr1) nr2 =
-      NRNEHole (subst-nonredundant nr1 nr2)
+    subst-nonredundant (NRHole nr1) nr2 =
+      NRHole (subst-nonredundant nr1 nr2)
 
     subst-nonredundant-targets : ∀{Δp rs x e2} →
                                  Δp ⊢ rs nonredundant-targets →

@@ -22,32 +22,32 @@ module complete-satisfy-exclusive where
                          e ⊧ (ξ ◆d)
   val-not-sat-sat-dual {ξ = ·⊤} eval wt ct ¬sat = abort (¬sat CSTruth)
   val-not-sat-sat-dual {ξ = ·⊥} eval wt ct ¬sat = CSTruth
-  val-not-sat-sat-dual {ξ = N n} eval (TANum {n = m}) ct ¬sat
+  val-not-sat-sat-dual {ξ = N n} eval (TNum {n = m}) ct ¬sat
     with nat-dec m n
   ... | Inl refl = CSNotNum (λ _ → ¬sat CSNum)
   ... | Inr m≠n = CSNotNum m≠n
-  val-not-sat-sat-dual {ξ = N̸ n} eval (TANum {n = m}) ct ¬sat
+  val-not-sat-sat-dual {ξ = N̸ n} eval (TNum {n = m}) ct ¬sat
     with nat-dec m n
   ... | Inl refl = CSNum
   ... | Inr m≠n = abort (¬sat (CSNotNum m≠n))
   val-not-sat-sat-dual {e = inl τ e} {ξ = inl ξ}
-                     (VInl eval) (TAInl wt) (CTInl ct) ¬sat
+                     (VInl eval) (TInl wt) (CTInl ct) ¬sat
     with comp-satisfy-dec e ξ
   ... | Inl esat = abort (¬sat (CSInl esat))
   ... | Inr ¬esat = CSOrL (CSInl (val-not-sat-sat-dual eval wt ct ¬esat))
   val-not-sat-sat-dual {e = inr τ e} {ξ = inl ξ}
-                     (VInr eval) (TAInr wt) (CTInl ct) ¬sat =
+                     (VInr eval) (TInr wt) (CTInl ct) ¬sat =
     CSOrR (CSInr CSTruth)
   val-not-sat-sat-dual {e = inl τ e} {ξ = inr ξ}
-                     (VInl eval) (TAInl wt) (CTInr ct) ¬sat =
+                     (VInl eval) (TInl wt) (CTInr ct) ¬sat =
     CSOrR (CSInl CSTruth)
   val-not-sat-sat-dual {e = inr τ e} {ξ = inr ξ}
-                     (VInr eval) (TAInr wt) (CTInr ct) ¬sat
+                     (VInr eval) (TInr wt) (CTInr ct) ¬sat
     with comp-satisfy-dec e ξ
   ... | Inl esat = abort (¬sat (CSInr esat))
   ... | Inr ¬esat = CSOrL (CSInr (val-not-sat-sat-dual eval wt ct ¬esat))
   val-not-sat-sat-dual {e = ⟨ e1 , e2 ⟩} {ξ = ⟨ ξ1 , ξ2 ⟩}
-                     (VPair eval1 eval2) (TAPair wt1 wt2)
+                     (VPair eval1 eval2) (TPair wt1 wt2)
                      (CTPair ct1 ct2) ¬sat
     with comp-satisfy-dec e1 ξ1 | comp-satisfy-dec e2 ξ2
   ... | Inl sat1 | Inl sat2 = abort (¬sat (CSPair sat1 sat2))
@@ -66,7 +66,7 @@ module complete-satisfy-exclusive where
   ... | Inr ¬sat1 | Inr ¬sat2 =
     CSAnd (val-not-sat-sat-dual eval wt ct1 ¬sat1)
           (val-not-sat-sat-dual eval wt ct2 ¬sat2)
-  val-not-sat-sat-dual {e = e} {ξ = ξ1 ∧ ξ2} eval wt (CTAnd ct1 ct2) ¬sat
+  val-not-sat-sat-dual {e = e} {ξ = ξ1 ∧ ξ2} eval wt (CTnd ct1 ct2) ¬sat
     with comp-satisfy-dec e ξ1 | comp-satisfy-dec e ξ2
   ... | Inl sat1 | Inl sat2 = abort (¬sat (CSAnd sat1 sat2))
   ... | Inl sat1 | Inr ¬sat2 = CSOrR (val-not-sat-sat-dual eval wt ct2 ¬sat2)

@@ -18,46 +18,46 @@ module type-assignment-unicity where
                         Γ , Δ , Δp ⊢ e :: τ →
                         Γ , Δ , Δp ⊢ e :: τ' →
                         τ == τ'
-    expr-type-unicity TAUnit TAUnit = refl
-    expr-type-unicity TANum TANum = refl
-    expr-type-unicity {Γ = Γ} (TAVar wt) (TAVar wt') =
+    expr-type-unicity TUnit TUnit = refl
+    expr-type-unicity TNum TNum = refl
+    expr-type-unicity {Γ = Γ} (TVar wt) (TVar wt') =
       ctx-unicity {Γ = Γ} wt wt'
-    expr-type-unicity (TALam apt wt) (TALam apt' wt')
+    expr-type-unicity (TLam apt wt) (TLam apt' wt')
       with expr-type-unicity wt wt'
     ... | refl = refl
-    expr-type-unicity (TAAp wt1 wt2) (TAAp wt1' wt2')
+    expr-type-unicity (TAp wt1 wt2) (TAp wt1' wt2')
       with expr-type-unicity wt1 wt1'
     ... | refl = refl
-    expr-type-unicity (TAInl wt) (TAInl wt')
+    expr-type-unicity (TInl wt) (TInl wt')
       with expr-type-unicity wt wt'
     ... | refl = refl
-    expr-type-unicity (TAInr wt) (TAInr wt')
+    expr-type-unicity (TInr wt) (TInr wt')
       with expr-type-unicity wt wt'
     ... | refl = refl
-    expr-type-unicity (TAMatchZPre wt rst) (TAMatchZPre wt' rst')
+    expr-type-unicity (TMatchZPre wt rst) (TMatchZPre wt' rst')
       with expr-type-unicity wt wt'
     ... | refl
       with rules-unicity rst rst'
     ... | refl , refl = refl
-    expr-type-unicity (TAMatchNZPre wt fin pre post ¬satm)
-                      (TAMatchNZPre wt' fin' pre' post' ¬satm')
+    expr-type-unicity (TMatchNZPre wt fin pre post ¬satm)
+                      (TMatchNZPre wt' fin' pre' post' ¬satm')
       with expr-type-unicity wt wt'
     ... | refl
       with rules-unicity pre pre'
     ... | refl , refl = refl
-    expr-type-unicity (TAPair wt1 wt2) (TAPair wt1' wt2')
+    expr-type-unicity (TPair wt1 wt2) (TPair wt1' wt2')
       with expr-type-unicity wt1 wt1' | expr-type-unicity wt2 wt2'
     ... | refl | refl = refl
-    expr-type-unicity (TAFst wt) (TAFst wt')
+    expr-type-unicity (TFst wt) (TFst wt')
       with expr-type-unicity wt wt'
     ... | refl = refl
-    expr-type-unicity (TASnd wt) (TASnd wt')
+    expr-type-unicity (TSnd wt) (TSnd wt')
       with expr-type-unicity wt wt'
     ... | refl = refl
-    expr-type-unicity {Δ = Δ} (TAEHole x∈Δ st) (TAEHole x∈Δ' st')
+    expr-type-unicity {Δ = Δ} (TEHole x∈Δ st) (TEHole x∈Δ' st')
       with ctx-unicity {Γ = Δ} x∈Δ x∈Δ'
     ... | refl = refl
-    expr-type-unicity {Δ = Δ} (TANEHole x∈Δ st wt) (TANEHole x∈Δ' st' wt')
+    expr-type-unicity {Δ = Δ} (THole x∈Δ st wt) (THole x∈Δ' st' wt')
       with ctx-unicity {Γ = Δ} x∈Δ x∈Δ'
     ... | refl = refl
     
@@ -106,7 +106,7 @@ module type-assignment-unicity where
       with pattern-unicity pt1 pt1' | pattern-unicity pt2 pt2'
     ... | refl , refl | refl , refl = refl , refl
     pattern-unicity (PTEHole w∈Δ) (PTEHole w∈Δ') = refl , refl
-    pattern-unicity (PTNEHole w∈Δ pt) (PTNEHole w∈Δ' pt')
+    pattern-unicity (PTHole w∈Δ pt) (PTHole w∈Δ' pt')
       with pattern-unicity pt pt'
     ... | refl , refl = refl , refl
     pattern-unicity PTWild PTWild = refl , refl

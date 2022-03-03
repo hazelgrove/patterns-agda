@@ -32,7 +32,7 @@ module material-entailment where
                         ·⊤ ·: τ cc⊧ ((ξ1 ◆d) ∧ ξ2) →
                         ξ1 ·: τ cc⊧ ξ2
   material-entailment {ξ1 = ξ1} {ξ2 = ξ2}
-                      (Entails tct (CTAnd {τ = τ} ctd1 ct2) ment) =
+                      (Entails tct (CTnd {τ = τ} ctd1 ct2) ment) =
     Entails (same-type-dual ctd1) ct2 ent
     where
       ent : ∀{Δ Δp e} →

@@ -14,38 +14,38 @@ open import value-judgements
 -- theorems showing that one can determine
 -- entailment and potential entailment of the
 -- incomplete constraints emitted by patterns by
--- passing to truthify or falsify complete versions
+-- passing to truify or falsify complete versions
 -- of said constraints
 module complete-relationship where
   -- substituting ? for ⊤ in ξ does not
   -- change its type
-  truthify-same-type : ∀{ξ τ} →
+  truify-same-type : ∀{ξ τ} →
                        ξ :c: τ →
                        (ξ ◆⊤) :cc: τ
-  truthify-same-type CTTruth = CTTruth
-  truthify-same-type CTFalsity = CTFalsity
-  truthify-same-type CTUnknown = CTTruth
-  truthify-same-type CTNum = CTNum
-  truthify-same-type (CTInl ct) = CTInl (truthify-same-type ct)
-  truthify-same-type (CTInr ct) = CTInr (truthify-same-type ct)
-  truthify-same-type (CTPair ct1 ct2) =
-    CTPair (truthify-same-type ct1) (truthify-same-type ct2)
-  truthify-same-type (CTOr ct1 ct2) =
-    CTOr (truthify-same-type ct1) (truthify-same-type ct2)
+  truify-same-type CTTruth = CTTruth
+  truify-same-type CTFalsity = CTFalsity
+  truify-same-type CTUnknown = CTTruth
+  truify-same-type CTNum = CTNum
+  truify-same-type (CTInl ct) = CTInl (truify-same-type ct)
+  truify-same-type (CTInr ct) = CTInr (truify-same-type ct)
+  truify-same-type (CTPair ct1 ct2) =
+    CTPair (truify-same-type ct1) (truify-same-type ct2)
+  truify-same-type (CTOr ct1 ct2) =
+    CTOr (truify-same-type ct1) (truify-same-type ct2)
 
-  same-type-truthify : ∀{ξ τ} →
+  same-type-truify : ∀{ξ τ} →
                        (ξ ◆⊤) :cc: τ →
                        ξ :c: τ
-  same-type-truthify {ξ = ·⊤} CTTruth = CTTruth
-  same-type-truthify {ξ = ·⊥} CTFalsity = CTFalsity
-  same-type-truthify {ξ = ·?} CTTruth = CTUnknown
-  same-type-truthify {ξ = N n} CTNum = CTNum
-  same-type-truthify {ξ = inl ξ} (CTInl ctc) = CTInl (same-type-truthify ctc)
-  same-type-truthify {ξ = inr ξ} (CTInr ctc) = CTInr (same-type-truthify ctc)
-  same-type-truthify {ξ = ⟨ ξ1 , ξ2 ⟩} (CTPair ctc1 ctc2) =
-    CTPair (same-type-truthify ctc1) (same-type-truthify ctc2)
-  same-type-truthify {ξ = ξ1 ∨ ξ2} (CTOr ctc1 ctc2) =
-    CTOr (same-type-truthify ctc1) (same-type-truthify ctc2)
+  same-type-truify {ξ = ·⊤} CTTruth = CTTruth
+  same-type-truify {ξ = ·⊥} CTFalsity = CTFalsity
+  same-type-truify {ξ = ·?} CTTruth = CTUnknown
+  same-type-truify {ξ = N n} CTNum = CTNum
+  same-type-truify {ξ = inl ξ} (CTInl ctc) = CTInl (same-type-truify ctc)
+  same-type-truify {ξ = inr ξ} (CTInr ctc) = CTInr (same-type-truify ctc)
+  same-type-truify {ξ = ⟨ ξ1 , ξ2 ⟩} (CTPair ctc1 ctc2) =
+    CTPair (same-type-truify ctc1) (same-type-truify ctc2)
+  same-type-truify {ξ = ξ1 ∨ ξ2} (CTOr ctc1 ctc2) =
+    CTOr (same-type-truify ctc1) (same-type-truify ctc2)
 
   -- substituting ? for ⊥ in ξ does not
   -- change its type
@@ -79,63 +79,63 @@ module complete-relationship where
 
   -- possibly satisfying a constraint is the same as satisfying its
   -- truthified version
-  val-satormay-sat-truthify : ∀{e ξ} →
+  val-satormay-sat-truify : ∀{e ξ} →
                               e val →
                               e ⊧̇†? ξ →
                               e ⊧ (ξ ◆⊤)
-  val-satormay-sat-truthify eval (CSMSSat CSTruth) = CSTruth
-  val-satormay-sat-truthify eval (CSMSSat CSNum) = CSNum
-  val-satormay-sat-truthify (VInl eval) (CSMSSat (CSInl sat)) =
-    CSInl (val-satormay-sat-truthify eval (CSMSSat sat))
-  val-satormay-sat-truthify (VInr eval) (CSMSSat (CSInr sat)) =
-    CSInr (val-satormay-sat-truthify eval (CSMSSat sat))
-  val-satormay-sat-truthify (VPair eval1 eval2) (CSMSSat (CSPair sat1 sat2)) =
-    CSPair (val-satormay-sat-truthify eval1 (CSMSSat sat1))
-           (val-satormay-sat-truthify eval2 (CSMSSat sat2))
-  val-satormay-sat-truthify eval (CSMSSat (CSNotIntroPair ni sat1 sat2)) =
+  val-satormay-sat-truify eval (CSMSSat CSTruth) = CSTruth
+  val-satormay-sat-truify eval (CSMSSat CSNum) = CSNum
+  val-satormay-sat-truify (VInl eval) (CSMSSat (CSInl sat)) =
+    CSInl (val-satormay-sat-truify eval (CSMSSat sat))
+  val-satormay-sat-truify (VInr eval) (CSMSSat (CSInr sat)) =
+    CSInr (val-satormay-sat-truify eval (CSMSSat sat))
+  val-satormay-sat-truify (VPair eval1 eval2) (CSMSSat (CSPair sat1 sat2)) =
+    CSPair (val-satormay-sat-truify eval1 (CSMSSat sat1))
+           (val-satormay-sat-truify eval2 (CSMSSat sat2))
+  val-satormay-sat-truify eval (CSMSSat (CSNotIntroPair ni sat1 sat2)) =
     abort (val-notintro-not eval ni)
-  val-satormay-sat-truthify eval (CSMSSat (CSOrL sat1)) =
-    CSOrL (val-satormay-sat-truthify eval (CSMSSat sat1))
-  val-satormay-sat-truthify eval (CSMSSat (CSOrR sat2)) =
-    CSOrR (val-satormay-sat-truthify eval (CSMSSat sat2))
-  val-satormay-sat-truthify eval (CSMSMay CMSUnknown) = CSTruth
-  val-satormay-sat-truthify (VInl eval) (CSMSMay (CMSInl msat)) =
-    CSInl (val-satormay-sat-truthify eval (CSMSMay msat))
-  val-satormay-sat-truthify (VInr eval) (CSMSMay (CMSInr msat)) =
-    CSInr (val-satormay-sat-truthify eval (CSMSMay msat))
-  val-satormay-sat-truthify (VPair eval1 eval2) (CSMSMay (CMSPairL msat1 sat2)) =
-    CSPair (val-satormay-sat-truthify eval1 (CSMSMay msat1))
-           (val-satormay-sat-truthify eval2 (CSMSSat sat2))
-  val-satormay-sat-truthify (VPair eval1 eval2) (CSMSMay (CMSPairR sat1 msat2)) =
-    CSPair (val-satormay-sat-truthify eval1 (CSMSSat sat1))
-           (val-satormay-sat-truthify eval2 (CSMSMay msat2))
-  val-satormay-sat-truthify (VPair eval1 eval2) (CSMSMay (CMSPair msat1 msat2)) =
-    CSPair (val-satormay-sat-truthify eval1 (CSMSMay msat1))
-           (val-satormay-sat-truthify eval2 (CSMSMay msat2))
-  val-satormay-sat-truthify eval (CSMSMay (CMSOrL msat1 ¬sat2)) =
-    CSOrL (val-satormay-sat-truthify eval (CSMSMay msat1))
-  val-satormay-sat-truthify eval (CSMSMay (CMSOrR ¬sat1 msat2)) =
-    CSOrR (val-satormay-sat-truthify eval (CSMSMay msat2))
-  val-satormay-sat-truthify eval (CSMSMay (CMSNotIntro ni ref pos)) =
+  val-satormay-sat-truify eval (CSMSSat (CSOrL sat1)) =
+    CSOrL (val-satormay-sat-truify eval (CSMSSat sat1))
+  val-satormay-sat-truify eval (CSMSSat (CSOrR sat2)) =
+    CSOrR (val-satormay-sat-truify eval (CSMSSat sat2))
+  val-satormay-sat-truify eval (CSMSMay CMSUnknown) = CSTruth
+  val-satormay-sat-truify (VInl eval) (CSMSMay (CMSInl msat)) =
+    CSInl (val-satormay-sat-truify eval (CSMSMay msat))
+  val-satormay-sat-truify (VInr eval) (CSMSMay (CMSInr msat)) =
+    CSInr (val-satormay-sat-truify eval (CSMSMay msat))
+  val-satormay-sat-truify (VPair eval1 eval2) (CSMSMay (CMSPairL msat1 sat2)) =
+    CSPair (val-satormay-sat-truify eval1 (CSMSMay msat1))
+           (val-satormay-sat-truify eval2 (CSMSSat sat2))
+  val-satormay-sat-truify (VPair eval1 eval2) (CSMSMay (CMSPairR sat1 msat2)) =
+    CSPair (val-satormay-sat-truify eval1 (CSMSSat sat1))
+           (val-satormay-sat-truify eval2 (CSMSMay msat2))
+  val-satormay-sat-truify (VPair eval1 eval2) (CSMSMay (CMSPair msat1 msat2)) =
+    CSPair (val-satormay-sat-truify eval1 (CSMSMay msat1))
+           (val-satormay-sat-truify eval2 (CSMSMay msat2))
+  val-satormay-sat-truify eval (CSMSMay (CMSOrL msat1 ¬sat2)) =
+    CSOrL (val-satormay-sat-truify eval (CSMSMay msat1))
+  val-satormay-sat-truify eval (CSMSMay (CMSOrR ¬sat1 msat2)) =
+    CSOrR (val-satormay-sat-truify eval (CSMSMay msat2))
+  val-satormay-sat-truify eval (CSMSMay (CMSNotIntro ni ref pos)) =
     abort (val-notintro-not eval ni)
 
   -- converse of the above
-  sat-truthify-satormay : ∀{e ξ} →
+  sat-truify-satormay : ∀{e ξ} →
                           e ⊧ (ξ ◆⊤) →
                           e ⊧̇†? ξ
-  sat-truthify-satormay {ξ = ·⊤} sat = CSMSSat CSTruth
-  sat-truthify-satormay {ξ = ·?} sat = CSMSMay CMSUnknown
-  sat-truthify-satormay {ξ = N n} CSNum = CSMSSat CSNum
-  sat-truthify-satormay {ξ = inl ξ} (CSInl sat) =
-    satormay-inl (sat-truthify-satormay sat)
-  sat-truthify-satormay {ξ = inr ξ} (CSInr sat) =
-    satormay-inr (sat-truthify-satormay sat)
-  sat-truthify-satormay {ξ = ⟨ ξ1 , ξ2 ⟩} (CSPair sat1 sat2) =
-    satormay-pair (sat-truthify-satormay sat1) (sat-truthify-satormay sat2)
-  sat-truthify-satormay {ξ = ξ1 ∨ ξ2} (CSOrL sat1) =
-    satormay-or-l (sat-truthify-satormay sat1)
-  sat-truthify-satormay {ξ = ξ1 ∨ ξ2} (CSOrR sat2) =
-    satormay-or-r (sat-truthify-satormay sat2)
+  sat-truify-satormay {ξ = ·⊤} sat = CSMSSat CSTruth
+  sat-truify-satormay {ξ = ·?} sat = CSMSMay CMSUnknown
+  sat-truify-satormay {ξ = N n} CSNum = CSMSSat CSNum
+  sat-truify-satormay {ξ = inl ξ} (CSInl sat) =
+    satormay-inl (sat-truify-satormay sat)
+  sat-truify-satormay {ξ = inr ξ} (CSInr sat) =
+    satormay-inr (sat-truify-satormay sat)
+  sat-truify-satormay {ξ = ⟨ ξ1 , ξ2 ⟩} (CSPair sat1 sat2) =
+    satormay-pair (sat-truify-satormay sat1) (sat-truify-satormay sat2)
+  sat-truify-satormay {ξ = ξ1 ∨ ξ2} (CSOrL sat1) =
+    satormay-or-l (sat-truify-satormay sat1)
+  sat-truify-satormay {ξ = ξ1 ∨ ξ2} (CSOrR sat2) =
+    satormay-or-r (sat-truify-satormay sat2)
 
   -- satisfying a constraint is the same as satifying its
   -- falsified version
@@ -213,21 +213,21 @@ module complete-relationship where
 
   -- a constraint is possibly exhaustive only if its
   -- truthified version is exhaustve
-  truth-potent-ent-truthify : ∀{ξ τ} →
+  truth-potent-ent-truify : ∀{ξ τ} →
                              ·⊤ ·: τ c⊧̇†? ξ →
                              ·⊤ ·: τ cc⊧ (ξ ◆⊤)
-  truth-potent-ent-truthify (PotEntails trct ct pent) =
-    Entails CTTruth (truthify-same-type ct)
+  truth-potent-ent-truify (PotEntails trct ct pent) =
+    Entails CTTruth (truify-same-type ct)
             λ wt eval _ →
-              val-satormay-sat-truthify eval (pent wt (FVal eval) (CSMSSat CSTruth))
+              val-satormay-sat-truify eval (pent wt (FVal eval) (CSMSSat CSTruth))
 
   -- if the truthified version of a constraint is exhaustive,
   -- then the constraint is possibly exhaustive
-  truth-ent-truthify-potent : ∀{ξ τ} →
+  truth-ent-truify-potent : ∀{ξ τ} →
                              ·⊤ ·: τ cc⊧ (ξ ◆⊤) →
                              ·⊤ ·: τ c⊧̇†? ξ
-  truth-ent-truthify-potent {ξ = ξ} (Entails {τ = τ} trct tct ent) =
-    PotEntails CTTruth (same-type-truthify tct)
+  truth-ent-truify-potent {ξ = ξ} (Entails {τ = τ} trct tct ent) =
+    PotEntails CTTruth (same-type-truify tct)
                λ wt fin _ → all-fin-satm wt fin
     where
       all-fin-satm : ∀{Δ Δp e} →
@@ -235,27 +235,27 @@ module complete-relationship where
                      e final →
                      e ⊧̇†? ξ
       all-fin-satm =
-        val-final-satormay (same-type-truthify tct)
+        val-final-satormay (same-type-truify tct)
                            (λ wt' eval' →
-                              sat-truthify-satormay (ent wt' eval' CSTruth))
+                              sat-truify-satormay (ent wt' eval' CSTruth))
 
   -- an incomplete constraint entails another constraint
   -- only if the truthified version entails the falisfied version
-  ent-truthify-ent-falsify : ∀{ξ1 ξ2 τ} →
+  ent-truify-ent-falsify : ∀{ξ1 ξ2 τ} →
                              ξ1 ·: τ c⊧̇ ξ2 →
                              (ξ1 ◆⊤) ·: τ cc⊧ (ξ2 ◆⊥)
-  ent-truthify-ent-falsify (Entails ct1 ct2 ent) =
-    Entails (truthify-same-type ct1) (falsify-same-type ct2)
+  ent-truify-ent-falsify (Entails ct1 ct2 ent) =
+    Entails (truify-same-type ct1) (falsify-same-type ct2)
             λ wt eval satt →
               val-sat-sat-falsify eval
-                                  (ent wt eval (sat-truthify-satormay satt))
+                                  (ent wt eval (sat-truify-satormay satt))
 
   -- converse of the above
-  truthify-ent-falsify-ent : ∀{ξ1 ξ2 τ} →
+  truify-ent-falsify-ent : ∀{ξ1 ξ2 τ} →
                              (ξ1 ◆⊤) ·: τ cc⊧ (ξ2 ◆⊥) →
                              ξ1 ·: τ c⊧̇ ξ2
-  truthify-ent-falsify-ent (Entails tct1 fct2 ent) =
-    Entails (same-type-truthify tct1) (same-type-falsify fct2)
+  truify-ent-falsify-ent (Entails tct1 fct2 ent) =
+    Entails (same-type-truify tct1) (same-type-falsify fct2)
             λ wt eval satm →
               sat-falsify-sat (ent wt eval
-                                   (val-satormay-sat-truthify eval satm))
+                                   (val-satormay-sat-truify eval satm))
